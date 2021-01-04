@@ -1,0 +1,22 @@
+{
+  "pages": [
+   
+    "pages/index/main",
+    "pages/searchs/main",
+    "pages/pay/main",
+    "pages/detail/main",
+    "pages/payresult/main"
+  ],
+  "window": {
+    "backgroundTextStyle": "light",
+    "navigationBarBackgroundColor": "#fff",
+    "navigationBarTitleText": "读书",
+    "navigationBarTextStyle": "black"
+  },
+
+  "usingComponents": {
+    "van-button": "/vant-weapp/dist/button/index",
+    "van-icon": "/vant-weapp/dist/icon/index"
+  }
+
+}
