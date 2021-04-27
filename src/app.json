@@ -1,22 +1,67 @@
 {
   "pages": [
-   
+    "pages/applyForCashHis/main",
     "pages/index/main",
-    "pages/searchs/main",
-    "pages/pay/main",
-    "pages/detail/main",
-    "pages/payresult/main"
+    "pages/applyForCash/main",
+    "pages/self/main",
+    "pages/applyForCashDetail/main",
+    "pages/shenpi/main"
   ],
   "window": {
     "backgroundTextStyle": "light",
-    "navigationBarBackgroundColor": "#fff",
-    "navigationBarTitleText": "读书",
+    "navigationBarBackgroundColor": "#96c2f1",
+    "navigationBarTitleText": "审批",
     "navigationBarTextStyle": "black"
   },
+  "tabBar": {
+    "color": "#686868",
+    "selectedColor": "#47a86c",
+    "backgroundColor": "#ffffff",
+    "borderStyle": "white",
+    "list": [{
+      "pagePath": "pages/index/main",
+      "iconPath": "static/images/home.png",
+      "selectedIconPath": "static/images/home_active.png",
+      "text": "主页"
+    },
+    {
+      "pagePath": "pages/shenpi/main",
+      "iconPath": "static/images/self.png",
+      "selectedIconPath": "static/images/self_active.png",
+      "text": "待办"
+    },
+ 
+    {
+      "pagePath": "pages/self/main",
+      "iconPath": "static/images/self.png",
+      "selectedIconPath": "static/images/self_active.png",
+      "text": "我"
+    }
+  ]
 
+  },
   "usingComponents": {
-    "van-button": "/vant-weapp/dist/button/index",
-    "van-icon": "/vant-weapp/dist/icon/index"
+    "van-row":"/vant-weapp/dist/row/index",
+    "van-col":"/vant-weapp/dist/col/index",
+    "van-tag":"/vant-weapp/dist/tag/index",
+    "van-icon":"/vant-weapp/dist/icon/index",
+    "van-field":"/vant-weapp/dist/field/index",
+    "van-picker":"/vant-weapp/dist/picker/index",
+    "van-popup":"/vant-weapp/dist/popup/index",
+    "van-cell":"/vant-weapp/dist/cell/index",
+    "van-cell-group":"/vant-weapp/dist/cell-group/index",
+    "van-button":"/vant-weapp/dist/button/index",
+    "van-search":"/vant-weapp/dist/search/index",
+    "van-tabs":"/vant-weapp/dist/tabs/index",
+    "van-tab":"/vant-weapp/dist/tab/index",
+    "van-radio":"/vant-weapp/dist/radio/index",
+    "van-overlay":"/vant-weapp/dist/overlay/index",
+    "van-panel":"/vant-weapp/dist/panel/index",
+    "van-radio-group":"/vant-weapp/dist/radio-group/index",
+    "van-submit-bar":"/vant-weapp/dist/submit-bar/index",
+    "van-goods-action":"/vant-weapp/dist/goods-action/index",
+    "van-goods-action-icon":"/vant-weapp/dist/goods-action-icon/index",
+    "van-goods-action-button":"/vant-weapp/dist/goods-action-button/index"
   }
 
 }
