@@ -38,3 +38,8 @@ export function startSpareMoney(params){
 export function getSpareMoney(params){
   return request.get(`/api-ep-project/spareMoney/get`,params)
 }
+
+//查询待办和已办
+export function getFlowTask(params){
+  return request.get(`/api-ep-user/flowTask/getPage`,params)
+}

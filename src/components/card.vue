@@ -1,7 +1,7 @@
 <template>
   <div class="bg">
     <div class="card" v-for="(item, index) in cardList" :key="index" @click="toDetail(item)">
-      <div v-for="(label,index2) in item" :key="index2" :style="{color:index2 == 'title'?'black':'#888'}" v-show="index2 !== 'id'">{{label}}</div>
+      <div v-for="(label,index2) in item" :key="index2" :style="{color:index2 == 'title'?'black':'#888'}" v-show="index2 !== 'id'&&index2 !== 'orderId'">{{label}}</div>
     </div>
   </div>
 </template>

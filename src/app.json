@@ -1,7 +1,7 @@
 {
   "pages": [
-    "pages/applyForCashHis/main",
     "pages/index/main",
+    "pages/applyForCashHis/main",
     "pages/applyForCash/main",
     "pages/self/main",
     "pages/applyForCashDetail/main",

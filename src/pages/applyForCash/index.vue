@@ -1,6 +1,6 @@
 <template>
   <div>
-   <!-- <div>
+    <!-- <div>
       <van-field
       v-model="formData.applyUserName"
       name="用户名"
@@ -75,20 +75,20 @@
       @input="formData.bankAccount = $event.mp.detail"
     />
    </div> -->
-   <div>
-        <van-field
-        v-for="(item,index) in data.applyCash.vanFormData.formData"
+    <div>
+      <van-field
+        v-for="(item, index) in data.applyCash.vanFormData.formData"
         :key="index"
-      v-model="formData[item.name]"
-      :name="item.value"
-      :label="item.value"
-      :placeholder="item.value"
-      input-align="right"
-      :rules="[{ required: true, message: '请填写'+item.value }]"
-      @input="formData[item.name]= $event.mp.detail"
-        @click="item.type == 'user'?showPopup('表单'):''"
-    />
-   </div>
+        v-model="formData[item.name]"
+        :name="item.value"
+        :label="item.value"
+        :placeholder="item.value"
+        input-align="right"
+        :rules="[{ required: true, message: '请填写' + item.value }]"
+        @input="formData[item.name] = $event.mp.detail"
+        @click="item.type == 'user' ? showPopup('表单') : ''"
+      />
+    </div>
     <van-panel title="流程选择" :status="flowStatus">
       <van-radio-group :value="flowId" @change="radioChange">
         <van-radio
@@ -115,10 +115,20 @@
     <!-- <van-button type="info" size="normal" block @click="startFlow"
       >发起</van-button
     > -->
-       <van-goods-action>
-  <van-goods-action-button color="#7232dd" type="info" text="保存草稿"  @click="saveFlow('save')"/>
-  <van-goods-action-button color="#be99ff" type="warning" text="保存并提交"  @click="saveFlow('start')"/>
-</van-goods-action>
+    <van-goods-action>
+      <van-goods-action-button
+        color="#7232dd"
+        type="info"
+        text="保存草稿"
+        @click="saveFlow('save')"
+      />
+      <van-goods-action-button
+        color="#be99ff"
+        type="warning"
+        text="保存并提交"
+        @click="saveFlow('start')"
+      />
+    </van-goods-action>
     <!-- 收款人弹出层 -->
     <van-popup
       :show="show"
@@ -128,18 +138,17 @@
     >
       <User @submit="submit" @cancel="onClose"></User>
     </van-popup>
-  
   </div>
 </template>
 <script>
-import { getFlowList, getByFlowId,startSpareMoney} from "../../api/api";
+import { getFlowList, getByFlowId, startSpareMoney } from "../../api/api";
 import User from "../../components/userOptions";
-import data from '../../api/mockData'
+import data from "../../api/mockData";
 export default {
   data() {
     return {
       show: false,
-      data:data,
+      data: data,
       formData: {
         // applyUserId: 1,
         // applyUserName: "",
@@ -164,18 +173,15 @@ export default {
   components: { User },
   mounted() {
     this.getData();
-    this.formData=data.applyCash.formData
+    this.formData = data.applyCash.formData;
   },
   watch: {},
   methods: {
-    test(){
-    console.log(this.formData)
-    },
     //选用户后的确认事件
     submit(val) {
       if (this.popUpType == "表单") {
-        (this.formData.payeeUserId = val.id),
-          (this.formData.payeeUserName = val.userName),
+             this.$set(this.formData, "payeeUserId", val.id);
+        this.$set(this.formData, "payeeUserName", val.userName);
           (this.show = false);
         this.popUpType = "";
       } else if (this.popUpType == "流程") {
@@ -192,7 +198,7 @@ export default {
         this.show = false;
       }
     },
-    
+
     onClose() {
       this.show = false;
       this.popUpType = "";
@@ -211,6 +217,7 @@ export default {
     getByFlowId() {
       let params = {
         flowId: this.flowId,
+        userId:1
       };
       //设置流程列表
       getByFlowId(params).then((res) => {
@@ -265,32 +272,35 @@ export default {
     //   this.formData[value] = event.mp.detail;
     // },
     //保存草稿或发起流程
-    saveFlow(val){
-       let params={
-         ...this.formData,
-         formId:1,
-         flowId:this.flowId,
-         userId:1,
-         type:val=='save'?0:1,
-         optionalJson:val=='save'?'':JSON.stringify(this.fitNodeList),
-       }
-       startSpareMoney(params).then((res)=>{
-           mpvue.showToast({
-            title: res.data.message, 
-            icon: 'none',
-            duration: 3000, 
-            mask: true, 
-       });
-       //重启到某页面，如不是tabar页面会有回主页按钮
-     this.$router.push({ path: '/pages/applyForCashHis/main', reLaunch: true })
-       })
-    }
+    saveFlow(val) {
+      let params = {
+        ...this.formData,
+        formId: 1,
+        flowId: this.flowId,
+        userId: 1,
+        type: val == "save" ? 0 : 1,
+        optionalJson: val == "save" ? "" : JSON.stringify(this.fitNodeList),
+      };
+      startSpareMoney(params).then((res) => {
+        mpvue.showToast({
+          title: res.data.message,
+          icon: "none",
+          duration: 3000,
+          mask: true,
+        });
+        //重启到某页面，如不是tabar页面会有回主页按钮
+        this.$router.push({
+          path: "/pages/applyForCashHis/main",
+          reLaunch: true,
+        });
+      });
+    },
   },
 };
 </script>
 <style lang="scss">
-.van-panel{
-  margin-bottom: 2rem!important;
+.van-panel {
+  margin-bottom: 2rem !important;
 }
 </style>
 <style lang="scss" scoped>

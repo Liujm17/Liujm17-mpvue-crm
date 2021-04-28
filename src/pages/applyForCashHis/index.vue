@@ -53,6 +53,7 @@ export default {
         this.cardList = res.data.data.list.map((item) => {
           return {
             id: item.id,
+            orderId:item.orderId?item.orderId:'',
             title: "备用金申请",
             money: "申请金额为:" + item.money,
             remark: "备注:" + item.remark,
@@ -73,7 +74,8 @@ export default {
       this.$router.push({
         path:"/pages/applyForCashDetail/main",
         query:{
-          id:val.id
+          id:val.id,
+          data:'applyCash'
         }
       })
     },
