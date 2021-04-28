@@ -1,6 +1,6 @@
 <template>
   <div>
-    <van-tabs :active="active">
+    <van-tabs :active="active" @change="change">
       <van-tab title="详情">
         <div>
           <van-field
@@ -107,6 +107,24 @@ export default {
     this.formData = data[this.$route.query.data].formData;
   },
   methods: {
+    //切换标签页面
+     change(name) {
+      if(name.mp.detail.title == '日志'){
+         let params = {
+        orderId: this.$route.query.id,
+      };
+       //获取日志
+      data[this.$route.query.data].getHistory(params).then((res) => {
+         mpvue.showToast({
+          title: '正在加载',
+          icon: "loading",
+          duration: 500,
+          mask: true,
+        });
+        this.HistoryList = res;
+      });
+      }
+    },
     //选用户后的确认事件
     submit(val) {
       if (this.popUpType == "表单") {
@@ -153,10 +171,8 @@ export default {
         formId: 1,
         userId: 1,
       };
+     
       let params2 = {
-        orderId: this.$route.query.id,
-      };
-      let params3 = {
         formId: 1,
         userId: 1,
       };
@@ -164,12 +180,9 @@ export default {
       data[this.$route.query.data].getData(params).then((res) => {
         this.formData = res.data.data;
       });
-      //获取日志
-      data[this.$route.query.data].getHistory(params2).then((res) => {
-        this.HistoryList = res;
-      });
+      
       //获取流程数据
-      data[this.$route.query.data].getFlowList(params3).then((res) => {
+      data[this.$route.query.data].getFlowList(params2).then((res) => {
         if (res.length >= 1) {
           this.flowList = res;
           this.flowId = res[0].id + "";
