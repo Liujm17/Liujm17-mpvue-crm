@@ -49,11 +49,12 @@
       </van-tab>
     </van-tabs>
 
-    <van-goods-action>
+    <van-goods-action v-if="pageType == '历史'">
       <van-goods-action-button
         color="#7232dd"
         type="info"
         :text="text"
+        v-if="isEdit == true"
         @click="text == '编辑' ? changeText() : saveFlow('save')"
       />
       <van-goods-action-button
@@ -63,8 +64,31 @@
         v-if="text == '保存草稿'"
         @click="saveFlow('start')"
       />
-      <!-- <van-goods-action-button color="#be99ff" type="warning" text="保存并提交"  @click="saveFlow('start')"/> -->
+      <van-goods-action-button
+        color="#7232dd"
+        type="danger"
+        text="回撤"
+        v-if="isBack == true"
+      />
     </van-goods-action>
+
+    <van-goods-action v-else-if="pageType == '待审批'">
+      <van-goods-action-button
+        color="#7232dd"
+        type="info"
+        text="同意"
+        @click="agree"
+      />
+      <van-goods-action-button
+        color="#7232dd"
+        type="primary"
+        text="驳回"
+        @click="disagree"
+      />
+    </van-goods-action>
+    <van-goods-action v-else-if="pageType == '已审批'"> </van-goods-action>
+
+    <van-goods-action v-else-if="pageType == '已提交'"> </van-goods-action>
 
     <!-- 收款人弹出层 -->
     <van-popup
@@ -75,12 +99,24 @@
     >
       <User @submit="submit" @cancel="onClose"></User>
     </van-popup>
+
+    <!-- 同意驳回弹出层 -->
+    <van-popup
+      :show="show2"
+      position="bottom"
+      custom-style="width: 100%; min-height: 30%;display:flex;flex-direction: column;justify-content: center;"
+      @close="quxiao"
+    >
+      <Deal :type="dealType" @quxiao="quxiao" @queding="queding"></Deal>
+    </van-popup>
   </div>
 </template>
 <script>
 import data from "../../api/mockData";
 import User from "../../components/userOptions";
+import Deal from "../../components/deal";
 import Card from "../../components/card";
+import { agree, disagree } from "../../api/api";
 export default {
   data() {
     return {
@@ -89,6 +125,7 @@ export default {
       formData: {},
       readonly: true,
       show: false,
+      show2: false,
       popUpType: "",
       text: "编辑",
       text2: "提交审批",
@@ -99,30 +136,36 @@ export default {
       nodeList: [],
       fitNodeList: [],
       flowStatus: 1,
+      pageType: "",
+      isEdit: false,
+      isBack: false,
+      dealType: "agree",
     };
   },
-  components: { User, Card },
+  components: { User, Card, Deal },
   mounted() {
+    this.text = "编辑";
     this.getData();
-    this.formData = data[this.$route.query.data].formData;
+    this.pageType = this.$route.query.type;
+    // this.formData = data[this.$route.query.data].formData;
   },
   methods: {
     //切换标签页面
-     change(name) {
-      if(name.mp.detail.title == '日志'){
-         let params = {
-        orderId: this.$route.query.id,
-      };
-       //获取日志
-      data[this.$route.query.data].getHistory(params).then((res) => {
-         mpvue.showToast({
-          title: '正在加载',
-          icon: "loading",
-          duration: 500,
-          mask: true,
+    change(name) {
+      if (name.mp.detail.title == "日志") {
+        let params = {
+          orderId: this.$route.query.id,
+        };
+        //获取日志
+        data[this.$route.query.data].getHistory(params).then((res) => {
+          mpvue.showToast({
+            title: "正在加载",
+            icon: "loading",
+            duration: 500,
+            mask: true,
+          });
+          this.HistoryList = res;
         });
-        this.HistoryList = res;
-      });
       }
     },
     //选用户后的确认事件
@@ -133,7 +176,6 @@ export default {
         this.$set(this.formData, "payeeUserName", val.userName);
         // (this.formData.payeeUserId = val.id),
         // (this.formData.payeeUserName = val.userName),
-        console.log(this.formData.payeeUserName);
         this.popUpType = "";
       } else if (this.popUpType == "流程") {
         this.$set(
@@ -171,7 +213,7 @@ export default {
         formId: 1,
         userId: 1,
       };
-     
+
       let params2 = {
         formId: 1,
         userId: 1,
@@ -179,8 +221,10 @@ export default {
       //获取表单数据
       data[this.$route.query.data].getData(params).then((res) => {
         this.formData = res.data.data;
+        this.isEdit = res.data.data.isEdit == 1 ? true : false;
+        this.isBack = res.data.data.isBack == 1 ? true : false;
       });
-      
+
       //获取流程数据
       data[this.$route.query.data].getFlowList(params2).then((res) => {
         if (res.length >= 1) {
@@ -214,12 +258,8 @@ export default {
     },
     //保存草稿或发起流程
     saveFlow(val) {
-      this.$delete(this.formData, "createTime");
-      this.$delete(this.formData, "createUser");
-      this.$delete(this.formData, "updataTime");
-      this.$delete(this.formData, "updataUser");
-      this.$delete(this.formData, "id");
-      this.$delete(this.formData, "test");
+      data.dataFilter(this.formData);
+
       let params = {
         ...this.formData,
         formId: 1,
@@ -243,6 +283,57 @@ export default {
           });
         }, 1000);
       });
+    },
+    //同意
+    agree() {
+      this.dealType = "agree";
+      this.show2 = true;
+    },
+    //驳回
+    disagree() {
+      this.dealType = "disagree";
+      this.show2 = true;
+    },
+    //确定同意/驳回
+    queding(val) {
+      let params = {
+        ...val,
+        userId: 1,
+        orderId: this.$route.query.orderId,
+      };
+      if (this.dealType == "agree") {
+        agree(params).then((res) => {
+          mpvue.showToast({
+            title: res.data.message,
+            icon: "none",
+            duration: 1000,
+            mask: true,
+          });
+          this.show2 = false;
+           this.$router.push({
+            path: '/pages/shenpi/main',
+            reLaunch: true,
+          });
+        });
+      } else {
+        disagree(params).then((res) => {
+          mpvue.showToast({
+            title: res.data.message,
+            icon: "none",
+            duration: 1000,
+            mask: true,
+          });
+              this.show2 = false;
+           this.$router.push({
+            path: '/pages/shenpi/main',
+            reLaunch: true,
+          });
+        });
+      }
+    },
+    //取消同意/驳回
+    quxiao() {
+      this.show2 = false;
     },
   },
 };

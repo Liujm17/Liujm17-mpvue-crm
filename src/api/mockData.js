@@ -27,6 +27,20 @@ function formattingTime(time) {
   return FormattedDateTime
 }
 
+//过滤null的传参
+function dataFilter(data){
+    if (data) {
+        for (var key in data) {
+          if (
+            data[key] == null ||
+            typeof data[key] == "undefined" ||key == 'id'
+          ) {
+            delete data[key];
+          }
+        }
+      }
+}
+
 //备用金申请
 const applyCash = {
   vanFormData: {
@@ -145,5 +159,6 @@ const applyCash = {
 
 export default {
   applyCash,
-  formattingTime
+  formattingTime,
+  dataFilter
 }

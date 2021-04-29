@@ -4,6 +4,7 @@
     "pages/applyForCashHis/main",
     "pages/applyForCash/main",
     "pages/self/main",
+    "pages/bind/main",
     "pages/applyForCashDetail/main",
     "pages/shenpi/main"
   ],

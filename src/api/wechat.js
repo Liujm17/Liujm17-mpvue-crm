@@ -1,4 +1,4 @@
-import { getOpenId } from './api'
+
  //是否获得授权
  export function getSetting(auth, onSuccess, onFail) {
   mpvue.getSetting({

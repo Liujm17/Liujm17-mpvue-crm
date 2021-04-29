@@ -75,7 +75,8 @@ export default {
         path:"/pages/applyForCashDetail/main",
         query:{
           id:val.id,
-          data:'applyCash'
+          data:'applyCash',
+          type:'历史'
         }
       })
     },
