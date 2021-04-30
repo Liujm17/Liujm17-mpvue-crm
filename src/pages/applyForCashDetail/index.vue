@@ -59,6 +59,13 @@
       />
       <van-goods-action-button
         color="#7232dd"
+        type="warning"
+        text="删除"
+        v-if="isEdit == true"
+        @click="delFlow"
+      />
+      <van-goods-action-button
+        color="#7232dd"
         type="primary"
         :text="text2"
         v-if="text == '保存草稿'"
@@ -88,7 +95,35 @@
     </van-goods-action>
     <van-goods-action v-else-if="pageType == '已审批'"> </van-goods-action>
 
-    <van-goods-action v-else-if="pageType == '已提交'"> </van-goods-action>
+    <van-goods-action v-else-if="pageType == '已提交'"> 
+      <van-goods-action-button
+        color="#7232dd"
+        type="info"
+        :text="text"
+        v-if="isEdit == true"
+        @click="text == '编辑' ? changeText() : saveFlow('save')"
+      />
+      <van-goods-action-button
+        color="#7232dd"
+        type="warning"
+        text="删除"
+        v-if="isEdit == true"
+        @click="delFlow"
+      />
+      <van-goods-action-button
+        color="#7232dd"
+        type="primary"
+        :text="text2"
+        v-if="text == '保存草稿'"
+        @click="saveFlow('start')"
+      />
+      <van-goods-action-button
+        color="#7232dd"
+        type="danger"
+        text="回撤"
+        v-if="isBack == true"
+      />
+    </van-goods-action>
 
     <!-- 收款人弹出层 -->
     <van-popup
@@ -109,12 +144,22 @@
     >
       <Deal :type="dealType" @quxiao="quxiao" @queding="queding"></Deal>
     </van-popup>
+
+      <van-popup
+      :show="show3"
+      position="bottom"
+      custom-style="width: 100%; min-height: 30%;display:flex;flex-direction: column;justify-content: center;"
+      @close="quxiao2"
+    >
+      <Delete  @quxiao="quxiao2" @queding="queding2"></Delete>
+    </van-popup>
   </div>
 </template>
 <script>
 import data from "../../api/mockData";
 import User from "../../components/userOptions";
 import Deal from "../../components/deal";
+import Delete from "../../components/sureDelete";
 import Card from "../../components/card";
 import { agree, disagree } from "../../api/api";
 export default {
@@ -126,6 +171,7 @@ export default {
       readonly: true,
       show: false,
       show2: false,
+      show3:false,
       popUpType: "",
       text: "编辑",
       text2: "提交审批",
@@ -142,12 +188,11 @@ export default {
       dealType: "agree",
     };
   },
-  components: { User, Card, Deal },
+  components: { User, Card, Deal ,Delete},
   mounted() {
     this.text = "编辑";
     this.getData();
     this.pageType = this.$route.query.type;
-    // this.formData = data[this.$route.query.data].formData;
   },
   methods: {
     //切换标签页面
@@ -210,13 +255,13 @@ export default {
     getData() {
       let params = {
         dataId: this.$route.query.id,
-        formId: 1,
-        userId: 1,
+        formId: this.$route.query.formId,
+        userId: mpvue.getStorageSync('UserId'),
       };
 
       let params2 = {
-        formId: 1,
-        userId: 1,
+        formId: this.$route.query.formId,
+        userId: mpvue.getStorageSync('UserId'),
       };
       //获取表单数据
       data[this.$route.query.data].getData(params).then((res) => {
@@ -240,7 +285,7 @@ export default {
     getListByFlowId() {
       let paramFlow = {
         flowId: this.flowId,
-        userId: 1,
+        userId: mpvue.getStorageSync('UserId'),
       };
       //根据流程id查询节点
       data[this.$route.query.data].getByFlowId(paramFlow).then((res) => {
@@ -256,19 +301,23 @@ export default {
     changeText() {
       (this.readonly = false), (this.text = "保存草稿");
     },
+    //打开删除确定框
+    delFlow() {
+      this.show3=true
+    },
     //保存草稿或发起流程
     saveFlow(val) {
-      data.dataFilter(this.formData);
+      data.dataFilter2(this.formData);
 
       let params = {
         ...this.formData,
-        formId: 1,
+        formId: this.$route.query.formId,
         flowId: this.flowId,
-        userId: 1,
+        userId: mpvue.getStorageSync('UserId'),
         type: val == "save" ? 0 : 1,
         optionalJson: val == "save" ? "" : JSON.stringify(this.fitNodeList),
       };
-      data[this.$route.query.data].saveOrStartFlow(params).then((res) => {
+      data[this.$route.query.data].editOrStartFlow(params).then((res) => {
         mpvue.showToast({
           title: res.data.message,
           icon: "none",
@@ -298,7 +347,7 @@ export default {
     queding(val) {
       let params = {
         ...val,
-        userId: 1,
+        userId: mpvue.getStorageSync('UserId'),
         orderId: this.$route.query.orderId,
       };
       if (this.dealType == "agree") {
@@ -310,8 +359,8 @@ export default {
             mask: true,
           });
           this.show2 = false;
-           this.$router.push({
-            path: '/pages/shenpi/main',
+          this.$router.push({
+            path: "/pages/shenpi/main",
             reLaunch: true,
           });
         });
@@ -323,18 +372,43 @@ export default {
             duration: 1000,
             mask: true,
           });
-              this.show2 = false;
-           this.$router.push({
-            path: '/pages/shenpi/main',
+          this.show2 = false;
+          this.$router.push({
+            path: "/pages/shenpi/main",
             reLaunch: true,
           });
         });
       }
     },
+    //确定删除
+    queding2(){
+          let params = {
+        id: this.formData.id,
+      };
+      data[this.$route.query.data].delFlow(params).then((res) => {
+        mpvue.showToast({
+          title: res.data.message,
+          icon: "none",
+          duration: 1000,
+          mask: true,
+        });
+         this.show3 = false;
+        //重启到某页面，如不是tabar页面会有回主页按钮
+        setTimeout(() => {
+          this.$router.push({
+            path: data[this.$route.query.data].backPath,
+            reLaunch: true,
+          });
+        }, 1000);
+      });
+    },
     //取消同意/驳回
     quxiao() {
       this.show2 = false;
     },
+    quxiao2(){
+      this.show3=false
+    }
   },
 };
 </script>

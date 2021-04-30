@@ -1,7 +1,15 @@
 <template>
   <div>
-    <van-search v-model="value" placeholder="请输入搜索关键词"  @search="onSearch" />
-    <Card :cardList="cardList" @toDetail="toDetail" v-if="cardList.length>0"></Card>
+    <van-search
+      v-model="value"
+      placeholder="请输入搜索关键词"
+      @search="onSearch"
+    />
+    <Card
+      :cardList="cardList"
+      @toDetail="toDetail"
+      v-if="cardList.length > 0"
+    ></Card>
     <div class="empty-text" v-else>暂无记录</div>
     <van-goods-action>
       <van-goods-action-button
@@ -28,7 +36,7 @@ export default {
     this.getData();
   },
   methods: {
-     //键盘上的搜索按钮事件
+    //键盘上的搜索按钮事件
     onSearch(val) {
       this.value = val.mp.detail;
       this.getData();
@@ -45,15 +53,15 @@ export default {
       let params = {
         pageNum: 1,
         pageSize: 999,
-        applyUserId: 1,
+        applyUserId: mpvue.getStorageSync("UserId"),
         month: this.value,
-        formId: 1,
+        formId: this.$store.state.formId,
       };
       getHistory(params).then((res) => {
         this.cardList = res.data.data.list.map((item) => {
           return {
             id: item.id,
-            orderId:item.orderId?item.orderId:'',
+            orderId: item.orderId ? item.orderId : "",
             title: "备用金申请",
             money: "申请金额为:" + item.money,
             remark: "备注:" + item.remark,
@@ -72,13 +80,14 @@ export default {
     //历史记录的详情
     toDetail(val) {
       this.$router.push({
-        path:"/pages/applyForCashDetail/main",
-        query:{
-          id:val.id,
-          data:'applyCash',
-          type:'历史'
-        }
-      })
+        path: "/pages/applyForCashDetail/main",
+        query: {
+          id: val.id,
+          formId:this.$store.state.formId,
+          data: "applyCash",
+          type: "历史",
+        },
+      });
     },
   },
 };
@@ -87,10 +96,10 @@ export default {
 .van-submit-bar__button {
   width: 100% !important;
 }
-.empty-text{
+.empty-text {
   text-align: center;
   margin-top: 2rem;
-   font:24px "隶书";
-   color: #84AF9B
+  font: 24px "隶书";
+  color: #84af9b;
 }
 </style>

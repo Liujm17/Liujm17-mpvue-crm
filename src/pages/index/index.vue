@@ -1,12 +1,16 @@
 <template>
   <div class="bg">
     <div class="box-card" v-for="(item, index) in Menulist" :key="index">
-      <div class="title">{{item.name}}</div>
+      <div class="title">{{ item.name }}</div>
       <div class="content">
         <van-row>
-          <van-col span="6" v-for="(item2, index2) in item.children" :key="index2">
+          <van-col
+            span="6"
+            v-for="(item2, index2) in item.children"
+            :key="index2"
+          >
             <div class="box">
-              <div class="box-content" @click="toPage(item2.route)">
+              <div class="box-content" @click="toPage(item2)">
                 <van-icon :name="item2.icon" dot size="40px" />
               </div>
               <div class="box-name">
@@ -20,45 +24,86 @@
   </div>
 </template>
 <script>
-import { getUnionid ,getMenus} from "../../api/api";
+import { getUnionid, getMenus } from "../../api/api";
 export default {
   data() {
     return {
-      Menulist:[]
+      Menulist: [],
     };
   },
   components: {},
+  created() {
+    // this.getCode()
+  },
   mounted() {
-    this.getCode();
-    this.getMenus()
+    // this.$nextTick(() => {
+      this.getMenus();
+    // });
+    // this.init().then((res) => {
+    //   this.getMenus();
+    //   console.log("jieshu");
+    // });
+  },
+   onPullDownRefresh() {
+    //doing something
+    mpvue.showToast({
+      title: "下拉刷新成功",
+      icon: "none",
+      duration: 1000,
+      mask: true,
+    });
+  this.getMenus();
+    //stop doing
+    wx.stopPullDownRefresh();
   },
   methods: {
-    //获取菜单
-    getMenus(){
-      let params={
-        systemCode:'03'
-      }
-      getMenus(params).then((res)=>{
-        this.Menulist=res.data.data
-      })
+    init() {
+      return new Promise(function (resolve, reject) {
+        mpvue.login({
+          success(res) {
+            if (res.code) {
+              //发起网络请求
+              let params = {
+                code: res.code,
+                systemcode: "05",
+              };
+              getUnionid(params).then((res) => {
+                if (res.data.data) {
+                  mpvue.setStorageSync("UserId", res.data.data.userInfo.id);
+                     mpvue.setStorageSync("applyUserName", res.data.data.userInfo.name);
+                  mpvue.setStorageSync(
+                    "Authorization",
+                    res.data.data.Authorization
+                  );
+                } else {
+                  mpvue.showToast({
+                    title: res.data.message + "即将跳转绑定页面",
+                    icon: "none",
+                    duration: 1000,
+                    mask: true,
+                  });
+                }
+              });
+            } else {
+              console.log("登录失败！" + res.errMsg);
+            }
+          },
+        });
+        resolve();
+      });
     },
-    // getSetting() {
-    //   getSetting(
-    //     "userInfo",
-    //     (res) => {
-    //       //已经获得授权，页面不再是授权页
-    //       console.log(res);
-    //       //获取授权信息
-    //       this.getCode();
-    //     },
-    //     (res) => {
-    //       console.log("2", res);
-    //     }
-    //   );
-    // },
+    //获取菜单
+    getMenus() {
+      let params = {
+        systemCode: "03",
+      };
+      getMenus(params).then((res) => {
+        this.Menulist = res.data.data;
+      });
+    },
     //获取code
     getCode() {
-      wx.login({
+      mpvue.login({
         success(res) {
           if (res.code) {
             //发起网络请求
@@ -67,7 +112,26 @@ export default {
               systemcode: "05",
             };
             getUnionid(params).then((res) => {
-              console.log(res);
+              if (res.data.data) {
+                mpvue.setStorageSync("UserId", res.data.data.userInfo.id);
+                 mpvue.setStorageSync("applyUserName", res.data.data.userInfo.name);
+                mpvue.setStorageSync(
+                  "Authorization",
+                  res.data.data.Authorization
+                );
+              } else {
+                mpvue.showToast({
+                  title: res.data.message + "即将跳转绑定页面",
+                  icon: "none",
+                  duration: 1000,
+                  mask: true,
+                });
+                setTimeout(() => {
+                  // this.$router.push({
+                  //   path: "/pages/bind/main",
+                  // })
+                });
+              }
             });
           } else {
             console.log("登录失败！" + res.errMsg);
@@ -78,10 +142,9 @@ export default {
 
     //到申请页面
     toPage(val) {
-      console.log(val);
+      this.$store.commit("changeForm", val.menuUrl);
       this.$router.push({
-        path: val,
-        query: "1",
+        path: val.route,
       });
     },
   },

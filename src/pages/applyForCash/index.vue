@@ -1,80 +1,5 @@
 <template>
   <div>
-    <!-- <div>
-      <van-field
-      v-model="formData.applyUserName"
-      name="用户名"
-      label="用户名"
-      placeholder="用户名"
-      input-align="right"
-      :rules="[{ required: true, message: '请填写用户名' }]"
-      @input="formData.applyUserName = $event.mp.detail"
-    />
-    <van-field
-      v-model="formData.payeeUserName"
-      type="text"
-      name="收款人"
-      label="收款人"
-      placeholder="收款人"
-      input-align="right"
-      @input="formData.payeeUserId = $event.mp.detail"
-      @click="showPopup('表单')"
-    />
-    <van-field
-      v-model="formData.money"
-      type="number"
-      name="金额"
-      label="金额"
-      placeholder="金额"
-      input-align="right"
-      @input="formData.money = $event.mp.detail"
-    />
-    <van-field
-      v-model="formData.month"
-      type="number"
-      name="所属期"
-      label="所属期"
-      placeholder="所属期"
-      input-align="right"
-      @input="formData.month = $event.mp.detail"
-    />
-    <van-field
-      v-model="formData.subject"
-      name="事由"
-      label="事由"
-      placeholder="事由"
-      input-align="right"
-      :rules="[{ required: true, message: '请填写事由' }]"
-      @input="formData.subject = $event.mp.detail"
-    />
-    <van-field
-      v-model="formData.remark"
-      name="备注"
-      label="备注"
-      placeholder="备注"
-      input-align="right"
-      :rules="[{ required: true, message: '请填写备注' }]"
-      @input="formData.remark = $event.mp.detail"
-    />
-    <van-field
-      v-model="formData.bankName"
-      type="number"
-      name="收款银行"
-      label="收款银行"
-      placeholder="收款银行"
-      input-align="right"
-      @input="formData.bankName = $event.mp.detail"
-    />
-    <van-field
-      v-model="formData.bankAccount"
-      type="number"
-      name="收款人账号"
-      label="收款人账号"
-      placeholder="收款人账号"
-      input-align="right"
-      @input="formData.bankAccount = $event.mp.detail"
-    />
-   </div> -->
     <div>
       <van-field
         v-for="(item, index) in data.applyCash.vanFormData.formData"
@@ -150,16 +75,6 @@ export default {
       show: false,
       data: data,
       formData: {
-        // applyUserId: 1,
-        // applyUserName: "",
-        // payeeUserId: "",
-        // payeeUserName: "",
-        // money: "",
-        // month: "",
-        // subject: "",
-        // remark: "",
-        // bankName: "",
-        // bankAccount: "",
       },
       flowId: "",
       flowList: [],
@@ -217,7 +132,7 @@ export default {
     getByFlowId() {
       let params = {
         flowId: this.flowId,
-        userId:1
+        userId:mpvue.getStorageSync('UserId')
       };
       //设置流程列表
       getByFlowId(params).then((res) => {
@@ -236,8 +151,8 @@ export default {
     //获取数据
     getData() {
       let params = {
-        formId: 1,
-        userId: 1,
+        formId: this.$store.state.formId,
+        userId: mpvue.getStorageSync('UserId'),
       };
       getFlowList(params).then((res) => {
         if (res.data.data.length >= 1) {
@@ -275,9 +190,9 @@ export default {
     saveFlow(val) {
       let params = {
         ...this.formData,
-        formId: 1,
+        formId: this.$store.state.formId,
         flowId: this.flowId,
-        userId: 1,
+        userId: mpvue.getStorageSync('UserId'),
         type: val == "save" ? 0 : 1,
         optionalJson: val == "save" ? "" : JSON.stringify(this.fitNodeList),
       };

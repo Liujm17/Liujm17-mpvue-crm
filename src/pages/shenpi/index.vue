@@ -71,39 +71,10 @@ export default {
         this.nowSatus = name.mp.detail.index;
       }
     },
-    // getData() {
-    //   let params = {
-    //     pageNum: 1,
-    //     pageSize: 999,
-    //     applyUserId: 1,
-    //     month: "",
-    //     formId: 1,
-    //   };
-    //   //已经提交的
-    //   getHistory(params).then((res) => {
-    //     this.cardList = res.data.data.list
-    //       .filter((item) => item.approveStatus !== -1)
-    //       .map((item) => {
-    //         return {
-    //           title: "备用金申请",
-    //           money: "申请金额为:" + item.money,
-    //           remark: "备注:" + item.remark,
-    //           status:
-    //             item.approveStatus == -1
-    //               ? "未提交"
-    //               : item.approveStatus == 0
-    //               ? "审批中"
-    //               : item.approveStatus == 1
-    //               ? "已结束"
-    //               : "起始状态",
-    //         };
-    //       });
-    //   });
-    // },
     //已经审批和待审批
     getTask(status) {
       let params2 = {
-        approverUserId: 1,
+        approverUserId: mpvue.getStorageSync("UserId"),
         pageNum: 1,
         pageSize: 9999,
         status: status,
@@ -120,9 +91,15 @@ export default {
             return {
               id: item.dataId ? item.dataId : "",
               orderId: item.orderId ? item.orderId : "",
+              formId: item.formId ? item.formId : "",
               title: "申请类型:" + item.orderTitle,
               user: "申请人:" + item.startUserName,
-              status:"状态:"+item.orderStatus === 0?'审批中':(item.orderStatus === 1 ?'已结束':'已驳回')
+              status:
+                item.orderStatus === 0
+                  ? "审批中"
+                  : item.orderStatus === 1
+                  ? "已结束"
+                  : "已驳回",
             };
           });
         } else {
@@ -130,9 +107,15 @@ export default {
             return {
               id: item.dataId ? item.dataId : "",
               orderId: item.orderId ? item.orderId : "",
+              formId: item.formId ? item.formId : "",
               title: "申请类型:" + item.orderTitle,
               user: "申请人:" + item.startUserName,
-               status:"状态:"+item.orderStatus ==0?'审批中':(item.orderStatus ==1 ?'已结束':'已驳回')
+              status:
+                item.orderStatus == 0
+                  ? "审批中"
+                  : item.orderStatus == 1
+                  ? "已结束"
+                  : "已驳回",
             };
           });
         }
@@ -146,6 +129,7 @@ export default {
           query: {
             id: val.id,
             orderId: val.orderId,
+            formId: val.formId,
             data: "applyCash",
             type:
               this.nowSatus == 2
@@ -160,6 +144,7 @@ export default {
           path: "/pages/applyForCashDetail/main",
           query: {
             id: val.id,
+            formId: val.formId,
             data: "applyCash",
             type:
               this.nowSatus == 2

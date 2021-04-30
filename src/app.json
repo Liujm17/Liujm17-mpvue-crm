@@ -1,10 +1,10 @@
 {
   "pages": [
+    "pages/login/main",
     "pages/index/main",
     "pages/applyForCashHis/main",
     "pages/applyForCash/main",
     "pages/self/main",
-    "pages/bind/main",
     "pages/applyForCashDetail/main",
     "pages/shenpi/main"
   ],

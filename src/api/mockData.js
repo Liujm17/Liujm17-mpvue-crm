@@ -27,7 +27,7 @@ function formattingTime(time) {
   return FormattedDateTime
 }
 
-//过滤null的传参
+//过滤null的传参--清除id
 function dataFilter(data){
     if (data) {
         for (var key in data) {
@@ -39,6 +39,19 @@ function dataFilter(data){
           }
         }
       }
+}
+//过滤null的传参--不清除id
+function dataFilter2(data){
+  if (data) {
+      for (var key in data) {
+        if (
+          data[key] == null ||
+          typeof data[key] == "undefined" 
+        ) {
+          delete data[key];
+        }
+      }
+    }
 }
 
 //备用金申请
@@ -86,8 +99,8 @@ const applyCash = {
     ]
   },
   formData: {
-    applyUserId: 1,
-    applyUserName: "",
+    applyUserId:   mpvue.getStorageSync('UserId'),
+    applyUserName: mpvue.getStorageSync('applyUserName') ,
     payeeUserId: "",
     payeeUserName: "",
     money: "",
@@ -135,9 +148,17 @@ const applyCash = {
         return data
       })
   },
-  //发起或保存备用金申请
+  //发起或保存备用金申请---新增中
   saveOrStartFlow:function(params){
     return request.post(`/api-ep-project/spareMoney/add`,params)
+  },
+   //发起或保存备用金申请---草稿中
+ editOrStartFlow:function(params){
+    return request.post(`/api-ep-project/spareMoney/edit`,params)
+  },
+  //删除备用金可以编辑的流程
+  delFlow:function(params){
+    return request.post(`/api-ep-project/spareMoney/delete`,params)
   },
   //日志
   getHistory: function (params) {
@@ -160,5 +181,6 @@ const applyCash = {
 export default {
   applyCash,
   formattingTime,
-  dataFilter
+  dataFilter,
+  dataFilter2
 }
