@@ -11,7 +11,7 @@
           >
             <div class="box">
               <div class="box-content" @click="toPage(item2)">
-                <van-icon :name="item2.icon" dot size="40px" />
+                <ImageView height="100%" src=""></ImageView>
               </div>
               <div class="box-name">
                 {{ item2.name }}
@@ -25,13 +25,14 @@
 </template>
 <script>
 import { getUnionid, getMenus } from "../../api/api";
+import ImageView from '../../components/imageView'
 export default {
   data() {
     return {
       Menulist: [],
     };
   },
-  components: {},
+  components: {ImageView},
   created() {
     // this.getCode()
   },
@@ -185,6 +186,9 @@ export default {
         display: flex;
         justify-content: center;
         align-items: center;
+        img{
+          height: 100%;
+        }
       }
       .box-name {
         width: 90%;

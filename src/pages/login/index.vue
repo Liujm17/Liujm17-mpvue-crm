@@ -23,7 +23,6 @@ export default {
   },
   components: {},
   mounted() {
-    console.log( mpvue.getStorageSync('UserId'))
   },
   methods: {
      //aes密码加密
