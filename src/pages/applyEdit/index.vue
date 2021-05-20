@@ -4,7 +4,7 @@
       <van-tab title="详情">
         <div>
           <van-field
-            v-for="(item, index) in data.applyCash.vanFormData.formData"
+            v-for="(item, index) in data[page].vanFormData.formData"
             :key="index"
             v-model="formData[item.name]"
             :name="item.value"
@@ -13,13 +13,13 @@
             input-align="right"
             :rules="[{ required: true, message: '请填写' + item.value }]"
             @input="formData[item.name] = $event.mp.detail"
-            :readonly="readonly"
-            @click="
-              item.type == 'user' && readonly == false ? showPopup('表单') : ''
-            "
+            :readonly="item.readonly"
+             :required="item.required"
+               :type="item.type"
+           @click="item.click == 'user'? showPopup('表单') : ''"
           />
         </div>
-        <van-panel title="流程选择" :status="flowStatus" v-if="text !== '编辑'">
+        <van-panel title="流程选择" :status="flowStatus">
           <van-radio-group :value="flowId" @change="radioChange">
             <van-radio
               :name="item.id"
@@ -28,19 +28,24 @@
               >{{ item.name }}</van-radio
             >
           </van-radio-group>
-          <div class="liuchengtu">
-            <div class="test" v-for="(item, index) in fitNodeList" :key="index">
-              <van-tag
-                type="warning"
-                v-if="item.assigneeType == 'optional'"
-                @click="showPopup2(item.nodeId)"
-                >{{ item.userName ? item.userName : "自选" }}</van-tag
-              >
-              <van-tag round type="success" plain size="large" v-else>{{
-                item.content
-              }}</van-tag>
-            </div>
-          </div>
+         <div class="liuchengtu">
+        <div class="line" v-for="(item, index) in fitNodeList" :key="index">
+         <div   v-if="item.assigneeType == 'optional'">
+           <p>{{item.type == 'start'?'开始':(item.type == 'approver'?'审批':'抄送')}}</p>
+            <van-tag
+            type="warning"
+            @click="showPopup2(item.nodeId)"
+            >{{ item.userName ? item.userName : "自选" }}</van-tag
+          >
+         </div>
+         <div v-else>
+              <p>{{item.type == 'start'?'开始':(item.type == 'approver'?'审批':'抄送')}}</p>
+          <van-tag round :type="item.type == 'start'?'success':(item.type == 'approver'?'success':'primary')" plain size="large">{{
+            item.content
+          }}</van-tag>
+         </div>
+        </div>
+      </div>
         </van-panel>
       </van-tab>
 
@@ -49,13 +54,13 @@
       </van-tab>
     </van-tabs>
 
-    <van-goods-action v-if="pageType == '历史'">
+    <van-goods-action>
       <van-goods-action-button
         color="#7232dd"
         type="info"
-        :text="text"
+        text="保存草稿"
         v-if="isEdit == true"
-        @click="text == '编辑' ? changeText() : saveFlow('save')"
+        @click="saveFlow('save')"
       />
       <van-goods-action-button
         color="#7232dd"
@@ -67,61 +72,15 @@
       <van-goods-action-button
         color="#7232dd"
         type="primary"
-        :text="text2"
-        v-if="text == '保存草稿'"
+        text="保存并发起"
         @click="saveFlow('start')"
       />
       <van-goods-action-button
         color="#7232dd"
         type="danger"
-        text="回撤"
+        text="回撤到草稿"
         v-if="isBack == true"
-      />
-    </van-goods-action>
-
-    <van-goods-action v-else-if="pageType == '待审批'">
-      <van-goods-action-button
-        color="#7232dd"
-        type="info"
-        text="同意"
-        @click="agree"
-      />
-      <van-goods-action-button
-        color="#7232dd"
-        type="primary"
-        text="驳回"
-        @click="disagree"
-      />
-    </van-goods-action>
-    <van-goods-action v-else-if="pageType == '已审批'"> </van-goods-action>
-
-    <van-goods-action v-else-if="pageType == '已提交'"> 
-      <van-goods-action-button
-        color="#7232dd"
-        type="info"
-        :text="text"
-        v-if="isEdit == true"
-        @click="text == '编辑' ? changeText() : saveFlow('save')"
-      />
-      <van-goods-action-button
-        color="#7232dd"
-        type="warning"
-        text="删除"
-        v-if="isEdit == true"
-        @click="delFlow"
-      />
-      <van-goods-action-button
-        color="#7232dd"
-        type="primary"
-        :text="text2"
-        v-if="text == '保存草稿'"
-        @click="saveFlow('start')"
-      />
-      <van-goods-action-button
-        color="#7232dd"
-        type="danger"
-        text="回撤"
-        v-if="isBack == true"
+         @click="backFlow"
       />
     </van-goods-action>
 
@@ -165,23 +124,22 @@ import { agree, disagree } from "../../api/api";
 export default {
   data() {
     return {
+      page:'',
       data: data,
       active: 0,
       formData: {},
-      readonly: true,
+      // disabled: true,
       show: false,
       show2: false,
       show3:false,
       popUpType: "",
-      text: "编辑",
-      text2: "提交审批",
       HistoryList: [],
       //流程图
       flowId: "",
       flowList: [],
       nodeList: [],
       fitNodeList: [],
-      flowStatus: 1,
+         flowStatus: '流程数:0',
       pageType: "",
       isEdit: false,
       isBack: false,
@@ -189,17 +147,22 @@ export default {
     };
   },
   components: { User, Card, Deal ,Delete},
-  mounted() {
+  onShow() {
+     this.page=this.$route.query.data
     this.text = "编辑";
     this.getData();
     this.pageType = this.$route.query.type;
   },
   methods: {
+    //回撤
+    backFlow(){
+         this.$router.back()
+    },
     //切换标签页面
     change(name) {
       if (name.mp.detail.title == "日志") {
         let params = {
-          orderId: this.$route.query.id,
+          orderId: this.$route.query.orderId,
         };
         //获取日志
         data[this.$route.query.data].getHistory(params).then((res) => {
@@ -255,12 +218,12 @@ export default {
     getData() {
       let params = {
         dataId: this.$route.query.id,
-        formId: this.$route.query.formId,
+        formId: this.$store.state.formId,
         userId: mpvue.getStorageSync('UserId'),
       };
 
       let params2 = {
-        formId: this.$route.query.formId,
+        formId: this.$store.state.formId,
         userId: mpvue.getStorageSync('UserId'),
       };
       //获取表单数据
@@ -273,6 +236,7 @@ export default {
       //获取流程数据
       data[this.$route.query.data].getFlowList(params2).then((res) => {
         if (res.length >= 1) {
+          this.flowStatus='流程数:'+res.length
           this.flowList = res;
           this.flowId = res[0].id + "";
           this.getListByFlowId();
@@ -298,9 +262,9 @@ export default {
       this.getListByFlowId();
     },
     //切换编辑保存
-    changeText() {
-      (this.readonly = false), (this.text = "保存草稿");
-    },
+    // changeText() {
+    //   (this.disabled = false), (this.text = "保存草稿");
+    // },
     //打开删除确定框
     delFlow() {
       this.show3=true
@@ -311,7 +275,7 @@ export default {
 
       let params = {
         ...this.formData,
-        formId: this.$route.query.formId,
+        formId: this.$store.state.formId,
         flowId: this.flowId,
         userId: mpvue.getStorageSync('UserId'),
         type: val == "save" ? 0 : 1,
@@ -326,10 +290,8 @@ export default {
         });
         //重启到某页面，如不是tabar页面会有回主页按钮
         setTimeout(() => {
-          this.$router.push({
-            path: data[this.$route.query.data].backPath,
-            reLaunch: true,
-          });
+          //回退2层
+         this.$router.go(2)
         }, 1000);
       });
     },
@@ -359,10 +321,7 @@ export default {
             mask: true,
           });
           this.show2 = false;
-          this.$router.push({
-            path: "/pages/shenpi/main",
-            reLaunch: true,
-          });
+         this.$router.back()
         });
       } else {
         disagree(params).then((res) => {
@@ -373,10 +332,7 @@ export default {
             mask: true,
           });
           this.show2 = false;
-          this.$router.push({
-            path: "/pages/shenpi/main",
-            reLaunch: true,
-          });
+        this.$router.back()
         });
       }
     },
@@ -384,6 +340,7 @@ export default {
     queding2(){
           let params = {
         id: this.formData.id,
+        formId:this.$store.state.formId
       };
       data[this.$route.query.data].delFlow(params).then((res) => {
         mpvue.showToast({
@@ -395,10 +352,7 @@ export default {
          this.show3 = false;
         //重启到某页面，如不是tabar页面会有回主页按钮
         setTimeout(() => {
-          this.$router.push({
-            path: data[this.$route.query.data].backPath,
-            reLaunch: true,
-          });
+          this.$router.go(2)
         }, 1000);
       });
     },
@@ -422,10 +376,18 @@ export default {
   display: flex;
   flex-direction: column;
   margin-top: 0.5rem;
-  .test {
-    border-left: 2px black solid;
+  .line {
     height: 1.2rem;
-    margin-left: 1rem;
+    margin-left: 0.5rem;
+  }
+  .line:nth-last-child(n+2){
+    border-left: 2px black solid;
+  }
+   .line:nth-last-child(1){
+    margin-top: -0.3rem;
+  }
+   .line:nth-last-child(2){
+     height: 1.5rem;
   }
 }
 </style>

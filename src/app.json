@@ -1,18 +1,21 @@
 {
   "pages": [
-    "pages/login/main",
+    "pages/style/main",
     "pages/index/main",
-    "pages/applyForCashHis/main",
-    "pages/applyForCash/main",
     "pages/self/main",
-    "pages/applyForCashDetail/main",
+    "pages/login/main",
+    "pages/applyHistory/main",
+    "pages/applyAdd/main",
+    "pages/applyEdit/main",
+    "pages/applyDetail/main",
     "pages/shenpi/main"
   ],
   "window": {
     "backgroundTextStyle": "light",
     "navigationBarBackgroundColor": "#96c2f1",
     "navigationBarTitleText": "审批",
-    "navigationBarTextStyle": "black"
+    "navigationBarTextStyle": "black",
+    "onReachBottomDistance":100
   },
   "tabBar": {
     "color": "#686868",
@@ -37,6 +40,13 @@
       "iconPath": "static/images/self.png",
       "selectedIconPath": "static/images/self_active.png",
       "text": "我"
+    },
+
+    {
+      "pagePath": "pages/style/main",
+      "iconPath": "static/images/self.png",
+      "selectedIconPath": "static/images/self_active.png",
+      "text": "样式"
     }
   ]
 
@@ -45,7 +55,6 @@
     "van-row":"/vant-weapp/dist/row/index",
     "van-col":"/vant-weapp/dist/col/index",
     "van-tag":"/vant-weapp/dist/tag/index",
-    "van-icon":"/vant-weapp/dist/icon/index",
     "van-field":"/vant-weapp/dist/field/index",
     "van-picker":"/vant-weapp/dist/picker/index",
     "van-popup":"/vant-weapp/dist/popup/index",

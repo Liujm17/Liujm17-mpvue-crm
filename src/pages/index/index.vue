@@ -1,51 +1,57 @@
 <template>
   <div class="bg">
     <div class="box-card" v-for="(item, index) in Menulist" :key="index">
-      <div class="title">{{ item.name }}</div>
+      <div class="title">{{ item.title }}</div>
       <div class="content">
         <van-row>
           <van-col
             span="6"
-            v-for="(item2, index2) in item.children"
+            v-for="(item2, index2) in item.subs"
             :key="index2"
           >
             <div class="box">
               <div class="box-content" @click="toPage(item2)">
-                <ImageView height="100%" src=""></ImageView>
+                <ImageView height="100%" round :src="item2.icon"></ImageView>
               </div>
               <div class="box-name">
-                {{ item2.name }}
+                {{ item2.title }}
               </div>
             </div>
           </van-col>
         </van-row>
       </div>
     </div>
+    <div>
+    </div>
   </div>
 </template>
 <script>
-import { getUnionid, getMenus } from "../../api/api";
-import ImageView from '../../components/imageView'
+import { getMenus, getCount } from "../../api/api";
+import ImageView from "../../components/imageView";
+import User from '../../components/userOptions'
+import { getStorageSync } from "../../api/wechat";
 export default {
   data() {
     return {
       Menulist: [],
+      show:false
     };
   },
-  components: {ImageView},
-  created() {
-    // this.getCode()
-  },
-  mounted() {
-    // this.$nextTick(() => {
+  components: { ImageView,User},
+  onShow() {  
+  
+    //接收websocket消息
+    if (getStorageSync("UserId") && getStorageSync("Authorization")) {
       this.getMenus();
-    // });
-    // this.init().then((res) => {
-    //   this.getMenus();
-    //   console.log("jieshu");
-    // });
+      this.getCount();
+    } else {
+      this.$router.push({
+        path: "/pages/login/main",
+        reLaunch: true,
+      });
+    }
   },
-   onPullDownRefresh() {
+  onPullDownRefresh() {
     //doing something
     mpvue.showToast({
       title: "下拉刷新成功",
@@ -53,99 +59,41 @@ export default {
       duration: 1000,
       mask: true,
     });
-  this.getMenus();
+    this.getMenus();
+     this.getCount();
     //stop doing
     wx.stopPullDownRefresh();
   },
   methods: {
-    init() {
-      return new Promise(function (resolve, reject) {
-        mpvue.login({
-          success(res) {
-            if (res.code) {
-              //发起网络请求
-              let params = {
-                code: res.code,
-                systemcode: "05",
-              };
-              getUnionid(params).then((res) => {
-                if (res.data.data) {
-                  mpvue.setStorageSync("UserId", res.data.data.userInfo.id);
-                     mpvue.setStorageSync("applyUserName", res.data.data.userInfo.name);
-                  mpvue.setStorageSync(
-                    "Authorization",
-                    res.data.data.Authorization
-                  );
-                } else {
-                  mpvue.showToast({
-                    title: res.data.message + "即将跳转绑定页面",
-                    icon: "none",
-                    duration: 1000,
-                    mask: true,
-                  });
-                }
-              });
-            } else {
-              console.log("登录失败！" + res.errMsg);
-            }
-          },
+    //获取待办数
+    getCount() {
+      let params = {
+        approverUserId: wx.getStorageSync("UserId"),
+        status: 0,
+      };
+      getCount(params).then((res) => {
+        wx.setTabBarBadge({
+          index: 1,
+          text: res.data.data + "",
         });
-        resolve();
       });
     },
+
     //获取菜单
     getMenus() {
       let params = {
-        systemCode: "03",
+        systemCode: "05",
       };
       getMenus(params).then((res) => {
-        this.Menulist = res.data.data;
-      });
-    },
-    //获取code
-    getCode() {
-      mpvue.login({
-        success(res) {
-          if (res.code) {
-            //发起网络请求
-            let params = {
-              code: res.code,
-              systemcode: "05",
-            };
-            getUnionid(params).then((res) => {
-              if (res.data.data) {
-                mpvue.setStorageSync("UserId", res.data.data.userInfo.id);
-                 mpvue.setStorageSync("applyUserName", res.data.data.userInfo.name);
-                mpvue.setStorageSync(
-                  "Authorization",
-                  res.data.data.Authorization
-                );
-              } else {
-                mpvue.showToast({
-                  title: res.data.message + "即将跳转绑定页面",
-                  icon: "none",
-                  duration: 1000,
-                  mask: true,
-                });
-                setTimeout(() => {
-                  // this.$router.push({
-                  //   path: "/pages/bind/main",
-                  // })
-                });
-              }
-            });
-          } else {
-            console.log("登录失败！" + res.errMsg);
-          }
-        },
+        this.Menulist = res.data.data.menus;
+        this.$store.commit('setPermissions',res.data.data.permissions)
       });
     },
 
     //到申请页面
     toPage(val) {
-      this.$store.commit("changeForm", val.menuUrl);
       this.$router.push({
-        path: val.route,
+        path: val.index,
       });
     },
   },
@@ -186,7 +134,7 @@ export default {
         display: flex;
         justify-content: center;
         align-items: center;
-        img{
+        img {
           height: 100%;
         }
       }

@@ -1,0 +1,371 @@
+<template>
+  <div>
+    <van-tabs :active="active" @change="change">
+      <van-tab title="详情">
+        <div>
+          <van-field
+            v-for="(item, index) in data[page].vanFormData.formData"
+            :key="index"
+            v-model="formData[item.name]"
+            :name="item.value"
+            :label="item.value"
+            :placeholder="item.value"
+            input-align="right"
+            :rules="[{ required: true, message: '请填写' + item.value }]"
+            @input="formData[item.name] = $event.mp.detail"
+            :disabled="disabled"
+            :readonly="item.readonly"
+          />
+        </div>
+      </van-tab>
+
+      <van-tab title="日志">
+        <Card :cardList="HistoryList"></Card>
+      </van-tab>
+    </van-tabs>
+
+    <van-goods-action v-if="pageType == '历史'">
+      <van-goods-action-button
+        color="#7232dd"
+        type="info"
+        text="编辑"
+        v-if="isEdit == true"
+        @click="changeText()"
+      />
+      <van-goods-action-button
+        color="#7232dd"
+        type="warning"
+        text="删除"
+        v-if="isEdit == true"
+        @click="delFlow"
+      />
+      <van-goods-action-button
+        color="#7232dd"
+        type="danger"
+        text="回撤"
+        v-if="isBack == true"
+        @click="backFlow"
+      />
+    </van-goods-action>
+
+    <van-goods-action v-else-if="pageType == '待审批'">
+      <van-goods-action-button
+        color="#7232dd"
+        type="info"
+        text="同意"
+        @click="agree"
+      />
+       <van-goods-action-button
+        color="#7232dd"
+        type="default"
+        text="转审"
+        @click="referral"
+      />
+      <van-goods-action-button
+        color="#7232dd"
+        type="primary"
+        text="驳回"
+        @click="disagree"
+      />
+    </van-goods-action>
+    <van-goods-action v-else-if="pageType == '已审批'"> </van-goods-action>
+
+    <van-goods-action v-else-if="pageType == '已提交'">
+      <van-goods-action-button
+        color="#7232dd"
+        type="info"
+        text="编辑"
+        v-if="isEdit == true"
+        @click="changeText()"
+      />
+      <van-goods-action-button
+        color="#7232dd"
+        type="warning"
+        text="删除"
+        v-if="isEdit == true"
+        @click="delFlow"
+      />
+      <van-goods-action-button
+        color="#7232dd"
+        type="danger"
+        text="回撤"
+        v-if="isBack == true"
+        @click="backFlow"
+      />
+    </van-goods-action>
+
+    <!-- 同意驳回弹出层 -->
+    <van-popup
+      :show="show2"
+      position="bottom"
+      custom-style="width: 100%; min-height: 30%;display:flex;flex-direction: column;justify-content: center;"
+      @close="quxiao"
+    >
+      <Deal :type="dealType" @quxiao="quxiao" @queding="queding"></Deal>
+    </van-popup>
+    <!-- 删除或者回撤弹出层 -->
+    <van-popup
+      :show="show3"
+      position="bottom"
+      custom-style="width: 100%; min-height: 30%;display:flex;flex-direction: column;justify-content: center;"
+      @close="quxiao2"
+    >
+      <Delete @quxiao="quxiao2" @queding="queding2"></Delete>
+    </van-popup>
+
+    <!-- 收款人弹出层 -->
+    <van-popup
+      :show="show"
+      position="right"
+      custom-style="width: 80%; height: 100%;"
+      @close="onClose"
+    >
+      <User @submit="submit" @cancel="onClose"></User>
+    </van-popup>
+  </div>
+</template>
+<script>
+import data from "../../api/mockData";
+import Deal from "../../components/deal";
+import Delete from "../../components/sureDelete";
+import Card from "../../components/card";
+import User from '../../components/userOptions'
+import { agree, disagree, backFlow,referral } from "../../api/api";
+export default {
+  data() {
+    return {
+      page: "",
+      data: data,
+      active: 0,
+      formData: {},
+      disabled: true,
+      show: false,
+      show2: false,
+      show3: false,
+      popUpType: "",
+      HistoryList: [],
+      //流程图
+      flowId: "",
+      flowList: [],
+      nodeList: [],
+      fitNodeList: [],
+      flowStatus: 1,
+      pageType: "",
+      isEdit: false,
+      isBack: false,
+      dealType: "agree",
+      DeleteType: "delete",
+    };
+  },
+  components: { Card, Deal, Delete,User },
+  onShow() {
+    this.page = this.$route.query.data;
+    this.getData();
+    this.pageType = this.$route.query.type;
+  },
+  methods: {
+    //切换标签页面
+    change(name) {
+      if (name.mp.detail.title == "日志") {
+        let params = {
+          orderId: this.$route.query.orderId,
+        };
+        //获取日志
+        data[this.$route.query.data].getHistory(params).then((res) => {
+          mpvue.showToast({
+            title: "正在加载",
+            icon: "loading",
+            duration: 500,
+            mask: true,
+          });
+          this.HistoryList = res;
+        });
+      }
+    },
+    //选用户后的确认事件
+    submit(val) {
+      let params={
+         orderId: this.$route.query.orderId,
+         userId:val.id,
+         approverUserId:mpvue.getStorageSync("UserId")
+      }
+     referral(params).then((res)=>{
+         mpvue.showToast({
+            title: res.data.message,
+            icon: "none",
+            duration: 1000,
+            mask: true,
+          });
+          this.show = false;
+          this.$router.back();
+     })
+    },
+
+    //获取数据
+    getData() {
+      let params = {
+        dataId: this.$route.query.id,
+        formId: this.$store.state.formId,
+        userId: mpvue.getStorageSync("UserId"),
+      };
+
+      let params2 = {
+        formId: this.$store.state.formId,
+        userId: mpvue.getStorageSync("UserId"),
+      };
+      //获取表单数据
+      data[this.$route.query.data].getData(params).then((res) => {
+        this.formData = res.data.data;
+        this.isEdit = res.data.data.isEdit == 1 ? true : false;
+        this.isBack = res.data.data.isBack == 1 ? true : false;
+      });
+    },
+
+    //切换到编辑页面
+    changeText() {
+      this.$router.push({
+        path: "/pages/applyEdit/main",
+        query: {
+          id: this.$route.query.id,
+          orderId: this.$route.query.orderId,
+          formId: this.$store.state.formId,
+          data: this.$store.state.allData.filter(
+            (item) => item.formId == this.$store.state.formId
+          )[0].data,
+          type: "历史",
+        },
+      });
+      // (this.disabled = false), (this.text = "保存草稿");
+    },
+    //mpvue的更改选择，异步
+    radioChange(val) {
+      this.flowId = val.mp.detail;
+      this.getListByFlowId();
+    },
+    //回撤
+    backFlow() {
+      this.DeleteType = "back";
+      this.show3 = true;
+    },
+    //删除
+    delFlow() {
+      this.DeleteType = "delete";
+      this.show3 = true;
+    },
+    //同意
+    agree() {
+      this.dealType = "agree";
+      this.show2 = true;
+    },
+    //驳回
+    disagree() {
+      this.dealType = "disagree";
+      this.show2 = true;
+    },
+    //转审
+    referral(){
+     this.show=true
+    },
+    //关闭转审人菜单
+    onClose(){
+    this.show=false
+    },
+    //确定同意/驳回
+    queding(val) {
+      let params = {
+        ...val,
+        userId: mpvue.getStorageSync("UserId"),
+        orderId: this.$route.query.orderId,
+      };
+      if (this.dealType == "agree") {
+        agree(params).then((res) => {
+          mpvue.showToast({
+            title: res.data.message,
+            icon: "none",
+            duration: 1000,
+            mask: true,
+          });
+          this.show2 = false;
+          this.$router.back();
+        });
+      } else {
+        disagree(params).then((res) => {
+          mpvue.showToast({
+            title: res.data.message,
+            icon: "none",
+            duration: 1000,
+            mask: true,
+          });
+          this.show2 = false;
+          this.$router.back();
+        });
+      }
+    },
+    //确定删除
+    queding2() {
+      if (this.DeleteType == "delete") {
+        let params = {
+          id: this.formData.id,
+          formId: this.$store.state.formId,
+        };
+        data[this.$route.query.data].delFlow(params).then((res) => {
+          mpvue.showToast({
+            title: res.data.message,
+            icon: "none",
+            duration: 1000,
+            mask: true,
+          });
+          this.show3 = false;
+          //重启到某页面，如不是tabar页面会有回主页按钮
+          setTimeout(() => {
+            this.$router.back();
+          }, 1000);
+        });
+      }else if(this.DeleteType == 'back'){
+      let params={
+          orderId: this.$route.query.orderId,
+      }
+      backFlow(params).then((res)=>{
+         mpvue.showToast({
+            title: res.data.message,
+            icon: "none",
+            duration: 1000,
+            mask: true,
+          });
+          this.show3 = false;
+          //重启到某页面，如不是tabar页面会有回主页按钮
+          setTimeout(() => {
+            this.$router.back();
+          }, 1000);
+      })
+      }
+    },
+    //取消对同意/驳回的操作
+    quxiao() {
+      this.show2 = false;
+    },
+    //取消删除
+    quxiao2() {
+      this.show3 = false;
+    },
+  },
+};
+</script>
+<style lang="scss">
+.van-panel {
+  margin-bottom: 2rem !important;
+}
+</style>
+<style lang="scss" scoped>
+.liuchengtu {
+  display: flex;
+  flex-direction: column;
+  margin-top: 0.5rem;
+  .test {
+    border-left: 2px black solid;
+    height: 1.2rem;
+    margin-left: 1rem;
+  }
+}
+</style>
+

@@ -3,8 +3,7 @@ import {
   APP_ID,
   APP_SECRET
 } from '../utils/const'
-
-const base_url = 'http://47.105.173.228:8764'
+import {setStorageSync} from './wechat'
 
 // export function getHomeData(params){
 //      return get(`${base_url}/book/home/v2`,params)
@@ -15,7 +14,11 @@ const base_url = 'http://47.105.173.228:8764'
 //   }
 //获取目录菜单
 export function getMenus(params) {
-  return request.get(`/api-ep-user/menu/getTreeList`, params)
+  return request.get(`/api-ep-user/menu/getMenus`, params)
+}
+//获取待办数量
+export function getCount(params) {
+  return request.get(`/api-ep-user/flowTask/getCount`, params)
 }
 //获取备用金申请的历史记录
 export function getHistory(params) {
@@ -53,34 +56,35 @@ export function getFlowTask(params) {
 
 
 
-//根据授权获得code再获取系统里的token
+//根据授权获得code再获取系统里的Authorization
 export function getUnionid(params) {
   return request.post(`/api-ep-user/wechatController/wechat/miniappslogin`, params)
 }
 
 //登录
-export function login(params) {
+export function login() {
   mpvue.login({
     success(res) {
       if (res.code) {
-        const params={
-          code:res.code,
-          systemCode:'03'
+        const { code } = res
+        let params ={
+          code:code,
+          systemcode:'05'
         }
-        getUnionid(params).then(res=>{
-          if(res.data.data){
-            mpvue.setStorageSync("UserId", res.data.data.userInfo.id);
-            mpvue.setStorageSync("Authorization",res.data.data.Authorization);
-            }else{
-               mpvue.showToast({
-                   title: res.data.message+'即将跳转绑定页面',
-                   icon: "none",
-                   duration: 1000,
-                   mask: true,
-               });
-              console.log(res)
-            
-            }
+        getUnionid(params).then(res => {
+          if(res.data.data.Authorization){
+            setStorageSync("UserId", res.data.data.userInfo.id);
+            setStorageSync("applyUserName", res.data.data.userInfo.name);
+            setStorageSync("Authorization", res.data.data.Authorization);
+            wx.reLaunch({
+              url: '/pages/index/main'
+            })
+          }else{
+                 setStorageSync("unionid", res.data.data.unionid);
+                 setStorageSync("openid", res.data.data.openid);
+          }
+        }).catch(err => {
+          console.log(err) // 直接抛出异常
         })
       } else {
         console.log(res) // 直接抛出异常
@@ -92,6 +96,8 @@ export function login(params) {
   })
 }
 
+
+
 //同意
 export function agree(params) {
   return request.post(`/api-ep-user/flowOrder/agree`, params)
@@ -102,10 +108,17 @@ export function disagree(params) {
   return request.post(`/api-ep-user/flowOrder/disagree`, params)
 }
 
+//回撤
+export function backFlow(params){
+  return request.get('/api-ep-user/flowOrder/startUserRevoke',params)
+}
 
-
+//转审
+export function referral(params){
+  return request.post('/api-ep-user/flowOrder/referral',params)
+}
 
 //登录
-export function accountLogin(params){
-  return request.post('/api-ep-user/loginController/auth/login',params)
+export function accountBind(params){
+  return request.post('/api-ep-user/wechatController/wechat/bind',params)
 }

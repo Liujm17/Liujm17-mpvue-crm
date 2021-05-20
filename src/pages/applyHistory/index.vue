@@ -2,11 +2,12 @@
   <div>
     <van-search
       v-model="value"
-      placeholder="请输入搜索关键词"
+      placeholder="请输入所属期"
       @search="onSearch"
     />
     <Card
       :cardList="cardList"
+      :more="more"
       @toDetail="toDetail"
       v-if="cardList.length > 0"
     ></Card>
@@ -17,6 +18,7 @@
         type="info"
         text="新增"
         @click="onSubmit"
+        v-if="addButton"
       />
     </van-goods-action>
   </div>
@@ -29,11 +31,40 @@ export default {
     return {
       value: "",
       cardList: [],
+      more:true,
+      total:0,
+      pageSize:10,
+      addButton:true
     };
   },
   components: { Card },
-  mounted() {
+  onShow() {
+    this.$store.commit("changeForm",parseInt(this.$route.query.formId) );
+     this.addButton=this.$store.state.permissions.includes('Imprest:Add')
     this.getData();
+  },
+    //下拉刷新
+  onPullDownRefresh() {
+    //doing something
+    mpvue.showToast({
+      title: "下拉刷新成功",
+      icon: "none",
+      duration: 1000,
+      mask: true,
+    });
+   this.getData();
+    //stop doing
+    wx.stopPullDownRefresh();
+  },
+    // 上拉加载
+  onReachBottom: function () {
+    //执行上拉执行的功能
+    if(this.pageSize<this.total){
+    this.pageSize+=10
+    this.getData();
+    }else{
+      this.more=false
+    }
   },
   methods: {
     //键盘上的搜索按钮事件
@@ -44,20 +75,23 @@ export default {
     //新增
     onSubmit() {
       this.$router.push({
-        path: "/pages/applyForCash/main",
-        query: "1",
+        path: "/pages/applyAdd/main",
+        query: {
+             data: this.$store.state.allData.filter((item)=>item.formId==this.$store.state.formId)[0].data,
+        },
       });
     },
     //获取数据
     getData() {
       let params = {
         pageNum: 1,
-        pageSize: 999,
+        pageSize: this.pageSize,
         applyUserId: mpvue.getStorageSync("UserId"),
         month: this.value,
         formId: this.$store.state.formId,
       };
       getHistory(params).then((res) => {
+        this.total=res.data.data.total
         this.cardList = res.data.data.list.map((item) => {
           return {
             id: item.id,
@@ -71,7 +105,7 @@ export default {
                 : item.approveStatus == 0
                 ? "审批中"
                 : item.approveStatus == 1
-                ? "已结束"
+                ? "已通过"
                 : "起始状态",
           };
         });
@@ -80,11 +114,12 @@ export default {
     //历史记录的详情
     toDetail(val) {
       this.$router.push({
-        path: "/pages/applyForCashDetail/main",
+          path: `/pages/${this.$store.state.allData.filter((item)=>item.formId== this.$store.state.formId)[0].page}/main`,
         query: {
           id: val.id,
-          formId:this.$store.state.formId,
-          data: "applyCash",
+          orderId:val.orderId,
+          formId: this.$store.state.formId,
+          data: this.$store.state.allData.filter((item)=>item.formId== this.$store.state.formId)[0].data,
           type: "历史",
         },
       });
