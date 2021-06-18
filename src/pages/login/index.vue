@@ -77,7 +77,8 @@ export default {
         account: this.account,
         password: this.EncryptBASE64(this.password),
         unionid: getStorageSync("unionid"),
-        openid: getStorageSync("openid")
+        openid: getStorageSync("openid"),
+        systemcode:'05'
       };
       accountBind(params).then((res) => {
         if (res.data.code == 10000) {

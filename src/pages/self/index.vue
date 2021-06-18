@@ -11,7 +11,7 @@
           </div>
           <div class="sub-title">{{ nickName }}</div>
           <div class="title">{{ city }}</div>
-      <div @click="ceshi">测试视频上传</div>
+      <div @click="ceshi">测试</div>
         </div>
       </div>
     </div>
@@ -21,35 +21,6 @@
 import ImageView from "../../components/imageView";
 import Auth from "../../components/Auth";
 import {setStorageSync,getStorageSync} from "../../api/wechat"
-function formatDate(date, fmt) {
-  if (/(y+)/.test(fmt)) {
-    date = new Date(date * 1000);
-    fmt = fmt.replace(
-      RegExp.$1,
-      (date.getFullYear() + "").substr(4 - RegExp.$1.length)
-    );
-    var o = {
-      "M+": date.getMonth() + 1,
-      "d+": date.getDate(),
-      "h+": date.getHours(),
-      "m+": date.getMinutes(),
-      "s+": date.getSeconds(),
-    };
-    for (var k in o) {
-      if (new RegExp(`(${k})`).test(fmt)) {
-        var str = o[k] + "";
-        fmt = fmt.replace(
-          RegExp.$1,
-          RegExp.$1.length === 1 ? str : padLeftZero(str)
-        );
-      }
-    }
-    return fmt;
-  }
-}
-function padLeftZero(str) {
-  return ("00" + str).substr(str.length);
-}
 export default {
   data() {
     return {
@@ -84,15 +55,19 @@ export default {
   },
   onLoad() {},
   methods: {
+    // touchS(e){
+    //   console.log(e)
+    // },
+    //  touchE(e){
+    //   console.log(e)
+    // },
     //测试视频上传
     ceshi(){
-      wx.chooseVideo({
-  sourceType: ['album','camera'],
-  maxDuration: 60,
-  camera: 'back',
-  success(res) {
-    console.log(parseFloat(res.size/1024/1024).toFixed(1))
-  }
+const media= [{url:'http://47.105.173.228:8010/icon/spare_money.png'}]
+    wx.previewMedia({
+  current:0, // 当前显示图片的http链接
+  sources: media, // 需要预览的图片http链接列表
+  url:media[0]
 })
     },
     getUserInfo() {

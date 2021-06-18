@@ -20,69 +20,69 @@
 </template>
 
 <script>
-  export default {
-    props: {
-      src: {
-        type: String,
-        default: ''
-      },
-      mode: {
-        type: String,
-        default: 'widthFix'
-      },
-      lazyLoad: {
-        type: Boolean,
-        default: true
-      },
-      round: {
-        type: Boolean,
-        default: false
-      },
-      height: {
-        type: String,
-        default: 'auto'
+export default {
+  props: {
+    src: {
+      type: String,
+      default: "",
+    },
+    mode: {
+      type: String,
+      default: "widthFix",
+    },
+    lazyLoad: {
+      type: Boolean,
+      default: true,
+    },
+    round: {
+      type: Boolean,
+      default: false,
+    },
+    height: {
+      type: String,
+      default: "auto",
+    },
+  },
+  watch: {
+    src(newValue, preValue) {
+      if (newValue && newValue.length > 0 && newValue !== preValue) {
+        this.$nextTick(() => {
+          this.isLoading = true;
+          this.error = false;
+        });
       }
     },
-    watch: {
-      src(newValue, preValue) {
-        if (newValue && newValue.length > 0 && newValue !== preValue) {
-          this.$nextTick(() => {
-            this.isLoading = true
-            this.error = false
-          })
-        }
-      }
+  },
+  data() {
+    return {
+      isLoading: true,
+      error: false,
+    };
+  },
+  methods: {
+    onClick() {
+      this.$emit("onClick");
     },
-    data() {
-      return {
-        isLoading: true,
-        error: false
-      }
+    onLoad() {
+      this.isLoading = false;
+      this.error = false;
     },
-    methods: {
-      onClick() {
-        this.$emit('onClick')
-      },
-      onLoad() {
-        this.isLoading = false
-        this.error = false
-      },
-      onError() {
-        this.error = true
-        this.isLoading = false
-      }
-    }
-  }
+    onError() {
+      this.error = true;
+      this.isLoading = false;
+    },
+  },
+};
 </script>
 
 <style lang="scss" scoped>
-  .image-view {
+.image-view {
+  width: 100%;
+  .image {
     width: 100%;
-    .image {
-      width: 100%;
-      &.round {
-        border-radius: 50%;
-      }
+    &.round {
+      border-radius: 50%;
     }
   }
+}
 </style>

@@ -22,37 +22,45 @@
       </van-tab>
     </van-tabs>
     <div class="bottom-bt">
+      <!-- <div class="" style="width:50%">取消</div>
+      <div class="" style="width:50%">确定</div> -->
       <!-- <van-button color="#be99ff" type="warning" @click="cancel">取消</van-button>
       <van-button color="#7232dd" type="info" @click="submit">确定</van-button> -->
-      <van-goods-action>
+      <!-- <van-goods-action>
         <van-goods-action-button
-          color="#be99ff"
           type="warning"
           text="取消"
           @click="cancel"
         />
         <van-goods-action-button
-          color="#7232dd"
           type="info"
           text="确定"
           @click="submit"
         />
-      </van-goods-action>
+      </van-goods-action> -->
     </div>
+    <BottomButton :btList='btList'  @clickBt='clickBt'></BottomButton>
   </div>
 </template>
 <script>
-import { getUserOptions, getPostOptions } from "../api/api";
+import BottomButton from './bottomButton'
+import { getUserOptions } from "../api/api";
 export default {
   data() {
     return {
       active: 0,
       value: "",
       UserList: [],
-      radio: "1",
+      btList:[{name:'取消',click:'cancel'},{name:'确定',click:'submit',color:'blue'}]
     };
   },
-  components: {},
+  props:{
+      radio:{
+        type:String,
+        default:'1'
+      }
+  },
+  components: {BottomButton},
   onLoad() {
     this.getData();
   },
@@ -90,12 +98,16 @@ export default {
     // radioChange2(val) {
     //   this.radio2 = val.mp.detail;
     // },
+    //自定义底部按钮
+     clickBt(val){
+     this[val]()
+    },
     cancel() {
       this.$emit("cancel");
     },
     submit() {
       var value = {
-        userName: this.UserList.filter((item) => item.id == this.radio)[0].name,
+        name: this.UserList.filter((item) => item.id == this.radio)[0].name,
         id: this.radio,
       };
 
@@ -105,6 +117,13 @@ export default {
 };
 </script>
 <style lang="scss">
+.van-radio {
+  margin-top: 0.2rem !important;
+  margin-left: 0.3rem !important;
+  margin-bottom: 0.3rem !important;
+}
+</style>
+<style lang="scss" scoped>
 .select {
   font-size: 0.3rem;
   .post {
@@ -128,10 +147,5 @@ export default {
   height: 50px;
   line-height: 50px;
   text-align: center;
-}
-.van-radio {
-  margin-top: 0.2rem !important;
-  margin-left: 0.3rem !important;
-  margin-bottom: 0.3rem !important;
 }
 </style>

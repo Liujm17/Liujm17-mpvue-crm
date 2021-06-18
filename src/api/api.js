@@ -5,13 +5,11 @@ import {
 } from '../utils/const'
 import {setStorageSync} from './wechat'
 
-// export function getHomeData(params){
-//      return get(`${base_url}/book/home/v2`,params)
-// }
 
-//    export function register(params) {
-//     return post(`${base_url}/user/register`,params)
-//   }
+//获取用户所属项目列表
+export function getProjects(params) {
+  return request.get(`/api-ep-project/project/getIncludeProjects`, params)
+}
 //获取目录菜单
 export function getMenus(params) {
   return request.get(`/api-ep-user/menu/getMenus`, params)
@@ -28,9 +26,33 @@ export function getHistory(params) {
 export function getUserOptions(params) {
   return request.post(`/api-ep-user/userController`, params)
 }
+//获取供应商列表
+export function getProviderOptions(params) {
+  return request.get(`/api-ep-project/supplier/getPage`, params)
+}
 //获取部门列表
-export function getPostOptions(params) {
+export function getDeptOptions(params) {
   return request.post(`/api-ep-user/deptController/list`, params)
+}
+//获取岗位列表
+export function getPostOptions(params) {
+  return request.get(`/api-ep-user/dictItemController/getDictItemWithDictId`, params)
+}
+//获取产品列表
+export function getProductOptions(params) {
+  return request.post('/api-ep-project/product/getProducts', params)
+}
+//获取入库单里的产品列表
+export function getProductItemOptions(params) {
+  return request.get('/api-ep-project/purchase/getProductList', params)
+}
+//获取采购订单列表
+export function getOrderOptions(params){
+  return request.get('/api-ep-project/purchase/selectByType',params)
+}
+//获取设备信息列表
+export function getDeviceList(params){
+  return request.post('/api-ep-project/device/getDeviceList',params)
 }
 //获取对应备用金流程列表
 export function getFlowList(params) {
@@ -40,10 +62,7 @@ export function getFlowList(params) {
 export function getByFlowId(params) {
   return request.get(`/api-ep-user/flowConfig/getByFlowId`, params)
 }
-//发起或保存备用金申请
-export function startSpareMoney(params) {
-  return request.post(`/api-ep-project/spareMoney/add`, params)
-}
+
 //查询备用金历史表单详情
 export function getSpareMoney(params) {
   return request.get(`/api-ep-project/spareMoney/get`, params)
@@ -53,7 +72,14 @@ export function getSpareMoney(params) {
 export function getFlowTask(params) {
   return request.get(`/api-ep-user/flowTask/getPage`, params)
 }
-
+//获取历史巡检记录
+export function getHistoryInspects(params) {
+  return request.get(`/api-ep-project/device/getHistoryInspects`, params)
+}
+//扫码获取设备信息
+export function getDeviceByQrCode(params) {
+  return request.get(`/api-ep-project/device/getDeviceByQrCode`, params)
+}
 
 
 //根据授权获得code再获取系统里的Authorization
@@ -63,7 +89,7 @@ export function getUnionid(params) {
 
 //登录
 export function login() {
-  mpvue.login({
+  wx.login({
     success(res) {
       if (res.code) {
         const { code } = res

@@ -1,14 +1,41 @@
 {
   "pages": [
-    "pages/style/main",
     "pages/index/main",
+    "pages/style/main",
+    "pages/test/main",
     "pages/self/main",
     "pages/login/main",
-    "pages/applyHistory/main",
-    "pages/applyAdd/main",
-    "pages/applyEdit/main",
-    "pages/applyDetail/main",
+    "pages/history/main",
+    "pages/add/main",
+    "pages/edit/main",
+    "pages/detail/main",
     "pages/shenpi/main"
+  ],
+  "subpackages": [
+    {
+      "root": "pages/extraPages/",
+      "pages": [
+        "procurementHis/main",
+        "storage/main",
+        "storageHis/main",
+        "storageHandle/main",
+        "deviceAdd/main",
+        "deviceEdit/main",
+        "deviceDetail/main",
+        "POAdd/main",
+        "POEdit/main",
+        "PODetail/main",
+        "inStorageAdd/main",
+        "inStorageEdit/main",
+        "inStorageDetail/main",
+        "pollingAdd/main",
+        "pollingDetail/main",
+        "pollingList/main",
+        "pollingHis/main",
+        "breakdownAdd/main",
+        "breakdownDetail/main"
+      ]
+    }
   ],
   "window": {
     "backgroundTextStyle": "light",
@@ -47,6 +74,13 @@
       "iconPath": "static/images/self.png",
       "selectedIconPath": "static/images/self_active.png",
       "text": "样式"
+    },
+
+    {
+      "pagePath": "pages/test/main",
+      "iconPath": "static/images/self.png",
+      "selectedIconPath": "static/images/self_active.png",
+      "text": "测试"
     }
   ]
 
@@ -60,18 +94,24 @@
     "van-popup":"/vant-weapp/dist/popup/index",
     "van-cell":"/vant-weapp/dist/cell/index",
     "van-cell-group":"/vant-weapp/dist/cell-group/index",
+    "van-collapse":"/vant-weapp/dist/collapse/index",
+    "van-collapse-item":"/vant-weapp/dist/collapse-item/index",
     "van-button":"/vant-weapp/dist/button/index",
     "van-search":"/vant-weapp/dist/search/index",
+    "van-stepper":"/vant-weapp/dist/stepper/index",
     "van-tabs":"/vant-weapp/dist/tabs/index",
+    "van-steps":"/vant-weapp/dist/steps/index",
     "van-tab":"/vant-weapp/dist/tab/index",
     "van-radio":"/vant-weapp/dist/radio/index",
     "van-overlay":"/vant-weapp/dist/overlay/index",
     "van-panel":"/vant-weapp/dist/panel/index",
     "van-radio-group":"/vant-weapp/dist/radio-group/index",
     "van-submit-bar":"/vant-weapp/dist/submit-bar/index",
+    "van-swipe-cell":"/vant-weapp/dist/swipe-cell/index",
+    "van-datetime-picker":"/vant-weapp/dist/datetime-picker/index",
     "van-goods-action":"/vant-weapp/dist/goods-action/index",
-    "van-goods-action-icon":"/vant-weapp/dist/goods-action-icon/index",
-    "van-goods-action-button":"/vant-weapp/dist/goods-action-button/index"
+    "van-goods-action-button":"/vant-weapp/dist/goods-action-button/index",
+    "van-icon":"/vant-weapp/dist/icon/index"
   }
 
 }

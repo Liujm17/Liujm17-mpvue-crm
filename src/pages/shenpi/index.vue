@@ -1,6 +1,6 @@
 <template>
   <div>
-    <van-search v-model="value" placeholder="请输入搜索关键词" />
+    <Search :value='value'></Search>
     <van-tabs :active="active" @change="change">
       <van-tab :title="'待审批' + listLength">
         <Card
@@ -43,7 +43,8 @@
 </template>
 <script>
 import Card from "../../components/card";
-import { getHistory, getFlowTask, getCount } from "../../api/api";
+import Search from '../../components/searchView'
+import { getFlowTask, getCount } from "../../api/api";
 export default {
   data() {
     return {
@@ -58,7 +59,7 @@ export default {
       more:true
     };
   },
-  components: { Card },
+  components: { Card,Search },
   //当点击tab页面切换时候的生命周期
   // onTabItemTap(item) {
   //   this.getTask(0);
@@ -208,7 +209,7 @@ export default {
           query: {
             id: val.id,
             formId: val.formId,
-             orderId: val.orderId,
+            orderId: val.orderId,
             data: this.$store.state.allData.filter((item)=>item.formId==val.formId)[0].data,
             type:
               this.nowSatus == 2
