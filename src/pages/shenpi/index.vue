@@ -189,7 +189,7 @@ export default {
       this.$store.commit("changeActive", this.nowSatus);
       if (this.nowSatus == 0) {
         this.$router.push({
-          path: `/pages/${this.$store.state.allData.filter((item)=>item.formId==val.formId)[0].page}/main`,
+          path: `${this.$store.state.allData.filter((item)=>item.formId==val.formId)[0].detailpage}`,
           query: {
             id: val.id,
             orderId: val.orderId,
@@ -205,7 +205,7 @@ export default {
         });
       } else {
         this.$router.push({
-          path: `/pages/${this.$store.state.allData.filter((item)=>item.formId==val.formId)[0].page}/main`,
+          path: `${this.$store.state.allData.filter((item)=>item.formId==val.formId)[0].detailpage}`,
           query: {
             id: val.id,
             formId: val.formId,

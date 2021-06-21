@@ -33,7 +33,11 @@
         "pollingList/main",
         "pollingHis/main",
         "breakdownAdd/main",
-        "breakdownDetail/main"
+        "breakdownDetail/main",
+        "maintainAdd/main",
+        "maintainDetail/main",
+        "upkeepAdd/main",
+        "upkeepDetail/main"
       ]
     }
   ],

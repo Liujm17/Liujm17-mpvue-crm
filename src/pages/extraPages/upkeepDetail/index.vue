@@ -20,14 +20,14 @@
           >
           </van-field>
           <van-field
-            v-model="formData.faultReason"
+            v-model="formData.repairDetail"
             rows="1"
             autosize
-            label="故障原因"
+            label="备注"
             type="textarea"
             readonly
-            placeholder="故障报修描述信息"
-            @input="faultReason = $event.mp.detail"
+            placeholder="保养描述信息"
+            @input="repairDetail = $event.mp.detail"
           />
         </van-cell-group>
         <!-- 附件 -->
@@ -36,42 +36,10 @@
           :onlyOne="false"
           :notShow="false"
         ></Accessroy>
-        <van-field
-          v-model="formData.repairResultStr"
-          label="维修结果"
-          readonly
-          input-align="right"
-          placeholder="维修结果"
-          @input="faultReason = $event.mp.detail"
-        />
-        <div v-if="managerUserIs">
-          <div class="polling-info">
-            <div class="polling-title">处理意见</div>
-            <RadioList
-              :typeList="typeList"
-              :active="active"
-              @changeData="changeData"
-            ></RadioList>
-          </div>
-          <div style="margin-top: 30px">
-            <van-field
-              v-model="formData.repairUserName"
-              label="选择维修人员"
-              readonly
-              input-align="right"
-              placeholder="维修人员"
-              @input="faultReason = $event.mp.detail"
-              @click="usershow = true"
-            />
-          </div>
-        </div>
       </van-tab>
       <van-tab title="设备信息">
         <DeviceInfo :dataId="deviceId"></DeviceInfo>
          </van-tab>
-         <!-- <van-tab title="维修记录">
-        
-         </van-tab> -->
     </van-tabs>
     <!-- 用户弹出层 -->
     <van-popup
@@ -106,49 +74,46 @@ export default {
       tabsActive:0,
       //列表
       listData: [
-        {
-          name: "deviceName",
-          value: "故障设备",
-          click: "device",
-          type: "",
-          required: true,
-          readonly: true,
+       {
+          name: 'deviceName',
+          value: '保养设备',
+          click: 'device',
+          type:'',
+          required:true,
+          readonly:true
         },
         {
-          name: "factoryId",
-          value: "故障报修编号",
-          click: "device",
-          type: "",
-          required: true,
-          readonly: true,
+          name: 'maintenanceDay',
+          value: '保养周期(天)',
+          click: '',
+          type:'dight',
+          required:true,
+          readonly:false
         },
         {
-          name: "deviceStatus",
-          value: "设备状态",
-          click: "device",
-          type: "",
-          required: true,
-          readonly: true,
+          name: 'maintainTime',
+          value: '保养时间',
+          click: 'date',
+          type:'',
+          required:true,
+          readonly:true
         },
         {
-          name: "faultTime",
-          value: "故障时间",
-          click: "device",
-          type: "",
-          required: true,
-          readonly: true,
+          name: 'nextMaintainTime',
+          value: '下次保养时间',
+          click: 'normal',
+          type:'',
+          required:true,
+          readonly:true
         },
       ],
       //表单
       formData: {
-        deviceName: "",
-        factoryId: "",
-        faultTime: "",
-        deviceStatus: "",
-        faultReason: "",
-        repairResultStr: "",
-        repairUserName: "",
-        repairUser: "",
+        deviceName:'',
+      deviceId:'',
+      maintenanceDay:'',
+      maintainTime:'',
+      nextMaintainTime:''
       },
       //附件
       photoList: [],
@@ -210,29 +175,23 @@ export default {
       let params = {
         id: this.$route.query.id,
       };
-      data["breakdown"].getData(params).then((res) => {
+      data["upkeep"].getData(params).then((res) => {
         const {
           deviceName,
           factoryId,
-          faultTime,
-          deviceStatus,
-          faultReason,
-          repairResultStr,
-          repairUserName,
-          repairUser,
+          maintenanceDay,
+          maintainTime,
+          nextMaintainTime,
+          remarks,
         } = res.data.data;
         this.formData = {
           deviceName,
           factoryId,
-          faultTime,
-          deviceStatus,
-          faultReason,
-          repairResultStr,
-          repairUserName,
-          repairUser,
+           maintenanceDay,
+          maintainTime,
+          nextMaintainTime,
+          remarks,
         };
-        this.managerUserIs = res.data.data.managerUserIs;
-        this.repairUserIs = res.data.data.repairUserIs;
         this.deviceId=res.data.data.deviceId
         this.photoList = res.data.data.fileVos
           ? res.data.data.fileVos.map((item) => {
@@ -253,7 +212,7 @@ export default {
         repairUser: this.formData.repairUser,
         repairUserName: this.formData.repairUserName,
       };
-      data["breakdown"].editOrStart(params).then((res) => {
+      data["upkeep"].editOrStart(params).then((res) => {
         mpvue.showToast({
           title: res.data.message,
           icon: "none",

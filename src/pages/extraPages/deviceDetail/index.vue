@@ -63,10 +63,24 @@
         </div>
       </van-tab>
        <van-tab title="报修记录">
-        
+        <div>
+          <Card
+            :cardList="cardList2"
+            @toDetail="toDetail2"
+            v-if="cardList2.length > 0"
+          ></Card>
+           <div class="empty-text" v-else>暂无记录</div>
+        </div>
       </van-tab>
        <van-tab title="保养记录">
-        
+        <div>
+          <Card
+            :cardList="cardList3"
+            @toDetail="toDetail3"
+            v-if="cardList3.length > 0"
+          ></Card>
+           <div class="empty-text" v-else>暂无记录</div>
+        </div>
       </van-tab>
     </van-tabs>
     <!-- 删除或者回撤弹出层 -->
@@ -111,6 +125,8 @@ export default {
       //巡检记录
       tabsActive: 0,
       cardList:[],
+      cardList2:[],
+      cardList3:[],
       page: "deviceInfo",
       //关联产品
       title: ["产品名称", "规格型号"],
@@ -129,9 +145,28 @@ export default {
     this.getData();
   },
   methods: {
+    //巡检详情
     toDetail(val){
         this.$router.push({
         path: '/pages/extraPages/pollingDetail/main',
+        query: {
+          id: val.id,
+        },
+      });
+    },
+     //报修详情
+    toDetail2(val){
+        this.$router.push({
+        path: '/pages/extraPages/breakdownDetail/main',
+        query: {
+          id: val.id,
+        },
+      });
+    },
+     //保养详情
+    toDetail3(val){
+        this.$router.push({
+        path: '/pages/extraPages/upkeepDetail/main',
         query: {
           id: val.id,
         },
@@ -149,6 +184,26 @@ export default {
       };
       data['polling'].getRecord(params).then((res) => {
         this.cardList = res;
+      });
+      }else if(val.mp.detail.title == "报修记录"){
+           let params = {
+        pageNum: 1,
+        pageSize: 999999999,
+        searchValues: '',
+        deviceId: this.deviceId ? this.deviceId : "",
+      };
+      data['breakdown'].getRecord(params).then((res) => {
+        this.cardList2 = res;
+      });
+      }else if(val.mp.detail.title == "保养记录"){
+            let params = {
+        pageNum: 1,
+        pageSize: 999999999,
+        searchValues: '',
+        deviceId: this.deviceId ? this.deviceId : "",
+      };
+      data['upkeep'].getRecord(params).then((res) => {
+        this.cardList3 = res;
       });
       }
     },

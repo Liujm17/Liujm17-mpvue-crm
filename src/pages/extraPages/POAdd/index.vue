@@ -282,7 +282,6 @@ export default {
           });
         });
       } else {
-        console.log(params);
         data["PO"].saveOrStart(params).then((res) => {
             mpvue.showToast({
           title: res.data.message,

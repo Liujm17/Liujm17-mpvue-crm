@@ -89,7 +89,6 @@ export default {
   watch: {
     dataId: {
       handler(newVal, oldVal) {
-          console.log(newVal)
         this.formData = data[this.page].formData;
         this.listData = data[this.page].vanFormData.formData;
         this.getData();

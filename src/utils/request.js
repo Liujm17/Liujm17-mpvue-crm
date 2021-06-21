@@ -6,7 +6,7 @@ request.config.baseURL = 'https://www.hxhb-test.icu:8004'
 // request.config.baseURL = 'https://www.saddlepoint.cn:8003'
 request.config.timeout = 3000 
 
-var jsonUrl=['/api-ep-project/device/addDevice','/api-ep-project/purchase/add','/api-ep-project/device/updateDevice','/api-ep-project/purchase/add','/api-ep-project/purchase/edit','/api-ep-project/stockIn/add','/api-ep-project/stockIn/edit','/api-ep-project/device/addDeviceInspect','/api-ep-project/device/addDeviceReport']
+var jsonUrl=['/api-ep-project/device/addDevice','/api-ep-project/purchase/add','/api-ep-project/device/updateDevice','/api-ep-project/purchase/add','/api-ep-project/purchase/edit','/api-ep-project/stockIn/add','/api-ep-project/stockIn/edit','/api-ep-project/device/addDeviceInspect','/api-ep-project/device/addDeviceReport','/api-ep-project/device/addDeviceRepair','/api-ep-project/device/addDeviceMaintain']
 //请求拦截
 request.interceptors.request.use((request) => {
  //给所有请求添加自定义header,传参太多要用json传参，其他不能用

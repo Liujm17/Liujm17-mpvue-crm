@@ -8,13 +8,15 @@
           v-for="(item2, index2) in item.subs"
           :key="index2"
           :style="{ border: item2.id == selected[index].id ? '1px blue solid' : '' }"
-          @click="changeSelect(item2.id,index)"
+          @click="changeSelect(item2.id,index,item2.title)"
         >
           <div class="box-text"> {{ item2.title }}</div>
         </div>
       </div>
     </div>
-    <div></div>
+    <div>
+      <van-button plain type="info" @click="submit">查询</van-button>
+    </div>
   </div>
 </template>
 <script>
@@ -25,35 +27,44 @@ export default {
         {
           title: "按时间筛选",
           subs: [
-            { title: "一天", id: 1 },
-            { title: "三天", id: 2 },
-            { title: "一周", id: 3 },
-            { title: "一个月", id: 4 },
+            { title: "最近一小时", id: 1 },
+            { title: "最近三小时", id: 2 },
+            { title: "最近半天", id: 3 },
+            { title: "最近一天", id: 4 },
+            { title: "最近一周", id: 5 },
+            { title: "最近一个月", id:6 },
+            { title: "最近半年", id: 7 },
+            { title: "最近一年", id: 8 },
           ],
         },
-        {
-          title: "高级筛选",
-          subs: [
-            { title: "1111", id: 7 },
-            { title: "2222", id: 8 },
-            { title: "2222", id: 9 },
-            { title: "2222", id: 10 },
-            { title: "2222", id: 11 },
-            { title: "2222", id: 12 },
-          ],
-        },
+        // {
+        //   title: "高级筛选",
+        //   subs: [
+        //     { title: "1111", id: 7 },
+        //     { title: "2222", id: 8 },
+        //     { title: "2222", id: 9 },
+        //     { title: "2222", id: 10 },
+        //     { title: "2222", id: 11 },
+        //     { title: "2222", id: 12 },
+        //   ],
+        // },
       ],
       show: false,
-      selected:[{id:1},{id:7}],
+      selected:[{id:1}],
+      selectedValue:'最近一小时'
     };
   },
   components: {},
   onShow() {},
   computed: {},
   methods: {
-    changeSelect(val,index) {
+    changeSelect(val,index,title) {
       this.selected[index].id=val
+      this.selectedValue=title
     },
+    submit(){
+      this.$emit('submit',this.selectedValue)
+    }
   },
 };
 </script>
@@ -87,11 +98,12 @@ export default {
       margin-bottom: 10px;
       .box {
         height: 30px;
-        width: 30%;
+        width: 33%;
         box-sizing: border-box;
         display: flex;
         justify-content: center;
         align-items: center;
+        margin: 10px 0;
         .box-text{
           font-size: 13px;
         }

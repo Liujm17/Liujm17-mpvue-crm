@@ -52,17 +52,15 @@
           :notShow="false"
         ></Accessroy>
       </van-tab>
-      <van-tab title="日志"> 
-          <div class="header">
-        <div v-for="(item, index) in hisTitle" :key="index" class="title">
-          {{ item }}
+      <van-tab title="日志">
+        <div class="header">
+          <div v-for="(item, index) in hisTitle" :key="index" class="title">
+            {{ item }}
+          </div>
         </div>
-      </div>
-         <Card :cardList="HistoryList"></Card>
+        <Card :cardList="HistoryList"></Card>
       </van-tab>
     </van-tabs>
-
-  
 
     <van-goods-action>
       <van-goods-action-button
@@ -92,16 +90,16 @@ import data from "../../../api/mockData";
 import Accessroy from "../../../components/apply/accessory";
 import BottomButton from "../../../components/bottomButton.vue";
 import Delete from "../../../components/sureDelete";
-import Card from '../../../components/card.vue'
+import Card from "../../../components/card.vue";
 import { backFlow } from "../../../api/api";
 export default {
-  components: { Accessroy, BottomButton, Delete,Card },
+  components: { Accessroy, BottomButton, Delete, Card },
   data() {
     return {
       //tab栏激活页
-       hisTitle: ["审批步骤", "处理人", "处理时间","结果"],
+      hisTitle: ["审批步骤", "处理人", "处理时间", "结果"],
       active: 0,
-      HistoryList:[],
+      HistoryList: [],
       //采购清单
       title: ["产品名称", "规格型号", "单价", "数量", "总金额"],
       content: [],
@@ -137,27 +135,35 @@ export default {
       orderId: "",
     };
   },
-  onShow() {
+  onLoad() {
     this.formData = this.data[this.page].formData;
     this.listData = this.data[this.page].vanFormData.formData;
     this.getData();
   },
+  watch: {
+    formData: {
+      handler(newVal, oldVal) {
+        console.log(newVal);
+        // this.getData()
+      },
+    },
+  },
   methods: {
-     //切换标签页面
+    //切换标签页面
     change(name) {
       if (name.mp.detail.title == "日志") {
-        let params={
-          orderId:this.orderId
-        }
-        data.getHistory(params).then((res)=>{
-           mpvue.showToast({
+        let params = {
+          orderId: this.orderId,
+        };
+        data.getHistory(params).then((res) => {
+          mpvue.showToast({
             title: "正在加载",
             icon: "loading",
             duration: 500,
             mask: true,
           });
           this.HistoryList = res;
-        })
+        });
       }
     },
     getData() {
@@ -167,9 +173,16 @@ export default {
       };
       //获取表单数据
       data["PO"].getData(params).then((res) => {
-        Object.keys(this.formData).map(
-          (item) => (this.formData[item] = res.data.data[item])
-        );
+        this.formData = {
+          userName: wx.getStorageSync("applyUserName"),
+          supplierId: res.data.data.supplierId,
+          supplierName: res.data.data.supplierName,
+          supplierContacts: res.data.data.supplierContacts,
+          supplierPhone: res.data.data.supplierPhone,
+          purchaseDate: res.data.data.purchaseDate,
+          purpose: res.data.data.purpose,
+          totalPrice: res.data.data.totalPrice,
+        };
         this.isBack = res.data.data.isBack == 0 ? false : true;
         this.isEdit = res.data.data.isEdit == 0 ? false : true;
         this.orderId = res.data.data.orderId ? res.data.data.orderId : "";
@@ -196,7 +209,7 @@ export default {
     },
     //删除
     del() {
-         let params = {
+      let params = {
         id: this.$route.query.id,
         formId: this.$store.state.formId,
       };
@@ -246,16 +259,16 @@ export default {
 
 <style scoped lang="scss">
 @import "../../../style/list.scss";
- .header {
-    display: flex;
-    line-height: 40px;
-    width: 90%;
-   margin-left: 5%;
-    .title {
-      flex: 1;
-      text-align: center;
-      color: #666666;
-      font-weight: 700;
-    }
+.header {
+  display: flex;
+  line-height: 40px;
+  width: 90%;
+  margin-left: 5%;
+  .title {
+    flex: 1;
+    text-align: center;
+    color: #666666;
+    font-weight: 700;
   }
+}
 </style>

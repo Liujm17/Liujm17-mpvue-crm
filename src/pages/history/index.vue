@@ -1,6 +1,6 @@
 <template>
   <div>
-    <Search :value="value" @onSearch="onSearch" :placeholder='placeholder'></Search>
+    <Search :value="value" @onSearch="onSearch" :placeholder='placeholder' @submit='searchSubmit'></Search>
     <RadioButton :active="active" :typeList='typeList' @changeData="changeData"></RadioButton>
     <Card
       :cardList="cardList"
@@ -38,7 +38,9 @@ export default {
       data: data,
       typeList:[],
       active:0,
-      activeValue:''
+      activeValue:'',
+      //时间筛选
+      classification:''
     };
   },
   components: { Card, Search,RadioButton},
@@ -95,6 +97,11 @@ export default {
       this.value = val.mp.detail;
       this.getData(this.activeValue);
     },
+    //筛选过滤确定
+    searchSubmit(val){
+      this.classification=val
+     this.getData()
+    },
     //新增
     onSubmit() {
       this.$router.push({
@@ -106,18 +113,24 @@ export default {
     },
     //获取数据
     getData(value ='') {
+       wx.showLoading({
+      title: '正在加载数据',
+    });
       let params = {
         pageNum: 1,
         pageSize: this.pageSize,
         applyUserId: mpvue.getStorageSync("UserId"),
         searchValues: this.value,
         formId: this.$store.state.formId,
-        deviceId:this.$route.query.deviceId?this.$route.query.deviceId:''
+        deviceId:this.$route.query.deviceId?this.$route.query.deviceId:'',
+        classification:this.classification
       };
         this.$set(params, data[this.filterInfo.data].keyword , value);
       data[this.filterInfo.data].getRecord(params).then((res) => {
         this.total = res.length;
         this.cardList = res;
+        this.classification=''
+         wx.hideLoading();
       });
     },
     //历史记录的详情

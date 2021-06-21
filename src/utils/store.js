@@ -27,6 +27,10 @@ export default new Vuex.Store({
                {formId:7,data:'polling',detailpage:'/pages/extraPages/pollingDetail/main',addpage:'/pages/extraPages/pollingHis/main',add:'Imprest:Add',components:[true,false],popUp:[false,true]},
                 //故障报修
                 {formId:8,data:'breakdown',detailpage:'/pages/extraPages/breakdownDetail/main',addpage:'/pages/extraPages/breakdownAdd/main',add:'Imprest:Add',components:[true,false],popUp:[false,true]},
+                  //故障维修
+                  {formId:9,data:'maintain',detailpage:'/pages/extraPages/maintainDetail/main',addpage:'/pages/extraPages/maintainAdd/main',add:'Imprest:Add',components:[true,false],popUp:[false,true]},
+                      //设备保养
+                      {formId:10,data:'upkeep',detailpage:'/pages/extraPages/upkeepDetail/main',addpage:'/pages/extraPages/upkeepAdd/main',add:'Imprest:Add',components:[true,false],popUp:[false,true]},
             ]
   },
   mutations: {

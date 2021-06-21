@@ -46,7 +46,8 @@
     />
 
     <!-- 年月选择器 -->
-    <van-picker show-toolbar title="标题" :columns="columns" />
+    <van-picker show-toolbar title="标题"  v-model="currentDate" :columns="columns"  @input="onInput" @cancel="can" @confirm='confirm'/>
+    
 
     <!-- 右滑删除 -->
     <van-swipe-cell :right-width="65">
@@ -137,15 +138,32 @@ export default {
           userName: null,
         },
       ],
+      currentDate:["2021", "2月", "2日", "2时", "2分", "4秒"],
       columns: [
         // 第一列
         {
-          values: Array.from({ length: 10 }, (v, k) => k + 2015),
-          defaultIndex: 2,
+          values: Array.from({ length: 10 }, (v, k) => (k + 2015)+''),
+          defaultIndex: 6,
         },
         // 第二列
         {
-          values: Array.from({ length: 12 }, (v, k) => k + 1),
+          values: Array.from({ length: 12 }, (v, k) => (k + 1)+''),
+          defaultIndex: 1,
+        },
+         {
+          values: Array.from({ length: 31 }, (v, k) => (k + 1)+''),
+          defaultIndex: 1,
+        },
+         {
+          values: Array.from({ length: 24 }, (v, k) => (k)+''),
+          defaultIndex: 1,
+        },
+         {
+          values: Array.from({ length: 60 }, (v, k) => (k)+''),
+          defaultIndex: 1,
+        },
+         {
+          values: Array.from({ length: 60 }, (v, k) => (k)+''),
           defaultIndex: 1,
         },
       ],
@@ -190,6 +208,17 @@ export default {
     this.getCalendarDate(); // 给calendarData添加当月数据
   },
   methods: {
+    can(){
+      console.log('quxiao')
+    },
+    confirm(val){
+     console.log(val.mp.detail.value)
+     const res=val.mp.detail.value
+     let dateTime= res[0]+'-'+res[1]+'-'+res[2]+' '+res[3]+':'+res[4]+':'+res[5]
+    },
+    onInput(val){
+       console.log(val)
+    },
     testR(){
      this.show=true
     },

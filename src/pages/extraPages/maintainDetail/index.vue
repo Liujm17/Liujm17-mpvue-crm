@@ -1,7 +1,5 @@
 <template>
   <div class="allbg">
-    <van-tabs :active="tabsActive" @change="tabsChange">
-      <van-tab title="详情">
         <div class="title">基本信息</div>
         <van-cell-group>
           <van-field
@@ -19,15 +17,23 @@
             @input="formData[item.name] = $event.mp.detail"
           >
           </van-field>
+        <van-field
+          v-model="formData.repairResultStr"
+          label="维修结果"
+          readonly
+          input-align="right"
+          placeholder="维修结果"
+          @input="repairDetail = $event.mp.detail"
+        />
           <van-field
-            v-model="formData.faultReason"
+            v-model="formData.repairDetail"
             rows="1"
             autosize
             label="故障原因"
             type="textarea"
             readonly
             placeholder="故障报修描述信息"
-            @input="faultReason = $event.mp.detail"
+            @input="repairDetail = $event.mp.detail"
           />
         </van-cell-group>
         <!-- 附件 -->
@@ -36,14 +42,6 @@
           :onlyOne="false"
           :notShow="false"
         ></Accessroy>
-        <van-field
-          v-model="formData.repairResultStr"
-          label="维修结果"
-          readonly
-          input-align="right"
-          placeholder="维修结果"
-          @input="faultReason = $event.mp.detail"
-        />
         <div v-if="managerUserIs">
           <div class="polling-info">
             <div class="polling-title">处理意见</div>
@@ -60,19 +58,11 @@
               readonly
               input-align="right"
               placeholder="维修人员"
-              @input="faultReason = $event.mp.detail"
+              @input="repairDetail = $event.mp.detail"
               @click="usershow = true"
             />
           </div>
         </div>
-      </van-tab>
-      <van-tab title="设备信息">
-        <DeviceInfo :dataId="deviceId"></DeviceInfo>
-         </van-tab>
-         <!-- <van-tab title="维修记录">
-        
-         </van-tab> -->
-    </van-tabs>
     <!-- 用户弹出层 -->
     <van-popup
       :show="usershow"
@@ -98,9 +88,8 @@ import data from "../../../api/mockData";
 import Accessroy from "../../../components/apply/accessory.vue";
 import RadioList from "../../../components/radioButton.vue";
 import User from "../../../components/userOptions";
-import DeviceInfo from '../../../components/detail/deviceInfo.vue'
 export default {
-  components: { Accessroy, RadioList, User ,DeviceInfo},
+  components: { Accessroy, RadioList, User },
   data() {
     return {
       tabsActive:0,
@@ -123,8 +112,8 @@ export default {
           readonly: true,
         },
         {
-          name: "deviceStatus",
-          value: "设备状态",
+          name: "repairResult",
+          value: "维修结果",
           click: "device",
           type: "",
           required: true,
@@ -138,14 +127,22 @@ export default {
           required: true,
           readonly: true,
         },
+         {
+          name: "repairTime",
+          value: "维修时间",
+          click: "device",
+          type: "",
+          required: true,
+          readonly: true,
+        },
       ],
       //表单
       formData: {
         deviceName: "",
         factoryId: "",
         faultTime: "",
-        deviceStatus: "",
-        faultReason: "",
+        repairResult: "",
+        repairDetail: "",
         repairResultStr: "",
         repairUserName: "",
         repairUser: "",
@@ -210,13 +207,14 @@ export default {
       let params = {
         id: this.$route.query.id,
       };
-      data["breakdown"].getData(params).then((res) => {
+      data["maintain"].getData(params).then((res) => {
         const {
           deviceName,
           factoryId,
           faultTime,
-          deviceStatus,
-          faultReason,
+          repairTime,
+          repairResult,
+          repairDetail,
           repairResultStr,
           repairUserName,
           repairUser,
@@ -225,8 +223,9 @@ export default {
           deviceName,
           factoryId,
           faultTime,
-          deviceStatus,
-          faultReason,
+          repairTime,
+          repairResult,
+          repairDetail,
           repairResultStr,
           repairUserName,
           repairUser,
@@ -253,7 +252,7 @@ export default {
         repairUser: this.formData.repairUser,
         repairUserName: this.formData.repairUserName,
       };
-      data["breakdown"].editOrStart(params).then((res) => {
+      data["maintain"].editOrStart(params).then((res) => {
         mpvue.showToast({
           title: res.data.message,
           icon: "none",

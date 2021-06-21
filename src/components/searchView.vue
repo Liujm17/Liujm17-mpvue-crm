@@ -14,7 +14,7 @@
       custom-style="width: 80%; height: 100%;"
       @close="onClose"
     >
-      <FilterOptions></FilterOptions>
+      <FilterOptions @submit='submit'></FilterOptions>
     </van-popup>
   </div>
 </template>
@@ -43,6 +43,10 @@ export default {
     ImageView,FilterOptions
   },
   methods: {
+    submit(val){
+       this.show=false
+       this.$emit('submit',val)
+    },
     onSearch(val) {
       this.$emit("onSearch",val);
     },

@@ -19,23 +19,23 @@
       >
       </van-field>
     </van-cell-group>
-   <div class="polling-info">
-      <div class="polling-title">设备状态</div>
+   <!-- <div class="polling-info">
+      <div class="polling-title">维修结果</div>
       <RadioList
         :typeList="typeList"
         :active="active"
         @changeData="changeData"
       ></RadioList>
-    </div>
+    </div> -->
     <div class="polling-text">
       <van-field
-        v-model="faultReason"
+        v-model="remarks"
         rows="1"
         autosize
-        label="故障原因"
+        label="备注"
         type="textarea"
-        placeholder="故障报修描述信息"
-           @input="faultReason = $event.mp.detail"
+        placeholder="保养描述信息"
+           @input="remarks = $event.mp.detail"
       />
     </div>
     <!-- 附件 -->
@@ -78,7 +78,7 @@ export default {
       data: data,
       uuid: '',
       //问题描述
-      faultReason: "",
+      remarks: "",
       //附件
       photoList: [],
       //列表
@@ -86,9 +86,8 @@ export default {
       //表单
       formData: {},
       typeList: [
-        { value: 1, text: "运行中" },
-        { value: 2, text: "停机维修" },
-        { value: 3, text: "未上线" },
+        { value: 0, text: "未解决" },
+        { value: 1, text: "已解决" }
       ],
       active: 0,
       deviceRadio:'1',
@@ -98,11 +97,28 @@ export default {
     };
   },
   onLoad() {
-    this.formData = data["breakdown"].formData;
-    this.listData = data["breakdown"].vanFormData.formData;
+    this.formData = data["upkeep"].formData;
+    this.listData = data["upkeep"].vanFormData.formData;
     this.uuid= data.get_uuid()
   },
-  watch: {},
+  watch: {
+    'formData.maintainTime':{
+      handler(newVal,oldVal){
+        if(newVal){
+       this.formData.nextMaintainTime=data.formattingTime(new Date(newVal).getTime()+24*3600*1000*this.formData.maintenanceDay)
+        }
+      },
+      immediate:false
+    },
+    'formData.maintenanceDay':{
+      handler(newVal,oldVal){
+        if(newVal&&this.formData.maintainTime){
+       this.formData.nextMaintainTime=data.formattingTime(new Date(this.formData.maintainTime).getTime()+24*3600*1000*newVal)
+        }
+      },
+      immediate:false
+    }
+  },
   methods: {
     onClose(){
      this.diviceShow=false
@@ -139,8 +155,8 @@ export default {
     save() {
       let params = {
         ...this.formData,
-        deviceStatus: this.active == "0" ? "运行中" : (this.active == '1'?'停机维护':'未上线'),
-        faultReason: this.faultReason,
+        repairResult: this.active,
+        remarks: this.remarks,
         batchId: "",
         factoryId: 2020001,
         reportUser:wx.getStorageSync("UserId"),
@@ -153,7 +169,7 @@ export default {
           //文件code
           let resData = JSON.parse(res.data);
           params.batchId = resData.data.batchId;
-          data["breakdown"].saveOrStart(params).then((res) => {
+          data["upkeep"].saveOrStart(params).then((res) => {
             mpvue.showToast({
               title: res.data.message,
               icon: "none",
@@ -165,7 +181,7 @@ export default {
           });
         });
       } else {
-        data["breakdown"].saveOrStart(params).then((res) => {
+        data["upkeep"].saveOrStart(params).then((res) => {
           mpvue.showToast({
             title: res.data.message,
             icon: "none",

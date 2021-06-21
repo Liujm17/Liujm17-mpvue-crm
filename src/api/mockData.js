@@ -837,7 +837,7 @@ const PO ={
       type:'',
       totalPrice:0
     },
-     //供应商列表
+     //采购单列表
    getRecord:function(params) {
     return request.get(`/api-ep-project/purchase/getPage`, params)
     .then((res) => {
@@ -1214,6 +1214,175 @@ const breakdown ={
 
 }
 
+//故障维修
+const maintain ={
+  //状态选择数组
+    radioList:[{text:'采购',value:1},{text:'调拨',value:2},],
+    // 搜索词
+    searchValues:'故障设备',
+    //历史tab栏
+    typeList:[],
+    //历史里类型判断关键词
+    keyword:'status',
+     //是否有日志
+     hasHistory:false,
+     //是否是审批
+     isApprove:false,
+    vanFormData: {
+      formData: [
+        {
+          name: 'deviceName',
+          value: '设备名称',
+          click: 'device',
+          type:'',
+          required:true,
+          readonly:true
+        },
+        {
+          name: 'faultTime',
+          value: '故障时间',
+          click: 'date',
+          type:'',
+          required:true,
+          readonly:true
+        },
+        {
+          name: 'repairTime',
+          value: '维修时间',
+          click: 'date',
+          type:'',
+          required:true,
+          readonly:true
+        },
+      ]
+    },
+    formData: {
+      deviceName:'',
+      deviceId:'',
+      faultTime:'',
+      repairTime:''
+    },
+     //故障维修列表
+   getRecord:function(params) {
+    return request.get(`/api-ep-project/device/getDeviceRepairs`, params)
+    .then((res) => {
+      let data = []
+      data  = res.data.data.list.map((item,index) => {
+        return {
+          id: item.id,
+          index:index+1,
+          deviceName:item.deviceName,
+          repairTime:formattingTime(item.repairTime),
+          faultReason:item.faultReason,
+        };
+      });
+      return data
+    })
+  },
+   //获取表单详情
+   getData: function (params) {
+    return request.get(`/api-ep-project/device/getDeviceRepairDetail`, params)
+  },
+  //故障维修---新增中(新增)
+  saveOrStart:function(params){
+    return request.post(`/api-ep-project/device/addDeviceRepair`,params)
+  },
+   //故障报修---详情中(处理)
+  editOrStart:function(params){
+    return request.post(`/api-ep-project/device/managerHandle`,params)           
+  },
+
+}
+
+//设备保养
+const upkeep ={
+  //状态选择数组
+    radioList:[{text:'采购',value:1},{text:'调拨',value:2},],
+    // 搜索词
+    searchValues:'故障设备',
+    //历史tab栏
+    typeList:[],
+    //历史里类型判断关键词
+    keyword:'status',
+     //是否有日志
+     hasHistory:false,
+     //是否是审批
+     isApprove:false,
+    vanFormData: {
+      formData: [
+        {
+          name: 'deviceName',
+          value: '保养设备',
+          click: 'device',
+          type:'',
+          required:true,
+          readonly:true
+        },
+        {
+          name: 'maintenanceDay',
+          value: '保养周期(天)',
+          click: '',
+          type:'dight',
+          required:true,
+          readonly:false
+        },
+        {
+          name: 'maintainTime',
+          value: '保养时间',
+          click: 'date',
+          type:'',
+          required:true,
+          readonly:true
+        },
+        {
+          name: 'nextMaintainTime',
+          value: '下次保养时间',
+          click: 'normal',
+          type:'',
+          required:true,
+          readonly:true
+        },
+      ]
+    },
+    formData: {
+      deviceName:'',
+      deviceId:'',
+      maintenanceDay:'',
+      maintainTime:'',
+      nextMaintainTime:''
+    },
+     //保养记录列表
+   getRecord:function(params) {
+    return request.get(`/api-ep-project/device/getDeviceMaintains`, params)
+    .then((res) => {
+      let data = []
+      data  = res.data.data.list.map((item,index) => {
+        return {
+          id: item.id,
+          index:index+1,
+          deviceName:item.deviceName,
+          maintainTime:formattingTime(item.maintainTime),
+          nextMaintainTime:formattingTime(item.nextMaintainTime),
+        };
+      });
+      return data
+    })
+  },
+   //获取表单详情
+   getData: function (params) {
+    return request.get(`/api-ep-project/device/getDeviceMaintainDetail`, params)
+  },
+  //保养---新增中(新增)
+  saveOrStart:function(params){
+    return request.post(`/api-ep-project/device/addDeviceMaintain`,params)
+  },
+   //故障报修---详情中(处理)
+  editOrStart:function(params){
+    return request.post(`/api-ep-project/device/managerHandle`,params)           
+  },
+
+}
+
 export default {
   applyCash,
   //员工管理
@@ -1230,6 +1399,10 @@ export default {
   polling,
   //故障报修
   breakdown,
+  //故障维修
+  maintain,
+  //设备保养
+  upkeep,
   formattingTime,
   dataFilter,
   dataFilter2,
