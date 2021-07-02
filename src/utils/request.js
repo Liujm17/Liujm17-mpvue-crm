@@ -6,7 +6,7 @@ request.config.baseURL = 'https://www.hxhb-test.icu:8004'
 // request.config.baseURL = 'https://www.saddlepoint.cn:8003'
 request.config.timeout = 3000 
 
-var jsonUrl=['/api-ep-project/device/addDevice','/api-ep-project/purchase/add','/api-ep-project/device/updateDevice','/api-ep-project/purchase/add','/api-ep-project/purchase/edit','/api-ep-project/stockIn/add','/api-ep-project/stockIn/edit','/api-ep-project/device/addDeviceInspect','/api-ep-project/device/addDeviceReport','/api-ep-project/device/addDeviceRepair','/api-ep-project/device/addDeviceMaintain']
+var jsonUrl=['/api-ep-project/device/addDevice','/api-ep-project/purchase/add','/api-ep-project/device/updateDevice','/api-ep-project/purchase/add','/api-ep-project/purchase/edit','/api-ep-project/stockIn/add','/api-ep-project/stockIn/edit','/api-ep-project/device/addDeviceInspect','/api-ep-project/device/addDeviceReport','/api-ep-project/device/addDeviceRepair','/api-ep-project/device/addDeviceMaintain','/api-ep-project/payment/add','/api-ep-project/payment/edit','/api-ep-project/spareMoney/add','/api-ep-project/spareMoney/edit','/api-ep-project/purchaseChange/add','/api-ep-project/purchaseChange/edit','/api-ep-project/stockOut/add','/api-ep-project/stockOut/edit','/api-ep-project/stockCheck/add','/api-ep-project/stockCheck/edit','/api-ep-project/cost/lend/addCostLend','/api-ep-project/cost/lend/editCostLend','/api-ep-project/factoryMaterial/add','/api-ep-project/factoryMaterial/edit','/api-ep-project/apply/add','/api-ep-project/apply/edit']
 //请求拦截
 request.interceptors.request.use((request) => {
  //给所有请求添加自定义header,传参太多要用json传参，其他不能用
@@ -32,13 +32,15 @@ request.interceptors.request.use((request) => {
 request.interceptors.response.use(
     (response) => {
         if(response.data.code == -1){
+          console.log(response.data.code)
             mpvue.showToast({
                 title: response.data.message,
                 icon: "none",
                 duration: 2000,
               });
+        }else if(response.data.code == 10000){
+          return response
         }
-        return response
     },
     (err) => {
         mpvue.showToast({

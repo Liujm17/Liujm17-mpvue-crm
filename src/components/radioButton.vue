@@ -1,5 +1,5 @@
 <template>
-     <div style="display:flex;flex-wrap:nowrap;align-items:center;" slot="button">
+     <div style="display:flex;flex-wrap:nowrap;align-items:center" class="radio-bg" slot="button">
       <van-button :type="active == index?'info':'default'" size="small" v-for="(item,index) in typeList" :key="index" @click="changeData(item,index)">{{item.text}}</van-button>
     </div>
 </template>

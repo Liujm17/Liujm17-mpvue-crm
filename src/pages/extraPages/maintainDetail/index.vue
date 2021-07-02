@@ -1,5 +1,7 @@
 <template>
   <div class="allbg">
+     <van-tabs :active="tabsActive">
+      <van-tab title="详情">
         <div class="title">基本信息</div>
         <van-cell-group>
           <van-field
@@ -63,6 +65,11 @@
             />
           </div>
         </div>
+         </van-tab>
+      <van-tab title="设备信息">
+        <DeviceInfo :dataId="deviceId"></DeviceInfo>
+         </van-tab>
+    </van-tabs>
     <!-- 用户弹出层 -->
     <van-popup
       :show="usershow"
@@ -88,8 +95,9 @@ import data from "../../../api/mockData";
 import Accessroy from "../../../components/apply/accessory.vue";
 import RadioList from "../../../components/radioButton.vue";
 import User from "../../../components/userOptions";
+import DeviceInfo from '../../../components/detail/deviceInfo.vue'
 export default {
-  components: { Accessroy, RadioList, User },
+  components: { Accessroy, RadioList, User,DeviceInfo },
   data() {
     return {
       tabsActive:0,
@@ -182,13 +190,6 @@ export default {
     },
   },
   methods: {
-       //切换tab
-    tabsChange(val) {
-      //切换标签页面
-      if (val.mp.detail.index == 1) {
-        this.DeviceInfoShow=true
-      }
-    },
     onClose() {
       this.usershow = false;
     },
@@ -253,17 +254,19 @@ export default {
         repairUserName: this.formData.repairUserName,
       };
       data["maintain"].editOrStart(params).then((res) => {
-        mpvue.showToast({
-          title: res.data.message,
-          icon: "none",
-          duration: 1000,
-          mask: true,
-        });
-        //重启到某页面，如不是tabar页面会有回主页按钮
-        setTimeout(() => {
-          //回退2层
-          this.$router.back();
-        }, 1000);
+        if(res.data.code == 10000){
+              mpvue.showToast({
+              title: res.data.message,
+              icon: "none",
+              duration: 3000,
+              mask: true,
+            });
+            //重启到某页面，如不是tabar页面会有回主页按钮
+             setTimeout(() => {
+               //回退2层
+                 this.$router.go(1);
+                }, 1000);
+             }
       });
     },
   },

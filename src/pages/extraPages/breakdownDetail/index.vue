@@ -69,9 +69,17 @@
       <van-tab title="设备信息">
         <DeviceInfo :dataId="deviceId"></DeviceInfo>
          </van-tab>
-         <!-- <van-tab title="维修记录">
-        
-         </van-tab> -->
+         <van-tab title="维修记录">
+            <div>
+          <Card
+            :more="false"
+            :cardList="cardList"
+            @toDetail="toDetail"
+            v-if="cardList.length > 0"
+          ></Card>
+           <div class="empty-text" v-else>暂无记录</div>
+        </div>
+         </van-tab>
     </van-tabs>
     <!-- 用户弹出层 -->
     <van-popup
@@ -99,8 +107,9 @@ import Accessroy from "../../../components/apply/accessory.vue";
 import RadioList from "../../../components/radioButton.vue";
 import User from "../../../components/userOptions";
 import DeviceInfo from '../../../components/detail/deviceInfo.vue'
+import Card from "../../../components/card.vue";
 export default {
-  components: { Accessroy, RadioList, User ,DeviceInfo},
+  components: { Accessroy, RadioList, User ,DeviceInfo,Card},
   data() {
     return {
       tabsActive:0,
@@ -168,6 +177,8 @@ export default {
       //是否是维修工
       repairUserIs: false,
       deviceId:'',
+      reportId:'',
+      cardList:[]
     };
   },
   onShow() {
@@ -185,11 +196,28 @@ export default {
     },
   },
   methods: {
+     //维修详情
+    toDetail(val){
+        this.$router.push({
+        path: '/pages/extraPages/maintainDetail/main',
+        query: {
+          id: val.id,
+        },
+      });
+    },
        //切换tab
     tabsChange(val) {
       //切换标签页面
-      if (val.mp.detail.index == 1) {
-        this.DeviceInfoShow=true
+      if (val.mp.detail.index == 2) {
+         let params = {
+        pageNum: 1,
+        pageSize: 999999999,
+        searchValues: '',
+        reportId: this.reportId ? this.reportId : "",
+      };
+      data['maintain'].getRecord(params).then((res) => {
+        this.cardList = res;
+      });
       }
     },
     onClose() {
@@ -233,7 +261,7 @@ export default {
         };
         this.managerUserIs = res.data.data.managerUserIs;
         this.repairUserIs = res.data.data.repairUserIs;
-        this.deviceId=res.data.data.deviceId
+        this.reportId=res.data.data.id
         this.photoList = res.data.data.fileVos
           ? res.data.data.fileVos.map((item) => {
               return {
@@ -254,17 +282,19 @@ export default {
         repairUserName: this.formData.repairUserName,
       };
       data["breakdown"].editOrStart(params).then((res) => {
-        mpvue.showToast({
-          title: res.data.message,
-          icon: "none",
-          duration: 1000,
-          mask: true,
-        });
-        //重启到某页面，如不是tabar页面会有回主页按钮
-        setTimeout(() => {
-          //回退2层
-          this.$router.back();
-        }, 1000);
+        if(res.data.code == 10000){
+              mpvue.showToast({
+              title: res.data.message,
+              icon: "none",
+              duration: 3000,
+              mask: true,
+            });
+            //重启到某页面，如不是tabar页面会有回主页按钮
+             setTimeout(() => {
+               //回退2层
+                 this.$router.go(1);
+                }, 1000);
+             }
       });
     },
   },
@@ -290,5 +320,11 @@ export default {
   .polling-title2 {
     font-weight: 500;
   }
+}
+.empty-text {
+  text-align: center;
+  margin-top: 2rem;
+  font: 24px "隶书";
+  color: #84af9b;
 }
 </style>

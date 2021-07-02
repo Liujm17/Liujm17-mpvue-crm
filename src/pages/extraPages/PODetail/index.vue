@@ -18,27 +18,16 @@
             :readonly="true"
             :rules="[{ required: true, message: '请填写' + item.value }]"
             @input="formData[item.name] = $event.mp.detail"
-          >
-          </van-field>
+          ></van-field>
         </van-cell-group>
 
         <!-- 关联产品 -->
         <div class="title">采购清单</div>
         <div class="table">
           <div class="table-header">
-            <div
-              v-for="(item, index) in title"
-              :key="index"
-              class="header-title"
-            >
-              {{ item }}
-            </div>
+            <div v-for="(item, index) in title" :key="index" class="header-title">{{ item }}</div>
           </div>
-          <div
-            class="table-content"
-            v-for="(item, index) in content"
-            :key="index"
-          >
+          <div class="table-content" v-for="(item, index) in content" :key="index">
             <div class="content-title">{{ item.name }}</div>
             <div class="content-title">{{ item.specs }}</div>
             <div class="content-title">{{ item.unitPrice }}</div>
@@ -46,23 +35,50 @@
             <div class="content-title">{{ item.totalPrice }}</div>
           </div>
         </div>
-        <Accessroy
-          :photoList="photoList"
-          :onlyOne="false"
-          :notShow="false"
-        ></Accessroy>
+        <Accessroy :photoList="photoList" :onlyOne="false" :notShow="false"></Accessroy>
+        <van-field
+          v-model="suggestion"
+          rows="1"
+          autosize
+          label="意见"
+          type="textarea"
+          placeholder="请输入意见"
+          v-if="isApproval"
+        />
+        <van-button type="info" size="normal" @click="operate" v-if="showoperate">操作</van-button>
+      </van-tab>
+
+      <van-tab title="付款申请">
+        <div>
+          <Card
+            :more="false"
+            :cardList="payCardList"
+            @toDetail="payToDetail"
+            v-if="payCardList.length > 0"
+          ></Card>
+          <div class="empty-text" v-else>暂无记录</div>
+        </div>
+      </van-tab>
+      <van-tab title="入库单">
+        <div>
+          <Card
+            :more="false"
+            :cardList="inCardList"
+            @toDetail="inToDetail"
+            v-if="inCardList.length > 0"
+          ></Card>
+          <div class="empty-text" v-else>暂无记录</div>
+        </div>
       </van-tab>
       <van-tab title="日志">
         <div class="header">
-          <div v-for="(item, index) in hisTitle" :key="index" class="title">
-            {{ item }}
-          </div>
+          <div v-for="(item, index) in hisTitle" :key="index" class="title">{{ item }}</div>
         </div>
         <Card :cardList="HistoryList"></Card>
       </van-tab>
     </van-tabs>
 
-    <van-goods-action>
+    <!-- <van-goods-action>
       <van-goods-action-button
         type="info"
         text="编辑"
@@ -81,7 +97,13 @@
         @click="back"
         v-if="isBack"
       />
-    </van-goods-action>
+       <van-goods-action-button
+        type="primary"
+        text="同意"
+        @click="agree"
+      />
+    </van-goods-action>-->
+    <van-dialog2 id="van-dialog" />
   </div>
 </template>
 
@@ -91,7 +113,8 @@ import Accessroy from "../../../components/apply/accessory";
 import BottomButton from "../../../components/bottomButton.vue";
 import Delete from "../../../components/sureDelete";
 import Card from "../../../components/card.vue";
-import { backFlow } from "../../../api/api";
+import { backFlow, agree, disagree } from "../../../api/api";
+import Dialog2 from "../../../../dist/wx/vant-weapp/dist/dialog2/dialog";
 export default {
   components: { Accessroy, BottomButton, Delete, Card },
   data() {
@@ -100,6 +123,8 @@ export default {
       hisTitle: ["审批步骤", "处理人", "处理时间", "结果"],
       active: 0,
       HistoryList: [],
+      payCardList: [],
+      inCardList: [],
       //采购清单
       title: ["产品名称", "规格型号", "单价", "数量", "总金额"],
       content: [],
@@ -132,6 +157,10 @@ export default {
       ],
       isBack: false,
       isEdit: false,
+      isDel:false,
+      isApproval: false,
+      showoperate: true,
+      suggestion:'',
       orderId: "",
     };
   },
@@ -143,12 +172,47 @@ export default {
   watch: {
     formData: {
       handler(newVal, oldVal) {
-        console.log(newVal);
+        if (!this.isBack && !this.isEdit && !this.isApproval&&!this.isDel) {
+          this.showoperate = false;
+        } else {
+          this.showoperate = true;
+        }
         // this.getData()
       },
     },
   },
   methods: {
+    //操作
+    operate() {
+      let a1 = this.isEdit ? ["编辑"] : [];
+      let a2 = this.isBack ? ["回撤"] : [];
+      let a3 = this.isApproval ? ["同意", "驳回"] : [];
+      let a4 = this.isDel?['删除']:[];
+      let b1 = this.isEdit ? ["edit"] : [];
+      let b2 = this.isBack ? ["back"] : [];
+      let b3 = this.isApproval ? ["agree", "disagree"] : [];
+      let b4 = this.isDel ? [ "del"] : [];
+      let a0 = [...a1, ...a2, ...a3, ...a4];
+      let b0 = [...b1, ...b2, ...b3, ...b4];
+      wx.showActionSheet({
+        itemList: a0,
+        success: (res) => {
+          this[b0[res.tapIndex]]();
+        },
+        fail: (res) => {
+          console.log(res.errMsg);
+        },
+      });
+    },
+    //付款详情
+    payToDetail(val) {
+      this.$router.push({
+        path: "/pages/extraPages/paymentDetail/main",
+        query: {
+          id: val.id,
+        },
+      });
+    },
     //切换标签页面
     change(name) {
       if (name.mp.detail.title == "日志") {
@@ -163,6 +227,41 @@ export default {
             mask: true,
           });
           this.HistoryList = res;
+        });
+      } else if (name.mp.detail.title == "付款申请") {
+        let params = {
+          pageNum: 1,
+          pageSize: 999999999,
+          searchValues: "",
+          approveStatus: "",
+          paymentType: "",
+          orderId: this.orderId ? this.orderId : "",
+        };
+        data["payment"].getRecord(params).then((res) => {
+          mpvue.showToast({
+            title: "正在加载",
+            icon: "loading",
+            duration: 500,
+            mask: true,
+          });
+          this.payCardList = res;
+        });
+      } else if (name.mp.detail.title == "入库单") {
+        let params = {
+          pageNum: 1,
+          pageSize: 999999999,
+          searchValues: "",
+          approveStatus: "",
+          orderId: this.orderId ? this.orderId : "",
+        };
+        data["inStorage"].getRecord(params).then((res) => {
+          mpvue.showToast({
+            title: "正在加载",
+            icon: "loading",
+            duration: 500,
+            mask: true,
+          });
+          this.inCardList = res;
         });
       }
     },
@@ -183,8 +282,13 @@ export default {
           purpose: res.data.data.purpose,
           totalPrice: res.data.data.totalPrice,
         };
-        this.isBack = res.data.data.isBack == 0 ? false : true;
-        this.isEdit = res.data.data.isEdit == 0 ? false : true;
+        this.isEdit =
+          res.data.data.isEdit == 1 || res.data.data.isEdit === "undefined"
+            ? true
+            : false;
+        this.isDel =res.data.data.isDel == 1?true:false;
+        this.isBack = res.data.data.isBack == 1 ? true : false;
+        this.isApproval = res.data.data.isApproval == 1 ? true : false;
         this.orderId = res.data.data.orderId ? res.data.data.orderId : "";
         this.content = res.data.data.purchaseDetailVoList.map((item) => {
           return {
@@ -252,6 +356,39 @@ export default {
           id: this.$route.query.id,
         },
       });
+    },
+    //同意
+    agree() {
+      let params = {
+        orderId: this.orderId,
+        suggestion: this.suggestion,
+      };
+      agree(params).then((res) => {
+        this.$router.back();
+      });
+    },
+    //不同意
+    disagree() {
+       Dialog2.confirm({
+        title: "操作",
+        message: "审批驳回",
+        //开启按空白处关闭弹窗
+        closeOnClickOverlay:true
+      })
+        .then((res) => {
+          let params={
+            orderId: this.orderId,
+            suggestion: this.suggestion,
+            dealResult:res.type
+          }
+          disagree(params).then((res) => {
+             this.$router.back();
+          });
+        })
+        .catch(() => {
+          // close
+          console.log("close");
+        });
     },
   },
 };

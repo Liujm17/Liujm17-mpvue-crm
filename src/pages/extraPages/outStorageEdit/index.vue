@@ -1,0 +1,397 @@
+<template>
+  <div class="allbg">
+    <div class="title">基本信息</div>
+    <van-cell-group>
+      <van-field
+        v-for="(item, index) in listData"
+        :key="index"
+        v-model="formData[item.name]"
+        :name="item.value"
+        :label="item.value"
+        :placeholder="item.click == 'radioGroup' ? '' : item.value"
+        :type="item.type"
+        :autosize="item.type == 'textarea' ? true : false"
+        :required="item.required"
+        input-align="right"
+        :readonly="readonly ? readonly : item.readonly"
+        :rules="[{ required: true, message: '请填写' + item.value }]"
+        @input="formData[item.name] = $event.mp.detail"
+        @click="
+          item.click == 'date'
+            ? showDate(item)
+            : item.click == 'order'
+            ? showOrder(item)
+            : ''
+        "
+      >
+
+     <RadioButton
+          :typeList="radioList"
+          :active="active"
+          @changeData="changeData"
+           v-if="item.click == 'radioGroup'"
+      ></RadioButton>
+      </van-field>
+    </van-cell-group>
+
+    <!-- 关联产品 -->
+    <div class="title">入库信息</div>
+    <div class="table">
+      <div class="table-header">
+        <div v-for="(item, index) in title" :key="index" class="header-title">
+          {{ item }}
+        </div>
+      </div>
+      <div class="table-content" v-for="(item, index) in content" :key="index">
+        <div class="content-title">{{ item.name }}</div>
+        <div class="content-title">{{ item.specs }}</div>
+        <div class="content-title">
+          <van-stepper
+            v-model="item.outQuantity"
+            @change="content[index].outQuantity = $event.mp.detail"
+            min="0"
+            :max="item.stockQuantity?item.stockQuantity:99999999999"
+          />
+        </div>
+        <div class="content-title" style="color: red" @click="delList(index)">
+          删除
+        </div>
+      </div>
+    </div>
+    <div class="table-add">
+      <van-button round plain hairline type="info" @click="addProduct"
+        >添加产品</van-button
+      >
+    </div>
+
+    <!-- 附件 -->
+    <!-- <Accessroy :photoList="photoList" :onlyOne="false"></Accessroy> -->
+
+    <!-- 日期 -->
+    <Picker
+      :show="dateShow"
+      click="date"
+      :formData="formData"
+      :clickName="clickName"
+      @cancel="onClose"
+      @submit="submit2"
+    ></Picker>
+
+    <!-- 采购产品弹出层 -->
+    <van-popup
+      :show="show2"
+      position="right"
+      custom-style="width: 80%; height: 100%;"
+      @close="onClose"
+    >
+      <OutProductItem
+        @submit="submit3"
+        :radio="radio2"
+        @cancel="onClose"
+      ></OutProductItem>
+    </van-popup>
+
+    <!-- 流程//流程必有用户弹出层 -->
+    <Flow
+      :flowStatus="flowStatus"
+      :flowId="flowId"
+      :flowList="flowList"
+      :fitNodeList="fitNodeList"
+      @showPopup2="showPopup2"
+      @radioChange="radioChange"
+    ></Flow>
+
+    <!-- 用户弹出层 -->
+    <van-popup
+      :show="usershow"
+      position="right"
+      custom-style="width: 80%; height: 100%;"
+      @close="onClose"
+    >
+      <User @submit="usersubmit" :radio="userradio" @cancel="onClose"></User>
+    </van-popup>
+
+      <!-- 订单出层 -->
+    <van-popup
+      :show="ordershow"
+      position="right"
+      custom-style="width: 80%; height: 100%;"
+      @close="onClose"
+    >
+      <Order @submit="ordersubmit" :radio="orderradio" @cancel="onClose"></Order>
+    </van-popup>
+
+    <!-- 底部按钮 -->
+    <van-goods-action>
+      <van-goods-action-button type="info" text="保存草稿" @click="save(0)" />
+      <van-goods-action-button
+        type="primary"
+        text="保存提交"
+        @click="save(1)"
+      />
+    </van-goods-action>
+  </div>
+</template>
+
+<script>
+import data from "../../../api/mockData";
+import Accessroy from "../../../components/apply/accessory";
+import RadioButton from "../../../components/radioButton.vue";
+import Picker from "../../../components/utils/picker.vue";
+import OutProductItem from "../../../components/outProductOptions.vue";
+import Flow from "../../../components/apply/flow.vue";
+import User from "../../../components/userOptions";
+import Order from "../../../components/orderOptions.vue";
+import { getFlowList, getByFlowId ,getProductItemOptions} from "../../../api/api";
+export default {
+  components: { Accessroy, Picker, OutProductItem, Flow, User ,Order,RadioButton},
+  data() {
+    return {
+       active: 0,
+       //入库类型按钮群
+       radioList:[],
+       //符合的产品选项列表
+       ProductItemList:[],
+      //采购清单
+      title: ["产品名称", "规格型号", "数量", "操作"],
+      content: [],
+      //采购清单list
+      purchaseDetailList: [],
+      //该页面字段方法数据
+      data: data,
+      //该页面数据名
+      page: "outStorage",
+      //表单列表
+      listData: [],
+      //表单值
+      formData: {},
+      //附件列表上传索引
+      valueIndex: 0,
+      //日期选择器
+      dateShow: false,
+      clickName: "",
+      show2: false,
+      radio2: "1",
+      orderradio:'1',
+      //流程
+      flowId: "",
+      flowList: [],
+      fitNodeList: [],
+      flowStatus: "流程数:0",
+      popUpType: "",
+      nodeId: "",
+      //流程中的用户弹窗
+      usershow: false,
+      ordershow:false,
+      userradio: "1",
+      stepDisabled:true,
+    };
+  },
+  onLoad() {
+    this.formData = this.data[this.page].formData;
+    this.listData = this.data[this.page].vanFormData.formData;
+    this.radioList=this.data[this.page].radioList;
+  },
+  onReady() {
+    this.getData();
+  },
+  watch: {
+    content: {
+      handler(newValue, oldValue) {
+        this.purchaseDetailList = newValue.map((item) => {
+          return {
+            productId: item.productId,
+            outQuantity: item.outQuantity,
+          };
+        });
+      },
+      //首次监听
+      //  immediate: true,
+      //深度监听
+      deep: true,
+    },
+  },
+  methods: {
+    //获取流程列表
+    getData() {
+      let params = {
+        formId: this.$store.state.formId,
+      };
+      getFlowList(params).then((res) => {
+        if (res.data.data.length >= 1) {
+          this.flowStatus = "流程数:" + res.data.data.length;
+          this.flowList = res.data.data.map((item) => {
+            return {
+              id: item.id,
+              name: item.flowName,
+            };
+          });
+          this.flowId = res.data.data[0].id + "";
+          this.getByFlowId();
+        } else if (res.data.data.length == 0) {
+          console.log("bukeyi");
+        }
+      });
+      let params2={
+        formId: this.$store.state.formId,
+        id: this.$route.query.id,
+      }
+      data["outStorage"].getData(params2).then((res) => {
+        // Object.keys(this.formData).map(
+        //   (item) => (this.formData[item] = res.data.data[item])
+        // );
+        this.formData = {
+          userName: wx.getStorageSync("applyUserName"),
+          outDate: res.data.data.outDate,
+          outType: res.data.data.outType,
+          purpose:res.data.data.purpose
+        };
+        this.content = res.data.data.stockOutDetailVoList.map((item) => {
+          return {
+            productId: item.productId,
+            name: item.productName,
+            specs: item.specs,
+            outQuantity: item.outQuantity,
+          };
+        });
+        this.formData.outType = "";
+        this.active = res.data.data.outType - 1;
+      });
+    },
+    //根据流程id查询节点
+    getByFlowId() {
+      let params = {
+        flowId: this.flowId,
+      };
+      //设置流程列表
+      getByFlowId(params).then((res) => {
+        this.fitNodeList = res.data.data.map((item) => {
+          return {
+            ...item,
+          };
+        });
+      });
+    },
+    //保存或发起
+    save(val) {
+      let params = {
+        factoryId: 2020001,
+        systemCode: "05",
+        userId: wx.getStorageSync("UserId"),
+        ...this.formData,
+        id: Number(this.$route.query.id),
+        stockOutDetailList: this.purchaseDetailList,
+        batchId: "",
+        startFlowDto: {
+          optionalJson: JSON.stringify(this.fitNodeList),
+          formId: this.$store.state.formId,
+          flowId: Number(this.flowId),
+        },
+      };
+      params.outType = this.active + 1;
+      params.startFlowDto.type = val;
+      data["outStorage"].editOrStart(params).then((res) => {
+        if(res.data.code == 10000){
+              mpvue.showToast({
+              title: res.data.message,
+              icon: "none",
+              duration: 3000,
+              mask: true,
+            });
+            //重启到某页面，如不是tabar页面会有回主页按钮
+            this.$router.back();
+            }
+      });
+    },
+     //按钮群点击更换高亮事件
+     changeData(item, index) {
+      this.active = index;
+    },
+    //显示日期弹窗
+    showDate(val) {
+      if (!this.$route.name.includes("Detail")) {
+        this.dateShow = true;
+        this.clickName = val.name;
+        // this.clickValue = val.clickValue;
+      } else {
+        return;
+      }
+    },
+    //采购订单弹窗
+    showOrder(){
+        if(this.active == 0){
+          this.ordershow=true
+        }else{
+          mpvue.showToast({
+          title: '调拨单无产品订单',
+          icon: "none",
+          duration: 1000,
+          mask: true,
+        });
+        }
+    },
+    //产品弹窗
+    addProduct() {
+      this.show2 = true;
+    },
+    //流程弹窗
+    showPopup2(val) {
+      this.show = true;
+      (this.popUpType = "流程"), (this.nodeId = val.nodeId);
+      this.userradio = val.userId + "";
+    },
+    //mpvue的更改选择，异步，更改流程列表
+    radioChange(val) {
+      this.flowId = val.mp.detail;
+      this.$route.query = {};
+      this.getByFlowId();
+    },
+    //关闭弹窗
+    onClose() {
+      this.dateShow = false;
+      this.show2 = false;
+      this.usershow = false;
+      this.ordershow=false
+    },
+    //日期确认
+    submit2(val) {
+      this.formData[this.clickName] = val;
+      //这个的时候他不需要id值 只需要name，value为undifined
+      // this.formData[this.clickValue] = val;
+      this.dateShow = false;
+    },
+    //采购订单确认
+    ordersubmit(val){
+        this.$set(this.formData, "purchaseId", Number(val.id));
+       this.ordershow=false
+    },
+    //产品确认
+    submit3(val) {
+      this.show2 = false;
+      this.content.push(val);
+    },
+    //删除产品列表对应产品
+    delList(val) {
+      this.content.splice(val, 1);
+    },
+    //流程选用户后的确认事件
+    usersubmit(val) {
+      this.$set(
+        this.fitNodeList.filter((item) => item.nodeId == this.nodeId)[0],
+        "userName",
+        val.name
+      );
+      this.$set(
+        this.fitNodeList.filter((item) => item.nodeId == this.nodeId)[0],
+        "userId",
+        val.id
+      );
+      this.usershow = false;
+    },
+  },
+};
+</script>
+
+<style scoped>
+@import "../../../style/list.scss";
+</style>

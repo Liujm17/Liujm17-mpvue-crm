@@ -2,20 +2,12 @@
   <div>
     <div class="table">
       <div class="table-header">
-        <div v-for="(item, index) in title" :key="index" class="header-title">
-          {{ item }}
-        </div>
+        <div v-for="(item, index) in title" :key="index" class="header-title">{{ item }}</div>
       </div>
       <div class="table-content" v-for="(item, index) in content" :key="index">
         <div class="content-title">{{ item.name }}</div>
         <div class="content-title">{{ item.size }}</div>
-        <div class="content-title">
-          <van-stepper
-            v-model="item.num"
-            :disabled="disabled"
-            @change="content[index].num = $event.mp.detail"
-          />
-        </div>
+        <div class="content-title">{{item.num}}</div>
       </div>
     </div>
     <BottomButton :btList="btList" @clickBt="clickBt"></BottomButton>
@@ -23,14 +15,12 @@
 </template>
 <script>
 import BottomButton from "../../../components/bottomButton";
+import {getOutProductIOptions} from '../../../api/api';
 export default {
   data() {
     return {
       title: ["产品名称", "规格型号", "数量"],
       content: [
-        { name: "1", size: "5", num: 6 },
-        { name: "2", size: "4", num: 7 },
-        { name: "3", size: "3", num: 9 },
       ],
       btList: [
         { name: "盘点", click: "check", color: "blue" },
@@ -45,20 +35,34 @@ export default {
       title: "当前页面",
     });
   },
-  onShow() {},
+  onShow() {
+    this.getData()
+  },
   methods: {
-    onChange(val) {
-      console.log(val);
+    //获取数据
+    getData(){
+      let params={
+        searchValues:''
+      }
+       getOutProductIOptions(params).then((res)=>{
+         this.content=res.data.data.map((item)=>{
+           return{
+             name:item.productName,
+             size:item.specs,
+             num:item.stockQuantity
+           }
+         })
+       })
     },
     //底部按钮点击事件，跳转到具体的点击事件
     clickBt(val) {
       this[val]();
     },
     check() {
-      this.$router.push('/pages/extraPages/storageHandle/main')
+      this.$router.push("/pages/extraPages/storageHandle/main");
     },
-    histroy(){
-      this.$router.push('/pages/extraPages/storageHis/main')
+    histroy() {
+      this.$router.push("/pages/extraPages/storageHis/main");
     },
     save() {
       console.log(this.content);

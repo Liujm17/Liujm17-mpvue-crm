@@ -51,7 +51,7 @@ export default {
       (item) => item.formId == this.$store.state.formId
     )[0];
     //对应的类型数组赋值
-    this.typeList=data[this.filterInfo.data].typeList
+    this.typeList=data[this.filterInfo.data].typeList?data[this.filterInfo.data].typeList:[]
     //对应搜索默认值
     this.placeholder=data[this.filterInfo.data].searchValues
     //储存表单id
@@ -79,7 +79,7 @@ export default {
   // 上拉加载
   onReachBottom: function () {
     //执行上拉执行的功能
-    if (this.pageSize < this.total) {
+    if (this.pageSize <= this.total) {
       this.pageSize += 10;
       this.getData(this.activeValue);
     } else {
@@ -163,5 +163,8 @@ export default {
   margin-top: 2rem;
   font: 24px "隶书";
   color: #84af9b;
+}
+.radio-bg:nth-child(3){
+  margin-top:10px
 }
 </style>

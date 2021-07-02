@@ -87,6 +87,7 @@ function get_uuid(){
       }
     }
   });
+  //显示上传进度
   uploadTask.onProgressUpdate((res) => {
     wx.showLoading({
       title: "上传进度：" + res.progress + "%",
@@ -135,40 +136,29 @@ function dataFilter2(data){
 //备用金申请
 const applyCash = {
   // 搜索词
-  searchValues:'',
+  searchValues:'申请人',
+  //历史tab栏
+  typeList:[{value:'',text:'全部'},{value:-1,text:'草稿'},{value:0,text:'审批中'},{value:1,text:'已结束'},{value:2,text:'已驳回'}],
+  //历史里类型判断关键词
+  keyword:'approveStatus',
   //有日志
   hasHistory:true,
   //是否是审批
   isApprove:true,
   vanFormData: {
     formData: [{
-        name: 'applyUserName',
-        value: '用户名',
+        name: 'userName',
+        value: '申请人',
         click: 'normal',
         type:'',
         required:true,
         readonly:true
-      }, {
-        name: 'payeeUserName',
-        value: '收款人',
-        click: 'user',
-        type:'',
-        required:true,
-        readonly:true
-      },
+      }, 
       {
         name: 'money',
-        value: '金额',
+        value: '借款金额',
         click: 'normal',
         type:'number',
-        required:true,
-        readonly:false
-      },
-      {
-        name: 'month',
-        value: '所属期',
-        click: 'normal',
-        type:'digit',
         required:true,
         readonly:false
       },
@@ -181,24 +171,24 @@ const applyCash = {
         readonly:false
       },
       {
-        name: 'remark',
-        value: '备注',
-        click: 'normal',
-        type:'',
-        required:false,
-        readonly:false
-      },
-      {
-        name: 'bankName',
-        value: '收款人银行',
+        name: 'accountName',
+        value: '账户',
         click: 'normal',
         type:'',
         required:true,
         readonly:false
       },
       {
+        name: 'bankName',
+        value: '开户行',
+        click: 'normal',
+        type:'',
+        required:false,
+        readonly:false
+      },
+      {
         name: 'bankAccount',
-        value: '收款人账号',
+        value: '银行账号',
         click: 'normal',
         type:'digit',
         required:true,
@@ -207,17 +197,11 @@ const applyCash = {
     ]
   },
   formData: {
-    id:"",
-    // applyUserId:getStorageSync('UserId'),
-    // applyUserName:getStorageSync('applyUserName') ,
-    applyUserId:"",
-    applyUserName:"",
-    payeeUserId: "",
-    payeeUserName: "",
+    userId:wx.getStorageSync('UserId'),
+    userName:"",
     money: "",
-    month: "",
     subject: "",
-    remark: "",
+    accountName:'',
     bankName: "",
     bankAccount: "",
   },
@@ -268,7 +252,7 @@ const applyCash = {
           orderId: item.orderId ? item.orderId : "",
           title: "备用金申请",
           money: "申请金额为:" + item.money,
-          remark: "备注:" + item.remark,
+          subject: "事由:" + item.subject,
           status:
             item.approveStatus == -1
               ? "未提交"
@@ -1383,6 +1367,671 @@ const upkeep ={
 
 }
 
+//付款申请
+const payment ={
+  //状态选择数组
+    radioList:[{text:'采购',value:1},{text:'调拨',value:2},],
+    // 搜索词
+    searchValues:'申请人,入库类别',
+    //历史tab栏
+    typeList:[{value:'',text:'全部'},{value:-1,text:'草稿'},{value:0,text:'审批中'},{value:1,text:'已结束'},{value:2,text:'已驳回'}],
+    typeList2:[{value:1,text:'库存采购付款'},{value:2,text:'现场采购付款'}],
+    //历史里类型判断关键词
+    keyword:'approveStatus',
+     //是否有日志
+     hasHistory:false,
+     //是否是审批
+     isApprove:false,
+     vanFormData: {
+      formData: [
+        {
+          name: 'userName',
+          value: '付款申请人',
+          click: 'normal',
+          type:'',
+          required:true,
+          readonly:true
+        },
+        {
+          name: 'supplierName',
+          value: '供应商名称',
+          click: 'provider',
+          type:'',
+          required:true,
+          readonly:true
+        },
+        {
+          name: 'supplierContacts',
+          value: '供应商联系人',
+          click: 'normal',
+          type:'',
+          required:true,
+          readonly:false
+        },
+        {
+          name: 'supplierPhone',
+          value: '供应商电话',
+          click: 'normal',
+          type:'digit',
+          required:false,
+          readonly:false
+        },
+        {
+          name: 'paymentDate',
+          value: '付款日期',
+          click: 'date',
+          type:'',
+          required:true,
+          readonly:true
+        },
+      ]
+    },
+    formData: {
+      userName:wx.getStorageSync('applyUserName'),
+      supplierId:'',
+      supplierName:'',
+      supplierContacts:'',
+      supplierPhone:'',
+      paymentDate:'',
+    },
+     //付款申请列表
+   getRecord:function(params) {
+    return request.get(`/api-ep-project/payment/getPage`, params)
+    .then((res) => {
+      let data = []
+      data  = res.data.data.list.map((item,index) => {
+        return {
+          id: item.id,
+          index:index+1,
+          supplierName:item.supplierName,
+          totalPrice:item.totalPrice,
+          paymentDate:formattingTime(item.paymentDate)
+        };
+      });
+      return data
+    })
+  },
+   //获取付款表单详情
+   getData: function (params) {
+    return request.get(`/api-ep-project/payment/getInfo`, params)
+  },
+  //付款申请---新增中(新增)
+  saveOrStart:function(params){
+    return request.post(`/api-ep-project/payment/add`,params)
+  },
+   //付款申请---详情中(修改)
+  editOrStart:function(params){
+    return request.post(`/api-ep-project/payment/edit`,params)           
+  },
+   //--(删除)
+   delFlow:function(params){
+    return request.post(`/api-ep-project/payment/del`,params)
+  },
+}
+
+//采购订单变更
+const changeOrder ={
+  //状态选择数组
+    radioList:[{text:'运行中',value:0},{text:'停机维修',value:1},{text:'未上线',value:2}],
+    // 搜索词
+    searchValues:'申请人,采购类别',
+    //历史tab栏
+    typeList:[{value:'',text:'全部'},{value:-1,text:'草稿'},{value:0,text:'审批中'},{value:1,text:'已结束'},{value:2,text:'已驳回'}],
+    //历史里类型判断关键词
+    keyword:'approveStatus',
+     //是否有日志
+     hasHistory:false,
+     //是否是审批
+     isApprove:false,
+    vanFormData: {
+      formData: [
+        {
+          name: 'userName',
+          value: '采购人',
+          click: 'normal',
+          type:'',
+          required:true,
+          readonly:true
+        },
+        {
+          name: 'supplierName',
+          value: '供应商名称',
+          click: 'provider',
+          type:'',
+          required:true,
+          readonly:true
+        },
+        {
+          name: 'supplierContacts',
+          value: '供应商联系人',
+          click: 'normal',
+          type:'',
+          required:true,
+          readonly:true
+        },
+        {
+          name: 'supplierPhone',
+          value: '供应商电话',
+          click: 'normal',
+          type:'digit',
+          required:true,
+          readonly:true
+        },
+        {
+          name: 'purchaseDate',
+          value: '采购日期',
+          click: 'date',
+          type:'',
+          required:true,
+          readonly:true
+        },
+        {
+          name: 'purpose',
+          value: '用途',
+          click: '',
+          type:'textarea',
+          required:true,
+          readonly:true
+        },
+      ]
+    },
+    formData: {
+      userName:wx.getStorageSync('applyUserName'),
+      supplierId:'',
+      supplierName:'',
+      supplierContacts:'',
+      supplierPhone:'',
+      purchaseDate:'',
+      purpose:'',
+      type:'',
+    },
+     //采购变更单列表
+   getRecord:function(params) {
+    return request.get(`/api-ep-project/purchaseChange/getPage`, params)
+    .then((res) => {
+      let data = []
+      data  = res.data.data.list.map((item,index) => {
+        return {
+          id: item.id,
+          index:index+1,
+          supplierName:item.supplierName,
+          oldTotalPrice:'原金额:'+item.oldTotalPrice+"(元)",
+          newTotalPrice:'变更后金额:'+item.newTotalPrice+"(元)",
+        };
+      });
+      return data
+    })
+  },
+   //获取表单详情
+  getData: function (params) {
+    return request.get(`/api-ep-project/purchaseChange/getInfo`, params)
+  },
+  //采购订单变更---新增中(新增)
+  saveOrStart:function(params){
+    return request.post(`/api-ep-project/purchaseChange/add`,params)
+  },
+   //采购订单变更---详情中(修改)
+  editOrStart:function(params){
+    return request.post(`/api-ep-project/purchaseChange/edit`,params)           
+  },
+   //--(删除)
+   delFlow:function(params){
+    return request.post(`/api-ep-project/purchaseChange/del`,params)
+  },
+  
+}
+
+//出库单
+const outStorage ={
+  //状态选择数组
+    radioList:[{text:'领用',value:1},{text:'调拨',value:2},],
+    // 搜索词
+    searchValues:'申请人,出库类别',
+    //历史tab栏
+    typeList:[{value:'',text:'全部'},{value:-1,text:'草稿'},{value:0,text:'审批中'},{value:1,text:'已结束'},{value:2,text:'已驳回'}],
+    //历史里类型判断关键词
+    keyword:'approveStatus',
+     //是否有日志
+     hasHistory:false,
+     //是否是审批
+     isApprove:false,
+    vanFormData: {
+      formData: [
+        {
+          name: 'userName',
+          value: '处理人',
+          click: 'normal',
+          type:'',
+          required:true,
+          readonly:true
+        },
+        {
+          name: 'outDate',
+          value: '出库日期',
+          click: 'date',
+          type:'',
+          required:true,
+          readonly:true
+        },
+        {
+          name: 'purpose',
+          value: '出库用途',
+          click: '',
+          type:'textarea',
+          required:true,
+          readonly:false
+        },
+        {
+          name: 'outType',
+          value: '出库类型',
+          click: 'radioGroup',
+          type:'',
+          required:true,
+          readonly:true
+        }
+      ]
+    },
+    formData: {
+      userName:wx.getStorageSync('applyUserName'),
+      outDate:'',
+      outType:'',
+      purpose:''
+    },
+     //入库单列表
+   getRecord:function(params) {
+    return request.get(`/api-ep-project/stockOut/getPage`, params)
+    .then((res) => {
+      let data = []
+      data  = res.data.data.list.map((item,index) => {
+        return {
+          id: item.id,
+          index:index+1,
+          userName:item.userName,
+          outType:item.outType == 1?'领用':'调拨',
+        };
+      });
+      return data
+    })
+  },
+   //获取表单详情
+   getData: function (params) {
+    return request.get(`/api-ep-project/stockOut/getInfo`, params)
+  },
+  //出库单---新增中(新增)
+  saveOrStart:function(params){
+    return request.post(`/api-ep-project/stockOut/add`,params)
+  },
+   //出库单---详情中(修改)
+  editOrStart:function(params){
+    return request.post(`/api-ep-project/stockOut/edit`,params)           
+  },
+   //--(删除)
+   delFlow:function(params){
+    return request.post(`/api-ep-project/stockOut/del`,params)
+  },
+}
+//借调结算
+const second ={
+  //状态选择数组
+    radioList:[{text:'采购',value:1},{text:'调拨',value:2},],
+    // 搜索词
+    searchValues:'调入项目、派工人、结算金额',
+    //历史tab栏
+    typeList:[{value:'',text:'全部'},{value:-1,text:'草稿'},{value:0,text:'审批中'},{value:1,text:'已结束'},{value:2,text:'已驳回'}],
+    typeList2:[],
+    //历史里类型判断关键词
+    keyword:'approveStatus',
+     //是否有日志
+     hasHistory:false,
+     //是否是审批
+     isApprove:false,
+     vanFormData: {
+      formData: [
+        {
+          name: 'toFactoryName',
+          value: '调入项目',
+          click: 'factory',
+          type:'',
+          required:true,
+          readonly:true
+        },
+        {
+          name: 'dispatchUserName',
+          value: '派工人',
+          click: 'user',
+          type:'',
+          required:true,
+          readonly:true
+        },
+        {
+          name: 'dispatchReason',
+          value: '派工原因',
+          click: 'normal',
+          type:'',
+          required:true,
+          readonly:false
+        },
+        {
+          name: 'dailySalary',
+          value: '日结标准',
+          click: 'normal',
+          type:'digit',
+          required:false,
+          readonly:false
+        },
+        {
+          name: 'startDate',
+          value: '开始日期',
+          click: 'date',
+          type:'',
+          required:true,
+          readonly:true
+        },
+        {
+          name: 'endDate',
+          value: '结束日期',
+          click: 'date',
+          type:'',
+          required:true,
+          readonly:true
+        },
+        {
+          name: 'settlementMoney',
+          value: '结算金额',
+          click: 'normal',
+          type:'digit',
+          required:true,
+          readonly:false
+        },
+        {
+          name: 'remark',
+          value: '备注',
+          click: 'normal',
+          type:'textarea',
+          required:false,
+          readonly:false
+        }
+      ]
+    },
+    formData: {
+      userName:wx.getStorageSync('applyUserName'),
+      toFactoryName:'',
+      toFactoryId:'',
+      dispatchUserId:'',
+      dispatchUserName:'',
+      dispatchReason:'',
+      dailySalary:'',
+      startDate:'',
+      endDate:'',
+      settlementMoney:'',
+      remark:''
+    },
+     //借调结算列表
+   getRecord:function(params) {
+    return request.post(`/api-ep-project/cost/lend/getCostLendList`, params)
+    .then((res) => {
+      let data = []
+      data  = res.data.data.list.map((item,index) => {
+        return {
+          id: item.id,
+          index:index+1,
+          toFactoryName:item.toFactoryName,
+          dispatchUserName:item.dispatchUserName,
+          dispatchReason:item.dispatchReason,
+        };
+      });
+      return data
+    })
+  },
+   //获取借调结算表单详情
+   getData: function (params) {
+    return request.get(`/api-ep-project/cost/lend/getCostLendDetail`, params)
+  },
+  //借调结算---新增中(新增)
+  saveOrStart:function(params){
+    return request.post(`/api-ep-project/cost/lend/addCostLend`,params)
+  },
+   //借调结算---详情中(修改)
+  editOrStart:function(params){
+    return request.post(`/api-ep-project/cost/lend/editCostLend`,params)           
+  },
+   //--(删除)
+   delFlow:function(params){
+    return request.post(`/api-ep-project/cost/lend/delCostLend`,params)
+  },
+}
+//费用报销
+const cost ={
+  //状态选择数组
+    radioList:[{text:'采购',value:1},{text:'调拨',value:2},],
+    // 搜索词
+    searchValues:'申请人,入库类别',
+    //历史tab栏
+    typeList:[{value:'',text:'全部'},{value:-1,text:'草稿'},{value:0,text:'审批中'},{value:1,text:'已结束'},{value:2,text:'已驳回'}],
+    typeList2:[{value:1,text:'库存采购付款'},{value:2,text:'现场采购付款'}],
+    //历史里类型判断关键词
+    keyword:'approveStatus',
+     //是否有日志
+     hasHistory:false,
+     //是否是审批
+     isApprove:false,
+     vanFormData: {
+      formData: [
+        {
+          name: 'userName',
+          value: '付款申请人',
+          click: 'normal',
+          type:'',
+          required:true,
+          readonly:true
+        },
+        {
+          name: 'supplierName',
+          value: '供应商名称',
+          click: 'provider',
+          type:'',
+          required:true,
+          readonly:true
+        },
+        {
+          name: 'supplierContacts',
+          value: '供应商联系人',
+          click: 'normal',
+          type:'',
+          required:true,
+          readonly:false
+        },
+        {
+          name: 'supplierPhone',
+          value: '供应商电话',
+          click: 'normal',
+          type:'digit',
+          required:false,
+          readonly:false
+        },
+        {
+          name: 'paymentDate',
+          value: '付款日期',
+          click: 'date',
+          type:'',
+          required:true,
+          readonly:true
+        },
+      ]
+    },
+    formData: {
+      userName:wx.getStorageSync('applyUserName'),
+      supplierId:'',
+      supplierName:'',
+      supplierContacts:'',
+      supplierPhone:'',
+      paymentDate:'',
+    },
+     //付款申请列表
+   getRecord:function(params) {
+    return request.get(`/api-ep-project/costReimburse/getPage`, params)
+    .then((res) => {
+      let data = []
+      data  = res.data.data.list.map((item,index) => {
+        return {
+          id: item.id,
+          index:index+1,
+          userName:item.userName,
+          totalPrice:item.totalPrice,
+        };
+      });
+      return data
+    })
+  },
+   //获取付款表单详情
+   getData: function (params) {
+    return request.get(`/api-ep-project/payment/getInfo`, params)
+  },
+  //付款申请---新增中(新增)
+  saveOrStart:function(params){
+    return request.post(`/api-ep-project/payment/add`,params)
+  },
+   //付款申请---详情中(修改)
+  editOrStart:function(params){
+    return request.post(`/api-ep-project/payment/edit`,params)           
+  },
+   //--(删除)
+   delFlow:function(params){
+    return request.post(`/api-ep-project/payment/del`,params)
+  },
+}
+
+
+//请示单
+const askfor= {
+  //状态选择数组
+  radioList:[{text:'已经'},{text:'还未'},{text:'测试2'}],
+   // 搜索词
+   searchValues:'申请人',
+   typeList:[{value:'',text:'全部'},{value:-1,text:'草稿'},{value:0,text:'审批中'},{value:1,text:'已结束'},{value:2,text:'已驳回'}],
+  //历史里类型判断关键词
+  keyword:'approveStatus',
+   //有日志
+   hasHistory:false,
+   //是否是审批
+   isApprove:false,
+  vanFormData: {
+    formData: [
+  
+      {
+        name: 'name',
+        value: '名称',
+        click: 'normal',
+        type:'',
+        required:true,
+        readonly:false
+      },
+    
+  
+    ]
+  },
+  formData: {
+     name:''
+  },
+   //请示单列表
+ getRecord:function(params) {
+  return request.get(`/api-ep-project/apply/getPage`, params)
+  .then((res) => {
+    let data = []
+    data  = res.data.data.list.map((item,index) => {
+      return {
+        id: item.id,
+        index:index+1,
+        userName:item.userName,
+        reason:item.reason,
+        applyDate:item.applyDate
+      };
+    });
+    return data
+  })
+},
+ //获取表单详情
+ getData: function (params) {
+  return request.get(`/api-ep-project/apply/get`, params)
+},
+//请示单---新增中(新增)
+saveOrStart:function(params){
+  return request.post(`/api-ep-project/apply/add`,params)
+},
+ //请示单---详情中(修改)
+editOrStart:function(params){
+  return request.post(`/api-ep-project/apply/edit`,params)
+},
+ //--(删除)
+ delFlow:function(params){
+  return request.post(`//api-ep-project/apply/delete`,params)
+},
+}
+//项目资料
+const factory= {
+  //状态选择数组
+  radioList:[{text:'已经'},{text:'还未'},{text:'测试2'}],
+   // 搜索词
+   searchValues:'资料名称',
+  typeList:[],
+  //历史里类型判断关键词
+  keyword:'approveStatus',
+   //有日志
+   hasHistory:false,
+   //是否是审批
+   isApprove:false,
+  vanFormData: {
+    formData: [
+  
+      {
+        name: 'name',
+        value: '名称',
+        click: 'normal',
+        type:'',
+        required:true,
+        readonly:false
+      },
+    
+  
+    ]
+  },
+  formData: {
+     name:''
+  },
+   //项目资料列表
+ getRecord:function(params) {
+  return request.get(`/api-ep-project/factoryMaterial/getPage`, params)
+  .then((res) => {
+    let data = []
+    data  = res.data.data.list.map((item,index) => {
+      return {
+        id: item.id,
+        index:index+1,
+        materialName:item.materialName,
+        createTime:item.createTime
+      };
+    });
+    return data
+  })
+},
+ //获取表单详情
+ getData: function (params) {
+  return request.get(`/api-ep-project/factoryMaterial/get`, params)
+},
+//项目资料---新增中(新增)
+saveOrStart:function(params){
+  return request.post(`/api-ep-project/factoryMaterial/add`,params)
+},
+ //项目资料---详情中(修改)
+editOrStart:function(params){
+  return request.post(`/api-ep-project/factoryMaterial/edit`,params)
+},
+ //--(删除)
+ delFlow:function(params){
+  return request.post(`/api-ep-project/factoryMaterial/delete`,params)
+},
+}
+
 export default {
   applyCash,
   //员工管理
@@ -1403,6 +2052,20 @@ export default {
   maintain,
   //设备保养
   upkeep,
+  //付款申请
+  payment,
+  //采购订单变更
+  changeOrder,
+  //出库单
+  outStorage,
+  //借调结算18
+  second,
+  //请示单16
+  askfor,
+  //付费用报销15
+  cost,
+  //项目资料20
+  factory,
   formattingTime,
   dataFilter,
   dataFilter2,

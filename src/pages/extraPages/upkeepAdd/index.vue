@@ -15,7 +15,7 @@
         :readonly="item.readonly"
         :rules="[{ required: true, message: '请填写' + item.value }]"
         @input="formData[item.name] = $event.mp.detail"
-        @click="item.click == 'device' ? showDevice() : (item.click == 'date'?showDate(item.name):'')"
+        @click="item.click == 'device' ? showDevice() : (item.click == 'date'?showDate(item):'')"
       >
       </van-field>
     </van-cell-group>
@@ -55,8 +55,17 @@
         @cancel="onClose"
       ></DeviciOptions>
     </van-popup>
-    <!-- 时间选择器 -->
-    <DateTime :show="timeShow" @cancel='timeCancel' @submit="timeSubmit"></DateTime>
+
+      <!-- 日期 -->
+    <Picker
+      :show="dateShow"
+      click="date"
+      :formData="formData"
+      :clickName="clickName"
+      @cancel="onClose"
+      @submit="dateSubmit"
+    ></Picker>
+
     <!-- 底部按钮 -->
     <van-goods-action>
       <van-goods-action-button type="info" text="保存" @click="save()" />
@@ -69,10 +78,10 @@
 import Accessroy from "../../../components/apply/accessory";
 import RadioList from "../../../components/radioButton.vue";
 import DeviciOptions from '../../../components/deviceOptions.vue'
-import DateTime from '../../../components/utils/dateTimePicker.vue'
+import Picker from '../../../components/utils/picker.vue'
 import data from "../../../api/mockData";
 export default {
-  components: { Accessroy, RadioList ,DeviciOptions,DateTime},
+  components: { Accessroy, RadioList ,DeviciOptions,Picker},
   data() {
     return {
       data: data,
@@ -92,8 +101,8 @@ export default {
       active: 0,
       deviceRadio:'1',
       diviceShow:false,
-      timeShow:false,
-      clickName:''
+      clickName:'',
+      dateShow:false,
     };
   },
   onLoad() {
@@ -105,7 +114,7 @@ export default {
     'formData.maintainTime':{
       handler(newVal,oldVal){
         if(newVal){
-       this.formData.nextMaintainTime=data.formattingTime(new Date(newVal).getTime()+24*3600*1000*this.formData.maintenanceDay)
+       this.formData.nextMaintainTime=data.formattingTime(new Date(newVal).getTime()+24*3600*1000*this.formData.maintenanceDay).replace('0:0:0','')
         }
       },
       immediate:false
@@ -113,15 +122,21 @@ export default {
     'formData.maintenanceDay':{
       handler(newVal,oldVal){
         if(newVal&&this.formData.maintainTime){
-       this.formData.nextMaintainTime=data.formattingTime(new Date(this.formData.maintainTime).getTime()+24*3600*1000*newVal)
+       this.formData.nextMaintainTime=data.formattingTime(new Date(this.formData.maintainTime).getTime()+24*3600*1000*newVal).replace('0:0:0','')
         }
       },
       immediate:false
     }
   },
   methods: {
+      //日期选择确定
+    dateSubmit(val) {
+      this.formData[this.clickName] = val;
+      this.dateShow = false;
+    },
     onClose(){
      this.diviceShow=false
+     this.dateShow=false
     },
     //显示设备列表
     showDevice(){
@@ -130,16 +145,8 @@ export default {
     //显示年月日时间
     showDate(val){
       //赋值点击的值
-      this.clickName=val
-      this.timeShow=true
-    },
-    //时间选择器取消
-    timeCancel(){
-      this.timeShow=false
-    },
-    timeSubmit(val){
-      this.formData[this.clickName]=val
-      this.timeShow=false
+      this.dateShow=true
+       this.clickName = val.name;
     },
     //设备列表确定
     deviceSubmit(val){
@@ -170,7 +177,8 @@ export default {
           let resData = JSON.parse(res.data);
           params.batchId = resData.data.batchId;
           data["upkeep"].saveOrStart(params).then((res) => {
-            mpvue.showToast({
+             if(res.data.code == 10000){
+              mpvue.showToast({
               title: res.data.message,
               icon: "none",
               duration: 3000,
@@ -178,18 +186,21 @@ export default {
             });
             //重启到某页面，如不是tabar页面会有回主页按钮
             this.$router.back();
+            }
           });
         });
       } else {
         data["upkeep"].saveOrStart(params).then((res) => {
-          mpvue.showToast({
-            title: res.data.message,
-            icon: "none",
-            duration: 3000,
-            mask: true,
-          });
-          //重启到某页面，如不是tabar页面会有回主页按钮
-          this.$router.back();
+           if(res.data.code == 10000){
+              mpvue.showToast({
+              title: res.data.message,
+              icon: "none",
+              duration: 3000,
+              mask: true,
+            });
+            //重启到某页面，如不是tabar页面会有回主页按钮
+            this.$router.back();
+            }
         });
       }
     },

@@ -41,6 +41,16 @@
         </div>
       </div>
     </div>
+    <van-field
+          v-model="suggestion"
+          rows="1"
+          autosize
+          label="意见"
+          type="textarea"
+          placeholder="请输入意见"
+          v-if="isApproval"
+        />
+     <van-button type="info" size="normal" @click="operate" v-if="showoperate">操作</van-button>
     </van-tab>
          <van-tab title="日志"> 
           <div class="header">
@@ -53,7 +63,7 @@
     </van-tabs>
 
     <!-- 底部按钮 -->
-    <van-goods-action>
+    <!-- <van-goods-action>
       <van-goods-action-button
         type="info"
         text="编辑"
@@ -72,13 +82,13 @@
         @click="back"
         v-if="isBack"
       />
-    </van-goods-action>
+    </van-goods-action> -->
   </div>
 </template>
 
 <script>
 import data from "../../../api/mockData";
-import { backFlow } from "../../../api/api";
+import { backFlow,agree,disagree } from "../../../api/api";
 import Card from '../../../components/card.vue'
 export default {
   components:{Card},
@@ -104,6 +114,9 @@ export default {
       formData: {},
       isBack: false,
       isEdit: false,
+      isApproval:false,
+      showoperate:true,
+      suggestion:'',
       orderId: "",
     };
   },
@@ -113,9 +126,38 @@ export default {
     this.getData();
   },
   watch: {
-    
+      formData: {
+      handler(newVal, oldVal) {
+        if(!this.isBack&&!this.isEdit&&!this.isApproval){
+          this.showoperate=false
+        }else{
+          this.showoperate=true
+        }
+        // this.getData()
+      },
+    },
   },
   methods: {
+     //操作
+    operate() {
+     let a1=this.isEdit?['编辑','删除']:[];
+     let a2=this.isBack?['回撤']:[];
+     let a3 =this.isApproval?['同意','驳回']:[];
+     let b1=this.isEdit?['edit','del']:[];
+     let b2=this.isBack?['back']:[];
+     let b3 =this.isApproval?['agree','disagree']:[];
+     let a0=[...a1,...a2,...a3];
+     let b0=[...b1,...b2,...b3];
+        wx.showActionSheet({
+          itemList: a0,
+        success:(res) =>{
+          this[b0[res.tapIndex]]()
+        },
+        fail:(res)=> {
+          console.log(res.errMsg);
+        },
+      });
+    },
        //切换标签页面
     change(name) {
       if (name.mp.detail.title == "日志") {
@@ -146,8 +188,9 @@ export default {
           inDate: res.data.data.inDate,
           inType: res.data.data.inType == 1 ? "采购" : "调拨",
         };
-        this.isBack = res.data.data.isBack == 0 ? false : true;
-        this.isEdit = res.data.data.isEdit == 0 ? false : true;
+         this.isEdit =res.data.data.isEdit == 1 || res.data.data.isEdit === 'undefined' ? true : false;
+        this.isBack = res.data.data.isBack == 1 ? true : false;
+        this.isApproval=res.data.data.isApproval == 1 ?true:false
         this.orderId = res.data.data.orderId ? res.data.data.orderId : "";
         this.content = res.data.data.stockInDetailVoList.map((item) => {
           return {
@@ -185,6 +228,7 @@ export default {
         }, 1000);
       });
     },
+    //撤回
     back() {
         let params = {
         orderId: this.orderId,
@@ -202,6 +246,19 @@ export default {
         }, 1000);
       });
     },
+     //同意
+    agree() {
+      let params = {
+        orderId: this.orderId,
+        suggestion: this.suggestion,
+      };
+      agree(params).then((res) => {
+        this.$router.back();
+      });
+    },
+    disagree(){
+      
+    }
   },
 };
 </script>

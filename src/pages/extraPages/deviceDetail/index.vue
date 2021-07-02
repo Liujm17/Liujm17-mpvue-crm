@@ -51,10 +51,12 @@
         <div class="img">
           <ImageView :src="QRSrc" height="100%" />
         </div>
+         <van-button type="info" size="normal" @click="operate">操作</van-button>
       </van-tab>
       <van-tab title="巡检记录">
         <div>
           <Card
+            :more="false"
             :cardList="cardList"
             @toDetail="toDetail"
             v-if="cardList.length > 0"
@@ -65,6 +67,7 @@
        <van-tab title="报修记录">
         <div>
           <Card
+            :more="false"
             :cardList="cardList2"
             @toDetail="toDetail2"
             v-if="cardList2.length > 0"
@@ -75,6 +78,7 @@
        <van-tab title="保养记录">
         <div>
           <Card
+            :more="false"
             :cardList="cardList3"
             @toDetail="toDetail3"
             v-if="cardList3.length > 0"
@@ -93,7 +97,7 @@
       <Delete @quxiao="quxiao" @queding="queding"></Delete>
     </van-popup>
 
-    <BottomButton :btList="btList" @clickBt="clickBt"></BottomButton>
+    <!-- <BottomButton :btList="btList" @clickBt="clickBt"></BottomButton> -->
   </div>
 </template>
 
@@ -145,6 +149,20 @@ export default {
     this.getData();
   },
   methods: {
+     //操作
+    operate() {
+     let a1=['编辑','删除'];
+     let b1=['edit','del'];
+        wx.showActionSheet({
+          itemList: a1,
+        success:(res) =>{
+          this[b1[res.tapIndex]]()
+        },
+        fail:(res)=> {
+          console.log(res.errMsg);
+        },
+      });
+    },
     //巡检详情
     toDetail(val){
         this.$router.push({
@@ -272,6 +290,7 @@ export default {
 </script>
 
 <style scoped>
+@import "../../../style/list.scss";
 .allbg {
   margin-bottom: 150px;
 }

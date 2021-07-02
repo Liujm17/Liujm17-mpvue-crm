@@ -26,7 +26,6 @@
 </template>
 <script>
 import BottomButton from "./bottomButton";
-import { getProductItemOptions } from "../api/api";
 export default {
   props: {
     radioList: {

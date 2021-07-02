@@ -50,6 +50,29 @@ export default {
     };
   },
   components: { Card, Search, RadioButton, BottomButton },
+    //下拉刷新
+  onPullDownRefresh() {
+    //doing something
+    mpvue.showToast({
+      title: "下拉刷新成功",
+      icon: "none",
+      duration: 1000,
+      mask: true,
+    });
+    this.getData(this.activeValue);
+    //stop doing
+    wx.stopPullDownRefresh();
+  },
+  // 上拉加载
+  onReachBottom: function () {
+    //执行上拉执行的功能
+    if (this.pageSize <= this.total) {
+      this.pageSize += 10;
+      this.getData(this.activeValue);
+    } else {
+      this.more = false;
+    }
+  },
   onShow() {
     this.value = "";
     //获取对应的页面信息在store里
@@ -68,29 +91,6 @@ export default {
     );
     //获取数据
     this.getData(this.activeValue);
-  },
-  //下拉刷新
-  onPullDownRefresh() {
-    //doing something
-    mpvue.showToast({
-      title: "下拉刷新成功",
-      icon: "none",
-      duration: 1000,
-      mask: true,
-    });
-    this.getData(this.activeValue);
-    //stop doing
-    wx.stopPullDownRefresh();
-  },
-  // 上拉加载
-  onReachBottom: function () {
-    //执行上拉执行的功能
-    if (this.pageSize < this.total) {
-      this.pageSize += 10;
-      this.getData(this.activeValue);
-    } else {
-      this.more = false;
-    }
   },
   methods: {
     changeData(item, index) {

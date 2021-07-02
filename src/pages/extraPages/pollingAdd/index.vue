@@ -130,7 +130,8 @@ export default {
           let resData = JSON.parse(res.data);
           params.batchId = resData.data.batchId;
           data["polling"].saveOrStart(params).then((res) => {
-            mpvue.showToast({
+            if(res.data.code == 10000){
+              mpvue.showToast({
               title: res.data.message,
               icon: "none",
               duration: 3000,
@@ -138,18 +139,21 @@ export default {
             });
             //重启到某页面，如不是tabar页面会有回主页按钮
             this.$router.back();
+            }
           });
         });
       } else {
         data["polling"].saveOrStart(params).then((res) => {
-          mpvue.showToast({
-            title: res.data.message,
-            icon: "none",
-            duration: 3000,
-            mask: true,
-          });
-          //重启到某页面，如不是tabar页面会有回主页按钮
-          this.$router.back();
+           if(res.data.code == 10000){
+              mpvue.showToast({
+              title: res.data.message,
+              icon: "none",
+              duration: 3000,
+              mask: true,
+            });
+            //重启到某页面，如不是tabar页面会有回主页按钮
+            this.$router.back();
+            }
         });
       }
     },

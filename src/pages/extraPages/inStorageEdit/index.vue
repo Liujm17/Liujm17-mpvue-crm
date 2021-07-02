@@ -336,7 +336,6 @@ export default {
             //   : 999999999,
           };
         });
-        console.log(this.content)
         this.formData.inType = "";
         this.active = res.data.data.inType - 1;
       });
@@ -392,17 +391,19 @@ export default {
       params.inType = this.active + 1;
       params.startFlowDto.type = val;
       data["inStorage"].editOrStart(params).then((res) => {
-        mpvue.showToast({
-          title: res.data.message,
-          icon: "none",
-          duration: 1000,
-          mask: true,
-        });
-        //重启到某页面，如不是tabar页面会有回主页按钮
-        setTimeout(() => {
-          //回退2层
-          this.$router.go(2);
-        }, 1000);
+        if(res.data.code == 10000){
+              mpvue.showToast({
+              title: res.data.message,
+              icon: "none",
+              duration: 3000,
+              mask: true,
+            });
+            //重启到某页面，如不是tabar页面会有回主页按钮
+             setTimeout(() => {
+               //回退2层
+                 this.$router.go(1);
+                }, 1000);
+             }
       });
     },
     //按钮群点击更换高亮事件

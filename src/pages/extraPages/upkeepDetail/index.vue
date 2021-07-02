@@ -1,6 +1,6 @@
 <template>
   <div class="allbg">
-    <van-tabs :active="tabsActive" @change="tabsChange">
+    <van-tabs :active="tabsActive">
       <van-tab title="详情">
         <div class="title">基本信息</div>
         <van-cell-group>
@@ -20,14 +20,14 @@
           >
           </van-field>
           <van-field
-            v-model="formData.repairDetail"
+            v-model="formData.remarks"
             rows="1"
             autosize
             label="备注"
             type="textarea"
             readonly
             placeholder="保养描述信息"
-            @input="repairDetail = $event.mp.detail"
+            @input="remarks = $event.mp.detail"
           />
         </van-cell-group>
         <!-- 附件 -->
@@ -113,7 +113,8 @@ export default {
       deviceId:'',
       maintenanceDay:'',
       maintainTime:'',
-      nextMaintainTime:''
+      nextMaintainTime:'',
+      repairDetail:''
       },
       //附件
       photoList: [],
@@ -150,13 +151,6 @@ export default {
     },
   },
   methods: {
-       //切换tab
-    tabsChange(val) {
-      //切换标签页面
-      if (val.mp.detail.index == 1) {
-        this.DeviceInfoShow=true
-      }
-    },
     onClose() {
       this.usershow = false;
     },
@@ -213,17 +207,19 @@ export default {
         repairUserName: this.formData.repairUserName,
       };
       data["upkeep"].editOrStart(params).then((res) => {
-        mpvue.showToast({
-          title: res.data.message,
-          icon: "none",
-          duration: 1000,
-          mask: true,
-        });
-        //重启到某页面，如不是tabar页面会有回主页按钮
-        setTimeout(() => {
-          //回退2层
-          this.$router.back();
-        }, 1000);
+          if(res.data.code == 10000){
+              mpvue.showToast({
+              title: res.data.message,
+              icon: "none",
+              duration: 3000,
+              mask: true,
+            });
+            //重启到某页面，如不是tabar页面会有回主页按钮
+             setTimeout(() => {
+               //回退2层
+                 this.$router.go(1);
+                }, 1000);
+             }
       });
     },
   },

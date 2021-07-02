@@ -8,7 +8,7 @@ import {setStorageSync} from './wechat'
 
 //获取用户所属项目列表
 export function getProjects(params) {
-  return request.get(`/api-ep-project/project/getIncludeProjects`, params)
+  return request.get(`/api-ep-project/factory/getIncludeProjects`, params)
 }
 //获取目录菜单
 export function getMenus(params) {
@@ -30,6 +30,10 @@ export function getUserOptions(params) {
 export function getProviderOptions(params) {
   return request.get(`/api-ep-project/supplier/getPage`, params)
 }
+//获取供应商采购列表
+export function getWaitPaymentList(params) {
+  return request.get(`/api-ep-project/purchase/getWaitPaymentList`, params)
+}
 //获取部门列表
 export function getDeptOptions(params) {
   return request.post(`/api-ep-user/deptController/list`, params)
@@ -46,9 +50,14 @@ export function getProductOptions(params) {
 export function getProductItemOptions(params) {
   return request.get('/api-ep-project/purchase/getProductList', params)
 }
+
 //获取采购订单列表
 export function getOrderOptions(params){
   return request.get('/api-ep-project/purchase/selectByType',params)
+}
+//获取可变更采购信息
+export function getChangeList(params){
+  return request.get('/api-ep-project/purchase/getCanChangeList',params)
 }
 //获取设备信息列表
 export function getDeviceList(params){
@@ -147,4 +156,34 @@ export function referral(params){
 //登录
 export function accountBind(params){
   return request.post('/api-ep-user/wechatController/wechat/bind',params)
+}
+
+
+
+//////库存相关接口 没formid
+
+//获取可出库的产品列表
+export function getOutProductIOptions(params) {
+  return request.get('/api-ep-project/stock/getList', params)
+}
+
+//添加盘点单
+export function addStockCheck(params) {
+  return request.post('/api-ep-project/stockCheck/add', params)
+}
+//修改盘点单
+export function editStockCheck(params) {
+  return request.post('/api-ep-project/stockCheck/edit', params)
+}
+//盘点单列表
+export function stockList(params){
+  return request.get('/api-ep-project/stockCheck/getPage',params)
+}
+//盘点单详情
+export function stockDetail(params){
+  return request.get('/api-ep-project/stockCheck/getInfo',params)
+}
+//盘点单删除
+export function stockDel(params){
+  return request.post('/api-ep-project/stockCheck/del',params)
 }

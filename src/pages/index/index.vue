@@ -1,49 +1,38 @@
 <template>
   <div class="bg">
+    <van-dialog2 id="van-dialog" />
     <div class="box-card" v-for="(item, index) in Menulist" :key="index">
       <div class="title">{{ item.title }}</div>
       <div class="content">
         <van-row>
-          <van-col
-            span="6"
-            v-for="(item2, index2) in item.subs"
-            :key="index2"
-          >
+          <van-col span="6" v-for="(item2, index2) in item.subs" :key="index2">
             <div class="box">
               <div class="box-content" @click="toPage(item2)">
                 <ImageView height="100%" round :src="item2.icon"></ImageView>
               </div>
-              <div class="box-name">
-                {{ item2.title }}
-              </div>
+              <div class="box-name">{{ item2.title }}</div>
             </div>
           </van-col>
         </van-row>
       </div>
     </div>
-    <div>
-    </div>
+    <div></div>
   </div>
 </template>
 <script>
-import { getMenus, getCount,getProjects } from "../../api/api";
+import { getMenus, getCount, getProjects } from "../../api/api";
 import ImageView from "../../components/imageView";
 import { getStorageSync } from "../../api/wechat";
+import Dialog2 from "../../../dist/wx/vant-weapp/dist/dialog2/dialog";
 export default {
   data() {
     return {
       Menulist: [],
-      show:false,
+      show: false,
     };
   },
-  components: { ImageView},
-  onShow() {  
-    //  let params={
-    //    userId:1
-    //  }
-    //  getProjects(params).then((res)=>{
-    //    console.log(res)
-    //  })
+  components: { ImageView },
+  onShow() {
     //接收websocket消息
     if (getStorageSync("UserId") && getStorageSync("Authorization")) {
       this.getMenus();
@@ -64,7 +53,7 @@ export default {
       mask: true,
     });
     this.getMenus();
-     this.getCount();
+    this.getCount();
     //stop doing
     wx.stopPullDownRefresh();
   },
@@ -90,14 +79,17 @@ export default {
       };
       getMenus(params).then((res) => {
         this.Menulist = res.data.data.menus;
-        this.$store.commit('setPermissions',res.data.data.permissions)
+        this.$store.commit("setPermissions", res.data.data.permissions);
       });
     },
 
     //到申请页面
-   async toPage(val) {
-    await    this.$store.commit('changeForm',parseInt(val.index.match(/\d+/g)[0]))
-     await     this.$router.push({
+    async toPage(val) {
+      await this.$store.commit(
+        "changeForm",
+        parseInt(val.index.match(/\d+/g)[0])
+      );
+      await this.$router.push({
         path: val.index,
       });
     },

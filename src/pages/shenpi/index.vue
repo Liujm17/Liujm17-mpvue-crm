@@ -87,7 +87,7 @@ export default {
   // 上拉加载
   onReachBottom: function () {
     //执行上拉执行的功能
-    if(this.pageSize<this.total){
+    if(this.pageSize<=this.total){
     this.pageSize+=10
     this.getTask(this.nowSatus);
     }else{
@@ -186,6 +186,7 @@ export default {
     },
     //历史记录的详情
     toDetail(val) {
+       this.$store.commit('changeForm',val.formId)
       this.$store.commit("changeActive", this.nowSatus);
       if (this.nowSatus == 0) {
         this.$router.push({

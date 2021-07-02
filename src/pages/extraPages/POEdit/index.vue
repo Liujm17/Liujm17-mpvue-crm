@@ -316,32 +316,36 @@ export default {
           let resData = JSON.parse(res.data);
           params.batchId = resData.data.batchId;
           data["PO"].editOrStart(params).then((res) => {
-                mpvue.showToast({
-          title: res.data.message,
-          icon: "none",
-          duration: 1000,
-          mask: true,
-        });
-        //重启到某页面，如不是tabar页面会有回主页按钮
-        setTimeout(() => {
-          //回退2层
-          this.$router.go(2);
-        }, 1000);
+                if(res.data.code == 10000){
+              mpvue.showToast({
+              title: res.data.message,
+              icon: "none",
+              duration: 3000,
+              mask: true,
+            });
+            //重启到某页面，如不是tabar页面会有回主页按钮
+             setTimeout(() => {
+               //回退2层
+                 this.$router.go(2);
+                }, 1000);
+             }
           });
         });
       } else {
         data["PO"].editOrStart(params).then((res) => {
-             mpvue.showToast({
-          title: res.data.message,
-          icon: "none",
-          duration: 1000,
-          mask: true,
-        });
-        //重启到某页面，如不是tabar页面会有回主页按钮
-        setTimeout(() => {
-          //回退2层
-          this.$router.go(2);
-        }, 1000);
+             if(res.data.code == 10000){
+              mpvue.showToast({
+              title: res.data.message,
+              icon: "none",
+              duration: 3000,
+              mask: true,
+            });
+            //重启到某页面，如不是tabar页面会有回主页按钮
+             setTimeout(() => {
+               //回退2层
+                 this.$router.go(2);
+                }, 1000);
+             }
         });
       }
     },

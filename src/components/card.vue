@@ -51,16 +51,16 @@ export default {
     display: flex;
     justify-content: space-around;
     align-items: center;
-    .text:nth-child(n+2){
-      flex: 1;
-      flex-wrap: wrap;
-      text-align: center;
-    }
-    .text:nth-child(2){
-       flex: 0.25;
-      flex-wrap: wrap;
-      text-align: center;
-    }
+    // .text:nth-child(n+2){
+    //   flex: 1;
+    //   flex-wrap: wrap;
+    //   text-align: center;
+    // }
+    // .text:nth-child(2){
+    //    flex: 0.25;
+    //   flex-wrap: wrap;
+    //   text-align: center;
+    // }
   }
 }
 </style>
