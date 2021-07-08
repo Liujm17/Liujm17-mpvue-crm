@@ -138,6 +138,9 @@ export default {
   },
   onShow() {
     this.getData();
+     wx.setNavigationBarTitle({
+          title: '保养记录-详情'+'('+wx.getStorageSync("factoryName")+')',
+      });
   },
   computed: {
     saveText() {

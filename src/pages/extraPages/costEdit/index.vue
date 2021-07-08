@@ -1,110 +1,124 @@
 <template>
   <div class="allbg">
     <div class="title">基本信息</div>
-    <van-cell-group v-if="showDetail">
-      <van-field
-        v-for="(item, index) in listData"
-        :key="index"
-        v-model="formData[item.name]"
-        :name="item.value"
-        :label="item.value"
-        :placeholder="item.click == 'radioGroup' ? '' : item.value"
-        :type="item.type"
-        :autosize="item.type == 'textarea' ? true : false"
-        :required="item.required"
-        input-align="right"
-        :readonly="readonly ? readonly : item.readonly"
-        :rules="[{ required: true, message: '请填写' + item.value }]"
-        @input="formData[item.name] = $event.mp.detail"
-        @click="
-          item.click == 'date'
-            ? showDate(item)
-            : item.click == 'provider'
-            ? showProvider(item)
-            : ''
-        "
-      >
-      </van-field>
-    </van-cell-group>
-
-     <van-cell-group v-else>
-      <van-field
-        v-for="(item, index) in listData2"
-        :key="index"
-        v-model="formData2[item.name]"
-        :name="item.value"
-        :label="item.value"
-        :placeholder="item.value"
-        :type="item.type"
-        :autosize="item.type == 'textarea' ? true : false"
-        :required="item.required"
-        input-align="right"
-        :readonly="readonly ? readonly : item.readonly"
-        :rules="[{ required: true, message: '请填写' + item.value }]"
-        @input="formData2[item.name] = $event.mp.detail"
-         @click="
-          item.click == 'date'
-            ? showDate(item)
-            : item.click == 'provider'
-            ? showProvider(item)
-            : ''
-        "
-      >
-      </van-field>
-    </van-cell-group>
-
-    <div class="polling-info">
-      <div class="polling-title">付款类型</div>
-      <RadioList
-        :typeList="typeList"
-        :active="active"
-        @changeData="changeData"
-      ></RadioList>
-    </div>
-     <!-- 收款信息 -->
-    <div class="title">收款信息</div>
     <van-cell-group>
-      <van-field v-model="payData.accountName"    @input="payData.accountName = $event.mp.detail" required input-align="right" label="账户" type="text" placeholder="请输入账户" />
-      <van-field v-model="payData.bankName"    @input="payData.bankName = $event.mp.detail" required input-align="right" label="开户行" type="text" placeholder="请输入开户行" />
-      <van-field v-model="payData.bankAccount"    @input="payData.bankAccount = $event.mp.detail" required input-align="right" label="银行账户" type="digit" placeholder="请输入银行账户" />
-      <van-field v-model="payData.totalPrice"    @input="payData.totalPrice = $event.mp.detail" :readonly="showDetail?true:false" input-align="right" type="digit" label="合计付款金额" placeholder="0" />
+      <van-field
+        v-model="formData.userName"
+        label="申请人"
+        required
+        readonly
+        input-align="right"
+        @input="formData.userName = $event.mp.detail"
+      />
+      <van-field
+        label="是否已付款"
+        required
+        readonly
+        input-align="right"
+        @input="formData.isPay = $event.mp.detail"
+      >
+        <RadioButton :typeList="radioList1" :active="active1" @changeData="changeData1"></RadioButton>
+      </van-field>
+      <van-field
+        v-model="formData.month"
+        label="费用所属期"
+        placeholder="请选择费用所属期"
+        required
+        readonly
+        input-align="right"
+        @input="formData.month = $event.mp.detail"
+        @click="showDate"
+      />
     </van-cell-group>
-
-   <!-- 供应商订单信息 -->
- <div class="title" v-if="showDetail">供应商订单信息</div>
-   <div class="card-bg" v-if="showDetail">
-    <div class="card" v-for="(item, index) in cardList" :key="index" @click="toDetail(item)">
-      <div class="text" v-for="(label,index2) in item" :key="index2" :style="{color:index2 == 'title'?'black':'#888'}" v-show="index2 !== 'id'&&index2 !== 'orderId'&&index2 !== 'formId'">{{label}}</div>
+    <div class="polling-text">
+      <van-field
+        v-model="formData.accountName"
+        placeholder="请填写账户"
+        label="账户"
+        required
+        input-align="right"
+        @input="formData.accountName = $event.mp.detail"
+      />
+      <van-field
+        v-model="formData.bankName"
+        placeholder="请填写开户行"
+        label="开户行"
+        required
+        input-align="right"
+        @input="formData.bankName = $event.mp.detail"
+      />
+      <van-field
+        v-model="formData.bankAccount"
+        placeholder="请填写银行账号"
+        label="银行账号"
+        required
+        type="digit"
+        input-align="right"
+        @input="formData.bankAccount = $event.mp.detail"
+      />
+      <van-field
+        v-model="formData.totalPrice"
+        label="合计付款金额"
+        required
+        readonly
+         type="digit"
+        input-align="right"
+        @input="formData.totalPrice = $event.mp.detail"
+      />
     </div>
-   </div>
+    <div style="width:100%;height:20px"></div>
+    <!-- 费用明细列表 -->
+     <div style="padding:10px;box-sizing:border-box" v-for="(item,index) in content" :key="index" >
+        <div class="title" style="display:flex;align-items:center;justify-content:space-between"><span>费用报销单明细({{index+1}})</span><span style="color:red;font-size:20px" @click="delList(index)">删除</span></div>
+      <van-cell-group>
+      <van-field
+        v-model="item.purpose"
+        placeholder="请填写费用用途"
+        label="费用用途"
+        required
+        input-align="right"
+        @input="item.purpose = $event.mp.detail"
+      />
+       <van-field
+        label="费用类别"
+        required
+        input-align="right"
+      >
+        <div style="display:flex;flex-wrap:nowrap;align-items:center" class="radio-bg" slot="button">
+        <van-button :type="item.active == index2?'info':'default'" size="small" v-for="(item2,index2) in radioList2" :key="index2" @click="changeData2(item2,index2,index)">{{item2.text}}</van-button>
+        </div>
+      </van-field>
+       <van-field
+        v-model="item.money"
+        placeholder="请填写报销金额"
+        label="报销金额"
+        type="digit"
+        required
+        input-align="right"
+        @input="item.money = $event.mp.detail"
+      />
+       <van-field
+        v-model="item.remark"
+        placeholder="请填写备注"
+        label="备注"
+        required
+        input-align="right"
+        @input="item.remark = $event.mp.detail"
+      />
 
- <!-- 供应商订单信息 ---产品列表-->
- <Purchase :paymentList='paymentList' v-if="showDetail"></Purchase>
-
-
+    </van-cell-group>
+     </div>
   
+   <div class="table-add">
+      <van-button round plain hairline type="info" @click="addProduct"
+        >添加明细</van-button
+      >
+    </div>
+
     <!-- 附件 -->
-    <Accessroy :photoList="photoList" :onlyOne="false" :deleteList='deleteList'></Accessroy>
-
-    <!-- 日期 -->
-    <Picker
-      :show="dateShow"
-      click="date"
-      :formData="active == 0?formData:formData2"
-      :clickName="clickName"
-      @cancel="onClose"
-      @submit="submit2"
-    ></Picker>
-    <!-- 供应商弹出层 -->
-    <van-popup
-      :show="show"
-      position="right"
-      custom-style="width: 80%; height: 100%;"
-      @close="onClose"
-    >
-      <Provider @submit="submit" :radio="radio" @cancel="onClose"></Provider>
-    </van-popup>
-
+    <Accessroy :photoList="photoList" :onlyOne="false" :deleteList="deleteList"></Accessroy>
+    <!-- 空白区域 -->
+    <div style="width:100%;height:20px"></div>
     <!-- 流程//流程必有用户弹出层 -->
     <Flow
       :flowStatus="flowStatus"
@@ -125,107 +139,62 @@
       <User @submit="usersubmit" :radio="userradio" @cancel="onClose"></User>
     </van-popup>
 
+    <!-- 日期 -->
+    <Picker
+      :show="dateShow"
+      click="date"
+      :formData="formData"
+      :clickName="clickName"
+      @cancel="onClose"
+      @submit="submit2"
+      :showDay="showDay"
+    ></Picker>
+
     <!-- 底部按钮 -->
     <van-goods-action>
       <van-goods-action-button type="info" text="保存草稿" @click="save(0)" />
-      <van-goods-action-button
-        type="primary"
-        text="保存提交"
-        @click="save(1)"
-      />
+      <van-goods-action-button type="primary" text="保存提交" @click="save(1)" />
     </van-goods-action>
   </div>
 </template>
 
 <script>
-import data from "../../../api/mockData";
 import Accessroy from "../../../components/apply/accessory";
-// import BottomButton from "../../../components/bottomButton";
-import Picker from "../../../components/utils/picker.vue";
-import Provider from "../../../components/providerOptions.vue";
+import data from "../../../api/mockData";
+import RadioButton from "../../../components/radioButton.vue";
+import { getFlowList, getByFlowId,getCostType } from "../../../api/api";
 import Flow from "../../../components/apply/flow.vue";
 import User from "../../../components/userOptions";
-import RadioList from "../../../components/radioButton.vue";
-import Purchase from '../../../components/apply/PurchaseDetails.vue'
-import { getFlowList, getByFlowId,getWaitPaymentList } from "../../../api/api";
+import Picker from "../../../components/utils/picker.vue";
 export default {
-  components: { Accessroy, Picker, Provider, Flow, User, RadioList,Purchase },
+  components: { Accessroy, Flow, User, Picker, RadioButton },
   data() {
     return {
-      //显示采购详情，根据付款类型来判断
-      showDetail:true,
-      //供应商订单信息
-      cardList:[],
-      //付款明细
-      paymentList:[],
-      //类型
-      active: 0,
-      typeList: [
-        { value: 1, text: "库存采购付款" },
-        { value: 2, text: "现场采购付款" },
-      ],
-      //该页面字段方法数据
       data: data,
       uuid: "",
-      //该页面数据名
-      page: "payment",
-      //表单列表
-      listData: [],
-      //表单值
-      formData: {},
-      //现场采购下的表单值
-      listData2:[
-          {
-          name: 'userName',
-          value: '付款申请人',
-          click: 'normal',
-          type:'',
-          required:true,
-          readonly:true
-        },
-        {
-          name: 'paymentDate',
-          value: '付款日期',
-          click: 'date',
-          type:'',
-          required:true,
-          readonly:true
-        },
-          {
-          name: 'purpose',
-          value: '用途',
-          click: 'normal',
-          type:'textarea',
-          required:true,
-          readonly:false
-        },
-      ],
-      formData2:{
-        userName:wx.getStorageSync('applyUserName'),
-        paymentDate:'',
-        purpose:''
+      //问题描述
+      formData: {
+        userId: "",
+        isPay: "",
+        userName: "",
+        month: "",
+        accountName: "",
+        bankName: "",
+        bankAccount: "",
+        totalPrice: "",
       },
-      //收款信息
-      payData: {
-        accountName:'',
-        bankName:'',
-        bankAccount:'',
-        totalPrice:''
-      },
-       //附件列表
+      //附件
       photoList: [],
-      //编辑中被删除的图片id列表
-      deleteList:[],
+        //编辑中被删除的图片id列表
+      deleteList: [],
       //需要上传的列表
-      needList:[],
-      //附件变化列表
-      //附件列表上传索引
+      needList: [],
+       //附件列表上传索引
       valueIndex: 0,
-      //日期选择器
-      dateShow: false,
-      clickName: "",
-      show: false,
-      radio: "1",
+      //列表
+      listData: [],
+      //表单
+      formData: {},
       //流程
       flowId: "",
       flowList: [],
@@ -236,138 +205,141 @@ export default {
       //流程中的用户弹窗
       usershow: false,
       userradio: "1",
+
+      //日期
+      dateShow: false,
+      showDay: false,
+      clickName: "",
+      //是否付款
+      radioList1: [
+        { text: "否", value: 0 },
+        { text: "是", value: 1 },
+      ],
+      active1: 0,
+      //费用报销类别
+      radioList2:[],
+      active2:0,
+      //费用报销明细
+      content:[{money:'',remark:'',purpose:'',type:1,active:0}]
     };
   },
   onLoad() {
-    this.formData = this.data[this.page].formData;
-    this.listData = this.data[this.page].vanFormData.formData;
     this.uuid = data.get_uuid();
+    this.deleteList=[]
   },
   onReady() {
-    this.getData();
+    this.formData.userName = wx.getStorageSync("applyUserName");
+    this.formData.userId = wx.getStorageSync("UserId");
+    this.getData2();
+    this.getType()
+    this.getData()
+      wx.setNavigationBarTitle({
+          title: '费用报销-编辑'+'('+wx.getStorageSync("factoryName")+')',
+      });
   },
   watch: {
-    'formData.supplierId':{
-      handler(newVal,oldVal){
-        if(newVal){
-            this.cardList=[]
-            let params={
-                supplierId:newVal
-            }
-            getWaitPaymentList(params).then((res)=>{
-              this.cardList.push({
-                unpaidQuantity:'供应商未付清订单数:'+res.data.data.unpaidQuantity+'个',
-                totalPrice:'总金额:'+res.data.data.totalPrice+'元',
-                 unpaidPrice:'未付金额:'+res.data.data.unpaidPrice+'元',
-                approvalPrice:'在途金额:'+res.data.data.approvalPrice+'元',
-              })
-              this.paymentList=res.data.data.unpaidPurchaseVoList.map((item)=>{
-                    return{
-                      id:item.id,
-                      totalPrice:item.totalPrice,
-                      unpaidPrice:item.unpaidPrice,
-                      approvalPrice:item.approvalPrice,
-                      paymentPrice:null,
-                      purchaseDetailVoList:item.purchaseDetailVoList
-                    }
-              })
-            })
-        } 
-      }
+    content: {
+      handler(newValue, oldValue) {
+       this.formData.totalPrice=newValue.reduce((total,item)=>total+item.money*1,0)
+      },
+        //首次监听
+      //  immediate: true,
+       //深度监听
+      deep: true,
     },
-    paymentList:{
-        handler(newVal,oldVal){
-          this.payData.totalPrice=Number(newVal.reduce((total,item)=>total+item.paymentPrice,0))
-        },
-        deep:true,
+      //监听图片列表，看有无新上传的
+    photoList: {
+      handler(newVal, oldVal) {
+        this.needList = data.sliceList(newVal.filter((item) => !item.id));
+      },
+      deep: true,
     },
-    //监听图片列表，看有无新上传的
-     photoList:{
-       handler(newVal,oldVal){
-        this.needList =data.sliceList(newVal.filter((item)=>!item.id))
-       },
-       deep:true
-     },
-     //监听图片列表，看有无把旧的图片删除的
-     deleteList:{
-        handler(newVal,oldVal){
-        this.needList=data.sliceList(newVal)
-       },
-       deep:true
-     }
-
+    //监听图片列表，看有无把旧的图片删除的
+    deleteList: {
+      handler(newVal, oldVal) {
+        this.needList = data.sliceList(newVal);
+      },
+      deep: true,
+    },
   },
   methods: {
-    //更换付款类型
-    changeData(item, index) {
-      //切换不清空收款信息
-      // this.payData = {
-      //   accountName:'',
-      //   bankName:'',
-      //   bankAccount:'',
-      //   totalPrice:''
-      // },
-       this.active = index;
-      if(item.text == '现场采购付款'){
-       this.showDetail=false
-      }else{
-        this.showDetail=true
-      }
-    },
-    //获取流程列表和列表数据
+     //获取数据
     getData() {
-      let params={
-          formId: this.$store.state.formId,
-          id: this.$route.query.id,
-       }
-        //获取表单数据
-      data['payment'].getData(params).then((res) => {
-        const data=res.data.data
-        if(data.paymentType == 1){
-          this.formData={
-            userName:wx.getStorageSync('applyUserName'),
-            supplierId:data.supplierId,
-            supplierName:data.supplierName,
-            supplierContacts:data.supplierContacts,
-            supplierPhone:data.supplierPhone,
-            paymentDate:data.paymentDate,
-          }
-          this.payData={
-             accountName:data.accountName,
-             bankName:data.bankName,
-             bankAccount:data.bankAccount,
-             totalPrice:data.totalPrice
-          }
-          this.paymentList=data.purchasePaymentVoList
-        }else{
-            this.formData2={
-             userName:wx.getStorageSync('applyUserName'),
-             paymentDate:data.paymentDate,
-              purpose:data.purpose
-          }
-          this.payData={
-             accountName:data.accountName,
-             bankName:data.bankName,
-             bankAccount:data.bankAccount,
-             totalPrice:data.totalPrice
-          }
-          this.paymentList=[]
-        }
-         this.photoList = data.fileList
-          ? data.fileList.map((item) => {
+      let params = {
+        formId: this.$store.state.formId,
+        id: this.$route.query.id,
+      };
+      data["cost"].getData(params).then((res) => {
+        this.formData = {
+          isPay: res.data.data.isPay ==0?'否':'是',
+          userName: res.data.data.userName,
+          month: res.data.data.month,
+          accountName: res.data.data.accountName,
+          bankName: res.data.data.bankName,
+          bankAccount: res.data.data.bankAccount,
+          totalPrice: res.data.data.totalPrice,
+        };
+       
+        this.photoList = res.data.data.fileList
+          ? res.data.data.fileList.map((item) => {
               return {
                 type: item.type == 0 ? "image" : "video",
                 img: item.type == 0 ? item.address : "",
                 video: item.type == 1 ? item.address : "",
-                id:item.id?item.id:''
+                 id: item.id ? item.id : "",
               };
             })
           : [];
+          this.content=res.data.data.costReimburseDetailVoList.map((item)=>{
+            return {
+              id:item.id?item.id:'',
+              money:item.money,
+              purpose:item.purpose,
+              remark:item.remark,
+              type:item.type,
+              active:item.type-1
+            }
+          })
       });
-      let params2 = {
+    },
+  
+    //获取费用类型
+    getType(){
+       let params={
+         type:1
+       }
+       getCostType(params).then((res)=>{
+         this.radioList2=res.data.data.map((item)=>{
+           return {
+             value:item.optionValue,
+             text:item.optionText
+           }
+         })
+       })
+    },
+    //添加明细
+    addProduct(){
+      this.content.push({money:'',remark:'',purpose:'',type:1,active:0})
+    },
+    ///删除费用列表对应
+    delList(val) {
+      this.content.splice(val, 1);
+    },
+    //是否按钮群点击更换高亮事件
+    changeData1(item, index) {
+      this.active1 = index;
+    },
+     //费用报销按钮群点击更换高亮事件
+    changeData2(item2, index2,index) {
+     this.content[index].active=index2
+     this.content[index].type=index2+1
+    },
+    //获取流程列表
+    getData2() {
+      let params = {
         formId: this.$store.state.formId,
       };
-      getFlowList(params2).then((res) => {
+      getFlowList(params).then((res) => {
         if (res.data.data.length >= 1) {
           this.flowStatus = "流程数:" + res.data.data.length;
           this.flowList = res.data.data.map((item) => {
@@ -397,97 +369,7 @@ export default {
         });
       });
     },
-    //保存或发起
-    save(val) {
-      let purchasePaymentList =this.paymentList.map((item)=>{
-        return{
-          purchaseId:item.id,
-          paymentPrice:item.paymentPrice
-        }
-      })
-      let params ={}
-       if(this.active == 0){
-        params = {
-        factoryId: 2020001,
-        systemCode: "05",
-        userId: wx.getStorageSync("UserId"),
-        ...this.formData,
-        ...this.payData,
-        purchasePaymentList,
-        batchId: "",
-        deleteIds:this.deleteList,
-        startFlowDto: {
-          optionalJson: JSON.stringify(this.fitNodeList),
-          formId: this.$store.state.formId,
-          flowId: Number(this.flowId),
-        },
-      };
-       }else if(this.active == 1){
-         params = {
-        factoryId: 2020001,
-        systemCode: "05",
-        userId: wx.getStorageSync("UserId"),
-        ...this.formData2,
-        ...this.payData,
-        purchasePaymentList,
-        deleteIds:this.deleteList,
-        batchId: "",
-        startFlowDto: {
-          optionalJson: JSON.stringify(this.fitNodeList),
-          formId: this.$store.state.formId,
-          flowId: Number(this.flowId),
-        },
-      };
-       }
-     
-      params.startFlowDto.type = val;
-      params.paymentType=this.active+1
-      if (this.needList.length > 0) {
-        data.upLoadFile(this.needList, 0, this.uuid).then((res) => {
-          //文件code
-          let resData = JSON.parse(res.data);
-          params.batchId = resData.data.batchId;
-          data["payment"].saveOrStart(params).then((res) => {
-            if(res.data.code == 10000){
-              mpvue.showToast({
-              title: res.data.message,
-              icon: "none",
-              duration: 3000,
-              mask: true,
-            });
-            //重启到某页面，如不是tabar页面会有回主页按钮
-            this.$router.back();
-            }
-          });
-        });
-      } else {
-        data["payment"].saveOrStart(params).then((res) => {
-         if(res.data.code == 10000){
-              mpvue.showToast({
-              title: res.data.message,
-              icon: "none",
-              duration: 3000,
-              mask: true,
-            });
-            //重启到某页面，如不是tabar页面会有回主页按钮
-            this.$router.back();
-            }
-        });
-      }
-    },
-    showDate(val) {
-      if (!this.$route.name.includes("Detail")) {
-        this.dateShow = true;
-        this.clickName = val.name;
-        // this.clickValue = val.clickValue;
-      } else {
-        return;
-      }
-    },
-    //显示供应商列表弹窗
-    showProvider(val) {
-      this.show = true;
-    },
+    //流程相关方法
     //流程弹窗
     showPopup2(val) {
       this.show = true;
@@ -499,33 +381,6 @@ export default {
       this.flowId = val.mp.detail;
       this.$route.query = {};
       this.getByFlowId();
-    },
-    //关闭弹窗
-    onClose() {
-      this.dateShow = false;
-      this.show = false;
-      this.usershow = false;
-    },
-    //日期确认
-    submit2(val) {
-      if(this.active == 0){
-            this.formData[this.clickName] = val;
-      //这个的时候他不需要id值 只需要name，value为undifined
-      // this.formData[this.clickValue] = val;
-      this.dateShow = false;
-      }else if(this.active == 1){
-          this.formData2[this.clickName] = val;
-      //这个的时候他不需要id值 只需要name，value为undifined
-      // this.formData[this.clickValue] = val;
-      this.dateShow = false;
-      }
-   
-    },
-    //供应商确认
-    submit(val) {
-      this.$set(this.formData, "supplierId", val.id);
-      this.$set(this.formData, "supplierName", val.name);
-      this.show = false;
     },
     //流程选用户后的确认事件
     usersubmit(val) {
@@ -541,13 +396,78 @@ export default {
       );
       this.usershow = false;
     },
+    //关闭弹窗
+    onClose() {
+      this.usershow = false;
+      this.dateShow = false;
+    },
+
+    //日期选择
+    //显示日期
+    showDate() {
+      this.dateShow = true;
+    },
+    //日期确认
+    submit2(val) {
+      this.formData.month = val;
+      this.dateShow = false;
+    },
+    //保存
+    save(val) {
+      let params = {
+        id: this.$route.query.id,
+        ...this.formData,
+        batchId: "",
+        factoryId: wx.getStorageSync("factoryId"),
+        costReimburseDetailList:this.content,
+        isPay:'',
+        deleteIds: this.deleteList,
+        userId: wx.getStorageSync("UserId"),
+        startFlowDto: {
+          optionalJson: JSON.stringify(this.fitNodeList),
+          formId: this.$store.state.formId,
+          flowId: Number(this.flowId),
+          type: val,
+        },
+      };
+      params.isPay=this.active1
+      if (this.needList.length > 0) {
+        data.upLoadFile(this.needList, 0, this.uuid).then((res) => {
+          //文件code
+          let resData = JSON.parse(res.data);
+          params.batchId = resData.data.batchId;
+          data["cost"].editOrStart(params).then((res) => {
+            if (res.data.code == 10000) {
+              mpvue.showToast({
+                title: res.data.message,
+                icon: "none",
+                duration: 3000,
+                mask: true,
+              });
+              //重启到某页面，如不是tabar页面会有回主页按钮
+              this.$router.back();
+            }
+          });
+        });
+      } else {
+        data["cost"].editOrStart(params).then((res) => {
+          if (res.data.code == 10000) {
+            mpvue.showToast({
+              title: res.data.message,
+              icon: "none",
+              duration: 3000,
+              mask: true,
+            });
+            //重启到某页面，如不是tabar页面会有回主页按钮
+            this.$router.back();
+          }
+        });
+      }
+    },
   },
 };
 </script>
 
-<style lang="scss" scoped>
-@import "../../../style/list.scss";
-</style>
 <style lang="scss" scoped>
 .allbg {
   margin-bottom: 150px;
@@ -566,30 +486,6 @@ export default {
   margin-top: 20px;
   .polling-title2 {
     font-weight: 500;
-  }
-}
-.card-bg {
-  width: 100%;
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  .card {
-    width: 95%;
-    line-height: 40px;
-    border: 1px solid #aaa;
-    margin: 3px 0;
-    box-sizing: border-box;
-    padding: 3px;
-    font-size: 0.3rem;
-    // float: left;
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: space-between;
-    align-items: center;
-    .text{
-      width: 50%;
-      text-align: center;
-    }
   }
 }
 </style>

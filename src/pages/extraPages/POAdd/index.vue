@@ -190,6 +190,9 @@ export default {
   },
   onReady() {
     this.getData();
+     wx.setNavigationBarTitle({
+          title: '采购订单-新增'+'('+wx.getStorageSync("factoryName")+')',
+      });
   },
   watch:{
        content: {
@@ -252,7 +255,7 @@ export default {
     //保存或发起
     save(val) {
       let params = {
-         factoryId: 2020001,
+         factoryId: wx.getStorageSync("factoryId"),
         systemCode: "05",
         userId: wx.getStorageSync("UserId"),
         ...this.formData,

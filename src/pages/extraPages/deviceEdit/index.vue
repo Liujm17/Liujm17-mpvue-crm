@@ -121,11 +121,15 @@ export default {
     };
   },
   onLoad() {
+    this.deleteList=[]
     this.formData = this.data[this.page].formData;
     this.listData = this.data[this.page].vanFormData.formData;
     this.radioList = this.data[this.page].radioList;
      this.uuid= data.get_uuid(),
     this.getData()
+      wx.setNavigationBarTitle({
+          title: '费用报销-编辑'+'('+wx.getStorageSync("factoryName")+')',
+      });
   },
    watch:{
      //监听图片列表，看有无新上传的
@@ -193,7 +197,7 @@ export default {
         ...this.formData,
         fileCode: "",
         deleteIds:this.deleteList,
-        factoryId: 2020001,
+        factoryId: wx.getStorageSync("factoryId"),
         systemCode: "05",
         userId: wx.getStorageSync("UserId"),
       };

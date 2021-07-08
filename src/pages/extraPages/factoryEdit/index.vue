@@ -58,11 +58,14 @@ export default {
   },
   onLoad() {
     this.uuid = data.get_uuid();
-  
+    this.deleteList=[]
   },
   //一定要用ready 因为onshow在选完图片后会再次调用
   onReady() {
       this.getData();
+        wx.setNavigationBarTitle({
+          title: '项目资料-编辑'+'('+wx.getStorageSync("factoryName")+')',
+      });
   },
   watch: {
     //监听图片列表，看有无新上传的
@@ -109,7 +112,7 @@ export default {
         remark: this.remark,
         batchId: "",
         deleteIds: this.deleteList,
-        factoryId: 2020001,
+        factoryId: wx.getStorageSync("factoryId"),
         userId: wx.getStorageSync("UserId"),
         userName: wx.getStorageSync("applyUserName"),
       };

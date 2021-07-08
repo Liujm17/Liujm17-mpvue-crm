@@ -186,6 +186,9 @@ export default {
     this.formData = this.data[this.page].formData;
     this.listData = this.data[this.page].vanFormData.formData;
     this.getData();
+     wx.setNavigationBarTitle({
+          title: '采购订单变更-详情'+'('+wx.getStorageSync("factoryName")+')',
+        });
   },
   watch: {
     formData: {

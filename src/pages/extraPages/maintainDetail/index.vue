@@ -177,6 +177,9 @@ export default {
   },
   onShow() {
     this.getData();
+     wx.setNavigationBarTitle({
+          title: '故障维修-详情'+'('+wx.getStorageSync("factoryName")+')',
+      });
   },
   computed: {
     saveText() {

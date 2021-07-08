@@ -32,6 +32,9 @@ export default {
   onShow(){
     //获取数据
     this.getData(this.activeValue);
+     wx.setNavigationBarTitle({
+          title: '库存盘点-历史'+'('+wx.getStorageSync("factoryName")+')',
+      });
   },
   methods: {
      //历史记录的详情

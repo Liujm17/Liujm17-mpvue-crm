@@ -137,6 +137,9 @@ export default {
   },
   onLoad() {
     this.getData();
+     wx.setNavigationBarTitle({
+          title: '付款申请-详情'+'('+wx.getStorageSync("factoryName")+')',
+      });
   },
   watch: {
     formData: {

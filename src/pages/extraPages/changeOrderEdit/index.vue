@@ -202,12 +202,16 @@ export default {
     };
   },
   onLoad() {
+    this.deleteList=[]
     this.formData = this.data[this.page].formData;
     this.listData = this.data[this.page].vanFormData.formData;
      this.uuid= data.get_uuid()
   },
   onReady() {
     this.getData();
+     wx.setNavigationBarTitle({
+          title: '采购订单变更-编辑'+'('+wx.getStorageSync("factoryName")+')',
+      });
   },
   watch:{
        content: {
@@ -339,7 +343,7 @@ export default {
     //保存或发起
     save(val) {
       let params = {
-         factoryId: 2020001,
+         factoryId: wx.getStorageSync("factoryId"),
         systemCode: "05",
         userId: wx.getStorageSync("UserId"),
         //采购单id

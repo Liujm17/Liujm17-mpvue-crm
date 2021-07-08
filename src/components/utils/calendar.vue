@@ -17,7 +17,7 @@
         >
       </div>
     </div>
-    <div class="calendar" :style="calendarStyle">
+    <div class="calendar" :style="calendarStyle" v-if="showDay">
       <div
         v-for="(item, index) in calendarData"
         class="calendar_item"
@@ -42,6 +42,12 @@
 <script>
 export default {
   name: "Calendar",
+  props:{
+    showDay:{
+      type:Boolean,
+      default:true
+    }
+  },
   data: () => {
     return {
       calendarData: [{label:"日"},{label: "一"}, {label:"二"},{label: "三"},{label: "四"},{label: "五"},{label: "六"}], //日历循环渲染数据
@@ -70,7 +76,12 @@ export default {
         this.$emit('cancel')
     },
     submit(){
-      const time=this.year+'-'+this.month+'-'+this.nowDate
+      let time=''
+      if(this.showDay){
+       time=this.year+'-'+this.month+'-'+this.nowDate
+      }else{
+       time=this.year+'-'+this.month
+      }
       this.$emit('submit',time)
     },
     //点击日期后马上出发的事件

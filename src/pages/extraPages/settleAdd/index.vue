@@ -2,24 +2,16 @@
   <div class="allbg">
     <div class="title">基本信息</div>
     <van-cell-group>
-      <van-field
-        v-model="formData.userName"
-        label="申请人"
+       <van-field
+        v-model="formData.collectionDate"
+        label="收款日期"
+        placeholder="请选择收款日期"
         required
         readonly
         input-align="right"
-        @input="formData.userName = $event.mp.detail"
+        @input="formData.collectionDate = $event.mp.detail"
+        @click="showDate2"
       />
-      <van-field
-        v-model="formData.isPay"
-        label="是否已付款"
-        required
-        readonly
-        input-align="right"
-        @input="formData.isPay = $event.mp.detail"
-      >
-        <RadioButton :typeList="radioList1" :active="active1" @changeData="changeData1"></RadioButton>
-      </van-field>
       <van-field
         v-model="formData.month"
         label="费用所属期"
@@ -30,58 +22,26 @@
         @input="formData.month = $event.mp.detail"
         @click="showDate"
       />
-    </van-cell-group>
-    <div class="polling-text">
-      <van-field
-        v-model="formData.accountName"
-        placeholder="请填写账户"
-        label="账户"
-        required
-        input-align="right"
-        @input="formData.accountName = $event.mp.detail"
-      />
-      <van-field
-        v-model="formData.bankName"
-        placeholder="请填写开户行"
-        label="开户行"
-        required
-        input-align="right"
-        @input="formData.bankName = $event.mp.detail"
-      />
-      <van-field
-        v-model="formData.bankAccount"
-        placeholder="请填写银行账号"
-        label="银行账号"
-        required
-        type="digit"
-        input-align="right"
-        @input="formData.bankAccount = $event.mp.detail"
-      />
-      <van-field
+        <van-field
         v-model="formData.totalPrice"
-        label="合计付款金额"
+        label="总金额"
         required
         readonly
          type="digit"
         input-align="right"
         @input="formData.totalPrice = $event.mp.detail"
       />
-    </div>
+    </van-cell-group>
+   
+  
     <div style="width:100%;height:20px"></div>
     <!-- 费用明细列表 -->
      <div style="padding:10px;box-sizing:border-box" v-for="(item,index) in content" :key="index" >
-        <div class="title" style="display:flex;align-items:center;justify-content:space-between"><span>费用报销单明细({{index+1}})</span><span style="color:red;font-size:20px" @click="delList(index)">删除</span></div>
+        <div class="title" style="display:flex;align-items:center;justify-content:space-between"><span>结算单明细({{index+1}})</span><span style="color:red;font-size:20px" @click="delList(index)">删除</span></div>
       <van-cell-group>
-      <van-field
-        v-model="item.purpose"
-        placeholder="请填写费用用途"
-        label="费用用途"
-        required
-        input-align="right"
-        @input="item.purpose = $event.mp.detail"
-      />
+     
        <van-field
-        label="费用类别"
+        label="类别"
         required
         input-align="right"
       >
@@ -90,21 +50,31 @@
         </div>
       </van-field>
        <van-field
-        v-model="item.money"
-        placeholder="请填写报销金额"
-        label="报销金额"
+        v-model="item.quantity"
+        placeholder="请填写数量"
+        label="数量"
         type="digit"
         required
         input-align="right"
-        @input="item.money = $event.mp.detail"
+        @input="item.quantity = $event.mp.detail"
       />
        <van-field
-        v-model="item.remark"
-        placeholder="请填写备注"
-        label="备注"
+        v-model="item.unitPrice"
+        placeholder="请填写单价"
+        label="单价"
+        type="digit"
         required
         input-align="right"
-        @input="item.remark = $event.mp.detail"
+        @input="item.unitPrice = $event.mp.detail"
+      />
+       <van-field
+        v-model="item.totalPrice"
+        label="金额"
+        type="digit"
+         readonly
+        required
+        input-align="right"
+        @input="item.totalPrice = $event.mp.detail"
       />
 
     </van-cell-group>
@@ -151,6 +121,17 @@
       :showDay="showDay"
     ></Picker>
 
+     <!-- 日期2  完整日期-->
+    <Picker
+      :show="dateShow2"
+      click="date"
+      :formData="formData"
+      :clickName="clickName"
+      @cancel="onClose"
+      @submit="submit3"
+      :showDay="true"
+    ></Picker>
+
     <!-- 底部按钮 -->
     <van-goods-action>
       <van-goods-action-button type="info" text="保存草稿" @click="save(0)" />
@@ -175,14 +156,9 @@ export default {
       uuid: "",
       //问题描述
       formData: {
-        userId: "",
-        isPay: "",
-        userName: "",
-        month: "",
-        accountName: "",
-        bankName: "",
-        bankAccount: "",
-        totalPrice: "",
+        month:'',
+        collectionDate:'',
+        totalPrice:''
       },
       //附件
       photoList: [],
@@ -200,7 +176,8 @@ export default {
       //流程中的用户弹窗
       usershow: false,
       userradio: "1",
-
+      //日期2
+      dateShow2:false,
       //日期
       dateShow: false,
       showDay: false,
@@ -215,7 +192,7 @@ export default {
       radioList2:[],
       active2:0,
       //费用报销明细
-      content:[{money:'',remark:'',purpose:'',type:1,active:0}]
+      content:[]
     };
   },
   onLoad() {
@@ -227,13 +204,16 @@ export default {
     this.getData2();
     this.getType()
      wx.setNavigationBarTitle({
-          title: '费用报销-新增'+'('+wx.getStorageSync("factoryName")+')',
+          title: '结算单-新增'+'('+wx.getStorageSync("factoryName")+')',
       });
   },
   watch: {
     content: {
       handler(newValue, oldValue) {
-       this.formData.totalPrice=newValue.reduce((total,item)=>total+item.money*1,0)
+       this.formData.totalPrice=newValue.reduce((total,item)=>total+item.unitPrice*item.quantity,0)
+       newValue.forEach((item)=>{
+         item.totalPrice=item.unitPrice*item.quantity
+       })
       },
         //首次监听
       //  immediate: true,
@@ -242,10 +222,10 @@ export default {
     },
   },
   methods: {
-    //获取费用类型
+    //获取结算单类型
     getType(){
        let params={
-         type:1
+         type:2
        }
        getCostType(params).then((res)=>{
          this.radioList2=res.data.data.map((item)=>{
@@ -258,7 +238,7 @@ export default {
     },
     //添加明细
     addProduct(){
-      this.content.push({money:'',remark:'',purpose:'',type:1,active:0})
+      this.content.push({quantity:'',unitPrice:'',totalPrice:'',type:1,active:0})
     },
     ///删除费用列表对应
     delList(val) {
@@ -346,10 +326,17 @@ export default {
     showDate() {
       this.dateShow = true;
     },
+     showDate2() {
+      this.dateShow2 = true;
+    },
     //日期确认
     submit2(val) {
       this.formData.month = val;
       this.dateShow = false;
+    },
+    submit3(val){
+       this.formData.collectionDate=val
+       this.dateShow2 = false;
     },
     //保存
     save(val) {
@@ -357,8 +344,7 @@ export default {
         ...this.formData,
         batchId: "",
         factoryId: wx.getStorageSync("factoryId"),
-        costReimburseDetailList:this.content,
-        isPay:'',
+        costStatementDetailList:this.content,
         userId: wx.getStorageSync("UserId"),
         startFlowDto: {
           optionalJson: JSON.stringify(this.fitNodeList),
@@ -367,13 +353,12 @@ export default {
           type: val,
         },
       };
-      params.isPay=this.active1
       if (this.photoList.length > 0) {
         data.upLoadFile(this.photoList, 0, this.uuid).then((res) => {
           //文件code
           let resData = JSON.parse(res.data);
           params.batchId = resData.data.batchId;
-          data["cost"].saveOrStart(params).then((res) => {
+          data["settle"].saveOrStart(params).then((res) => {
             if (res.data.code == 10000) {
               mpvue.showToast({
                 title: res.data.message,
@@ -387,7 +372,7 @@ export default {
           });
         });
       } else {
-        data["cost"].saveOrStart(params).then((res) => {
+        data["settle"].saveOrStart(params).then((res) => {
           if (res.data.code == 10000) {
             mpvue.showToast({
               title: res.data.message,

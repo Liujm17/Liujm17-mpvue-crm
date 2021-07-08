@@ -67,6 +67,9 @@ export default {
     );
     //获取数据
     this.getData(this.activeValue,this.activeValue2);
+     wx.setNavigationBarTitle({
+          title: '付款申请-历史记录'+'('+wx.getStorageSync("factoryName")+')',
+      });
   },
   //下拉刷新
   onPullDownRefresh() {

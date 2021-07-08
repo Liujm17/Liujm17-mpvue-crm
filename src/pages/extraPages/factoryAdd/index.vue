@@ -54,6 +54,9 @@ export default {
   },
   onLoad() {
     this.uuid = data.get_uuid();
+      wx.setNavigationBarTitle({
+          title: '项目资料-新增'+'('+wx.getStorageSync("factoryName")+')',
+      });
   },
   watch: {},
   methods: {
@@ -63,7 +66,7 @@ export default {
         materialName: this.materialName,
         remark: this.remark,
         batchId: "",
-        factoryId: 2020001,
+        factoryId: wx.getStorageSync("factoryId"),
         userId: wx.getStorageSync("UserId"),
         userName: wx.getStorageSync("applyUserName"),
       };

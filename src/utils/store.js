@@ -41,6 +41,8 @@ export default new Vuex.Store({
                {formId:15,data:'cost',detailpage:'/pages/extraPages/costDetail/main',addpage:'/pages/extraPages/costAdd/main',add:'Imprest:Add',components:[true,false],popUp:[false,true]},
                //请示单
                {formId:16,data:'askfor',detailpage:'/pages/extraPages/askforDetail/main',addpage:'/pages/extraPages/askforAdd/main',add:'Imprest:Add',components:[true,false],popUp:[false,true]},
+                  //结算单
+                  {formId:17,data:'settle',detailpage:'/pages/extraPages/settleDetail/main',addpage:'/pages/extraPages/settleAdd/main',add:'Imprest:Add',components:[true,false],popUp:[false,true]},
                 //借调结算
                 {formId:18,data:'second',detailpage:'/pages/extraPages/secondDetail/main',addpage:'/pages/extraPages/secondAdd/main',add:'Imprest:Add',components:[true,false],popUp:[false,true]},
                  //项目信息

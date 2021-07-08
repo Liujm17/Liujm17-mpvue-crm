@@ -1,7 +1,9 @@
 <template>
   <div class="bg">
     <div class="card"  v-for="(item, index) in cardList" :key="index" @click="toDetail(item)">
-      <div class="text" v-for="(label,index2) in item" :key="index2" :style="{color:item.color?item.color:''}" v-show="index2 !== 'id'&&index2 !== 'orderId'&&index2 !== 'formId'&&index2 !=='deviceId'&&index2 !=='color'">{{label}}</div>
+      <div class="text" v-for="(label,index2) in item" :key="index2" :style="{color:item.color?item.color:''}" v-show="index2 !== 'id'&&index2 !== 'orderId'&&index2 !== 'formId'&&index2 !=='deviceId'&&index2 !=='color'">
+        {{label}}
+      </div>
     </div>
     <div v-show="more&&cardList.length>10">下拉加载</div>
     <div v-show="!more||cardList.length<=10">没有更多了</div>
@@ -51,11 +53,12 @@ export default {
     display: flex;
     justify-content: space-around;
     align-items: center;
-    // .text:nth-child(n+2){
-    //   flex: 1;
-    //   flex-wrap: wrap;
-    //   text-align: center;
-    // }
+    .text:nth-child(n+2){
+      flex: 1;
+      flex-wrap: wrap;
+      text-align: center;
+      overflow: hidden;
+    }
     // .text:nth-child(2){
     //    flex: 0.25;
     //   flex-wrap: wrap;

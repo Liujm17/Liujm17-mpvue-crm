@@ -114,6 +114,9 @@ export default {
   },
   onShow() {
     this.getData();
+     wx.setNavigationBarTitle({
+          title: '库存盘点-详情'+'('+wx.getStorageSync("factoryName")+')',
+      });
   },
   watch: {
     formData: {

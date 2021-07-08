@@ -59,6 +59,9 @@ export default {
   },
   onShow() {
     this.getData();
+      wx.setNavigationBarTitle({
+          title: '项目资料-详情'+'('+wx.getStorageSync("factoryName")+')',
+      });
   },
   watch: {},
   methods: {
@@ -128,7 +131,7 @@ export default {
         materialName: this.materialName,
         remark: this.remark,
         batchId: "",
-        factoryId: 2020001,
+        factoryId: wx.getStorageSync("factoryId"),
         userId: wx.getStorageSync("UserId"),
         userName: wx.getStorageSync("applyUserName"),
       };

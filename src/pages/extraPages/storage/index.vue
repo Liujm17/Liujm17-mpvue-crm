@@ -31,12 +31,12 @@ export default {
   },
   components: { BottomButton },
   onLoad() {
-    wx.setNavigationBarTitle({
-      title: "当前页面",
-    });
   },
   onShow() {
     this.getData()
+     wx.setNavigationBarTitle({
+          title: '库存盘点'+'('+wx.getStorageSync("factoryName")+')',
+      });
   },
   methods: {
     //获取数据

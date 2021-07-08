@@ -239,12 +239,16 @@ export default {
     };
   },
   onLoad() {
+    this.deleteList=[]
     this.formData = this.data[this.page].formData;
     this.listData = this.data[this.page].vanFormData.formData;
     this.uuid = data.get_uuid();
   },
   onReady() {
     this.getData();
+     wx.setNavigationBarTitle({
+          title: '付款申请-编辑'+'('+wx.getStorageSync("factoryName")+')',
+      });
   },
   watch: {
     'formData.supplierId':{
@@ -408,7 +412,7 @@ export default {
       let params ={}
        if(this.active == 0){
         params = {
-        factoryId: 2020001,
+        factoryId: wx.getStorageSync("factoryId"),
         systemCode: "05",
         userId: wx.getStorageSync("UserId"),
         ...this.formData,
@@ -424,7 +428,7 @@ export default {
       };
        }else if(this.active == 1){
          params = {
-        factoryId: 2020001,
+        factoryId: wx.getStorageSync("factoryId"),
         systemCode: "05",
         userId: wx.getStorageSync("UserId"),
         ...this.formData2,

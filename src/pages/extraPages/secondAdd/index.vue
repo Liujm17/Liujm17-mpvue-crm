@@ -139,6 +139,9 @@ export default {
   },
   onReady() {
     this.getData();
+     wx.setNavigationBarTitle({
+          title: '借调结算-新增'+'('+wx.getStorageSync("factoryName")+')',
+      });
   },
   watch: {},
   methods: {
@@ -185,7 +188,7 @@ export default {
     save(val) {
       let params = {
         userId: wx.getStorageSync("UserId"),
-        factoryId: 2020001,
+        factoryId: wx.getStorageSync("factoryId"),
         systemCode: "05",
         ...this.formData,
         batchId: "",

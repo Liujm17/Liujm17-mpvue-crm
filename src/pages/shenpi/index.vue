@@ -42,7 +42,7 @@
   </div>
 </template>
 <script>
-import Card from "../../components/card";
+import Card from "../../components/boxCard.vue";
 import Search from '../../components/searchView'
 import { getFlowTask, getCount } from "../../api/api";
 export default {
@@ -133,18 +133,14 @@ export default {
         if (status < 2) {
           this.total=res.data.data.total;
           this.cardList2 = res.data.data.list.map((item) => {
+             
             return {
               id: item.dataId ? item.dataId : "",
               orderId: item.orderId ? item.orderId : "",
               formId: item.formId ? item.formId : "",
-              title: "申请类型:" + item.orderTitle,
+              title: "申请类型:" + item.orderTitle+'(单号'+item.dataId+')',
               user: "申请人:" + item.startUserName,
-              status:
-                item.orderStatus === 0
-                  ? "审批中"
-                  : item.orderStatus === 1
-                  ? "已通过"
-                  : "已驳回",
+              fieldInfoVos:item.fieldInfoVos
             };
           });
         } else if(status == 2){
@@ -154,14 +150,9 @@ export default {
               id: item.dataId ? item.dataId : "",
               orderId: item.orderId ? item.orderId : "",
               formId: item.formId ? item.formId : "",
-              title: "申请类型:" + item.orderTitle,
+              title: "申请类型:" + item.orderTitle+'(单号'+item.dataId+')',
               user: "申请人:" + item.startUserName,
-              status:
-                item.orderStatus == 0
-                  ? "审批中"
-                  : item.orderStatus == 1
-                  ? "已通过"
-                  : "已驳回",
+               fieldInfoVos:item.fieldInfoVos
             };
           });
         }else if(status == 3){
@@ -171,14 +162,9 @@ export default {
               id: item.dataId ? item.dataId : "",
               orderId: item.orderId ? item.orderId : "",
               formId: item.formId ? item.formId : "",
-              title: "申请类型:" + item.orderTitle,
+              title: "申请类型:" + item.orderTitle+'(单号'+item.dataId+')',
               user: "申请人:" + item.startUserName,
-              status:
-                item.orderStatus == 0
-                  ? "审批中"
-                  : item.orderStatus == 1
-                  ? "已通过"
-                  : "已驳回",
+               fieldInfoVos:item.fieldInfoVos
             };
           });
         }

@@ -6,7 +6,7 @@ request.config.baseURL = 'https://www.hxhb-test.icu:8004'
 // request.config.baseURL = 'https://www.saddlepoint.cn:8003'
 request.config.timeout = 3000 
 
-var jsonUrl=['/api-ep-project/device/addDevice','/api-ep-project/purchase/add','/api-ep-project/device/updateDevice','/api-ep-project/purchase/add','/api-ep-project/purchase/edit','/api-ep-project/stockIn/add','/api-ep-project/stockIn/edit','/api-ep-project/device/addDeviceInspect','/api-ep-project/device/addDeviceReport','/api-ep-project/device/addDeviceRepair','/api-ep-project/device/addDeviceMaintain','/api-ep-project/payment/add','/api-ep-project/payment/edit','/api-ep-project/spareMoney/add','/api-ep-project/spareMoney/edit','/api-ep-project/purchaseChange/add','/api-ep-project/purchaseChange/edit','/api-ep-project/stockOut/add','/api-ep-project/stockOut/edit','/api-ep-project/stockCheck/add','/api-ep-project/stockCheck/edit','/api-ep-project/cost/lend/addCostLend','/api-ep-project/cost/lend/editCostLend','/api-ep-project/factoryMaterial/add','/api-ep-project/factoryMaterial/edit','/api-ep-project/apply/add','/api-ep-project/apply/edit']
+var jsonUrl=['/api-ep-project/device/addDevice','/api-ep-project/purchase/add','/api-ep-project/device/updateDevice','/api-ep-project/purchase/add','/api-ep-project/purchase/edit','/api-ep-project/stockIn/add','/api-ep-project/stockIn/edit','/api-ep-project/device/addDeviceInspect','/api-ep-project/device/addDeviceReport','/api-ep-project/device/addDeviceRepair','/api-ep-project/device/addDeviceMaintain','/api-ep-project/payment/add','/api-ep-project/payment/edit','/api-ep-project/spareMoney/add','/api-ep-project/spareMoney/edit','/api-ep-project/purchaseChange/add','/api-ep-project/purchaseChange/edit','/api-ep-project/stockOut/add','/api-ep-project/stockOut/edit','/api-ep-project/stockCheck/add','/api-ep-project/stockCheck/edit','/api-ep-project/cost/lend/addCostLend','/api-ep-project/cost/lend/editCostLend','/api-ep-project/factoryMaterial/add','/api-ep-project/factoryMaterial/edit','/api-ep-project/apply/add','/api-ep-project/apply/edit','/api-ep-project/costReimburse/addReimburse','/api-ep-project/costReimburse/editReimburse','/api-ep-project/costStatement/add','/api-ep-project/costStatement/edit']
 //请求拦截
 request.interceptors.request.use((request) => {
  //给所有请求添加自定义header,传参太多要用json传参，其他不能用
@@ -17,7 +17,7 @@ request.interceptors.request.use((request) => {
  }
   request.headers['Authorization'] = mpvue.getStorageSync('Authorization')// 让每个请求携带自定义token 请根据实际情况自行修改
   var defaults = {
-    factoryId:2020001,
+    factoryId:wx.getStorageSync("factoryId"),
     systemCode:'05',
     userId:wx.getStorageSync('UserId')
   }

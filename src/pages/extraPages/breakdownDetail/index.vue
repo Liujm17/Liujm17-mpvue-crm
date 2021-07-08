@@ -183,6 +183,9 @@ export default {
   },
   onShow() {
     this.getData();
+      wx.setNavigationBarTitle({
+          title: '故障报修-详情'+'('+wx.getStorageSync("factoryName")+')',
+        });
   },
   computed: {
     saveText() {
@@ -219,6 +222,14 @@ export default {
         this.cardList = res;
       });
       }
+      // else if(val.mp.detail.index == 2){
+      //   let params = {
+      //   id: this.deviceId,
+      // };
+      //  data['deviceInfo'].getData(params).then((res)=>{
+         
+      //  })
+      // }
     },
     onClose() {
       this.usershow = false;
@@ -262,6 +273,7 @@ export default {
         this.managerUserIs = res.data.data.managerUserIs;
         this.repairUserIs = res.data.data.repairUserIs;
         this.reportId=res.data.data.id
+        this.deviceId=res.data.data.deviceId
         this.photoList = res.data.data.fileVos
           ? res.data.data.fileVos.map((item) => {
               return {

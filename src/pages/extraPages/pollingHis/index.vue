@@ -79,6 +79,9 @@ export default {
     // let firstTime = +new Date(this.year,this.month-1,1,0,0,0)
 
     this.getData()
+     wx.setNavigationBarTitle({
+          title: '历史巡检记录'+'('+wx.getStorageSync("factoryName")+')',
+      });
   },
   methods: {
     //获取当月数据

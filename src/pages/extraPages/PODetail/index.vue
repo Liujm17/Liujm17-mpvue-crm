@@ -48,7 +48,7 @@
         <van-button type="info" size="normal" @click="operate" v-if="showoperate">操作</van-button>
       </van-tab>
 
-      <van-tab title="付款申请">
+      <van-tab title="付款申请" v-if="$route.query.type=='历史'">
         <div>
           <Card
             :more="false"
@@ -59,7 +59,7 @@
           <div class="empty-text" v-else>暂无记录</div>
         </div>
       </van-tab>
-      <van-tab title="入库单">
+      <van-tab title="入库单" v-if="$route.query.type=='历史'">
         <div>
           <Card
             :more="false"
@@ -168,6 +168,9 @@ export default {
     this.formData = this.data[this.page].formData;
     this.listData = this.data[this.page].vanFormData.formData;
     this.getData();
+     wx.setNavigationBarTitle({
+          title: '采购订单-详情'+'('+wx.getStorageSync("factoryName")+')',
+      });
   },
   watch: {
     formData: {

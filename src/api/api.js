@@ -77,6 +77,10 @@ export function getSpareMoney(params) {
   return request.get(`/api-ep-project/spareMoney/get`, params)
 }
 
+//获取费用报销类别
+export function getCostType(params){
+  return request.get('/api-ep-project/common/getSelectBoxList',params)
+}
 //查询待办和已办
 export function getFlowTask(params) {
   return request.get(`/api-ep-user/flowTask/getPage`, params)
@@ -187,3 +191,4 @@ export function stockDetail(params){
 export function stockDel(params){
   return request.post('/api-ep-project/stockCheck/del',params)
 }
+

@@ -105,6 +105,9 @@ export default {
   },
    onShow() {
      this.getData()
+      wx.setNavigationBarTitle({
+          title: '请求单-详情'+'('+wx.getStorageSync("factoryName")+')',
+        });
   },
   watch: {},
   methods: {

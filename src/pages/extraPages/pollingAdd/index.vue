@@ -92,6 +92,9 @@ export default {
     this.listData = this.data["polling"].vanFormData.formData;
      this.uuid= data.get_uuid(),
     this.getData();
+     wx.setNavigationBarTitle({
+          title: '巡检记录-新增'+'('+wx.getStorageSync("factoryName")+')',
+      });
   },
   watch: {},
   methods: {
@@ -119,7 +122,7 @@ export default {
         deviceStatus: this.active == "0" ? "正常" : "异常",
         remarks: this.remarks,
         batchId: "",
-        factoryId: 2020001,
+        factoryId: wx.getStorageSync("factoryId"),
         userId: wx.getStorageSync("UserId"),
         userName: wx.getStorageSync("applyUserName"),
       };

@@ -92,6 +92,9 @@ export default {
   },
   onReady(){
     this.getData();
+      wx.setNavigationBarTitle({
+          title: '备用金-新增'+'('+wx.getStorageSync("factoryName")+')',
+        });
   },
   watch: {
     formData:function(val){
@@ -211,7 +214,7 @@ export default {
     //保存草稿或发起流程
     saveFlow(val) {
       let params = {
-          factoryId: 2020001,
+          factoryId: wx.getStorageSync("factoryId"),
         systemCode: "05",
         userId: wx.getStorageSync("UserId"),
         ...this.formData,

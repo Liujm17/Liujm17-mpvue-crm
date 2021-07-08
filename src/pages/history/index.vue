@@ -62,6 +62,9 @@ export default {
     );
     //获取数据
     this.getData(this.activeValue);
+      wx.setNavigationBarTitle({
+          title: '信息列表'+'('+wx.getStorageSync("factoryName")+')',
+        });
   },
   //下拉刷新
   onPullDownRefresh() {
@@ -167,4 +170,9 @@ export default {
 .radio-bg:nth-child(3){
   margin-top:10px
 }
+.text:nth-child(2){
+       flex: 0.25!important;
+      flex-wrap: wrap!important;
+      text-align: center!important;
+    }
 </style>

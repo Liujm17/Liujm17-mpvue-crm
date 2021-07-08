@@ -84,12 +84,16 @@ export default {
   },
   components: { User,BaseInfo,Flow,Accessroy },
   onLoad() {
+    this.deleteList=[]
      this.formData = this.data[this.page].formData;
     this.listData = this.data[this.page].vanFormData.formData;
     this.uuid = data.get_uuid();
   },
   onReady(){
     this.getData();
+    wx.setNavigationBarTitle({
+          title: '备用金-编辑'+'('+wx.getStorageSync("factoryName")+')',
+        });
   },
   watch: {
     formData:function(val){
@@ -245,7 +249,7 @@ export default {
     saveFlow(val) {
       let params = {
         id:this.$route.query.id,
-          factoryId: 2020001,
+          factoryId: wx.getStorageSync("factoryId"),
         systemCode: "05",
         userId: wx.getStorageSync("UserId"),
         ...this.formData,

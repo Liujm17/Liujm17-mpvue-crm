@@ -15,6 +15,10 @@ export default {
               type:Array,
               default:[]
           },
+          listIndex:{
+              type:Number,
+              default:0
+          }
       },
       data(){
 

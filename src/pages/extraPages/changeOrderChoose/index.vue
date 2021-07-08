@@ -35,6 +35,9 @@ export default {
   components: {BottomButton},
   onLoad() {
     this.getData();
+     wx.setNavigationBarTitle({
+          title: '采购订单变更-选择'+'('+wx.getStorageSync("factoryName")+')',
+        });
   },
   methods: {
     clickBt(val){

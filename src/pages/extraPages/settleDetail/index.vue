@@ -1,120 +1,94 @@
 <template>
   <div class="allbg">
-     <van-tabs :active="active" @change="change">
+    <van-tabs :active="active" @change="change">
       <van-tab title="详情">
-    <div class="title">基本信息</div>
-    <van-cell-group>
-      <van-field
-        v-model="formData.userName"
-        label="申请人"
-        required
-        readonly
-        input-align="right"
-        @input="formData.userName = $event.mp.detail"
-      />
-      <van-field
-        v-model="formData.isPay"
-        label="是否已付款"
-        required
-        readonly
-        input-align="right"
-        @input="formData.isPay = $event.mp.detail"
-      >
-        <!-- <RadioButton :typeList="radioList1" :active="active1" @changeData="changeData1"></RadioButton> -->
-      </van-field>
-      <van-field
-        v-model="formData.month"
-        label="费用所属期"
-        placeholder="请选择费用所属期"
-        required
-        readonly
-        input-align="right"
-        @input="formData.month = $event.mp.detail"
-        @click="showDate"
-      />
-    </van-cell-group>
-     <div class="title">付款信息</div>
-    <div class="polling-text">
-      <van-field
-        v-model="formData.accountName"
-        placeholder="请填写账户"
-        label="账户"
-        required
-        readonly
-        input-align="right"
-        @input="formData.accountName = $event.mp.detail"
-      />
-      <van-field
-        v-model="formData.bankName"
-        placeholder="请填写开户行"
-        label="开户行"
-        required
-        readonly
-        input-align="right"
-        @input="formData.bankName = $event.mp.detail"
-      />
-      <van-field
-        v-model="formData.bankAccount"
-        placeholder="请填写银行账号"
-        label="银行账号"
-        required
-        readonly
-        type="digit"
-        input-align="right"
-        @input="formData.bankAccount = $event.mp.detail"
-      />
-      <van-field
-        v-model="formData.totalPrice"
-        label="合计付款金额"
-        required
-        readonly
-        type="digit"
-        input-align="right"
-        @input="formData.totalPrice = $event.mp.detail"
-      />
-    </div>
-    <div style="width:100%;height:20px"></div>
-    <!-- 费用明细列表 -->
-    <div style="padding:10px;box-sizing:border-box" v-for="(item,index) in content" :key="index">
-      <div class="title" style="display:flex;align-items:center;justify-content:space-between">
-        <span>费用报销单明细({{index+1}})</span>
-      </div>
-      <van-cell-group>
-        <van-field
-          v-model="item.purpose"
-          placeholder="请填写费用用途"
-          label="费用用途"
-          required
-          readonly
-          input-align="right"
-          @input="item.purpose = $event.mp.detail"
-        />
-        <van-field label="费用类别"   v-model="item.type"   readonly required input-align="right"   @input="item.type = $event.mp.detail"></van-field>
-        <van-field
-          v-model="item.money"
-          placeholder="请填写报销金额"
-          label="报销金额"
-          type="digit"
-          required
-          readonly
-          input-align="right"
-          @input="item.money = $event.mp.detail"
-        />
-        <van-field
-          v-model="item.remark"
-          placeholder="请填写备注"
-          label="备注"
-          required
-          readonly
-          input-align="right"
-          @input="item.remark = $event.mp.detail"
-        />
-      </van-cell-group>
-    </div>
+        <div class="title">基本信息</div>
+        <van-cell-group>
+          <van-field
+            v-model="formData.collectionDate"
+            label="收款日期"
+            placeholder="请选择收款日期"
+            required
+            readonly
+            input-align="right"
+            @input="formData.collectionDate = $event.mp.detail"
+            @click="showDate2"
+          />
+          <van-field
+            v-model="formData.month"
+            label="费用所属期"
+            placeholder="请选择费用所属期"
+            required
+            readonly
+            input-align="right"
+            @input="formData.month = $event.mp.detail"
+            @click="showDate"
+          />
+          <van-field
+            v-model="formData.totalPrice"
+            label="总金额"
+            required
+            readonly
+            type="digit"
+            input-align="right"
+            @input="formData.totalPrice = $event.mp.detail"
+          />
+        </van-cell-group>
 
-    <!-- 附件 -->
-    <Accessroy :photoList="photoList" :onlyOne="false" :notShow="false"></Accessroy>
-    <van-field
+        <div style="width:100%;height:20px"></div>
+        <!-- 费用明细列表 -->
+        <div
+          style="padding:10px;box-sizing:border-box"
+          v-for="(item,index) in content"
+          :key="index"
+        >
+          <div class="title" style="display:flex;align-items:center;justify-content:space-between">
+            <span>结算单明细({{index+1}})</span>
+          </div>
+          <van-cell-group>
+            <van-field
+              v-model="item.type"
+              label="类别"
+              required
+              readonly
+              input-align="right"
+              @input="item.type = $event.mp.detail"
+            ></van-field>
+            <van-field
+              v-model="item.quantity"
+              placeholder="请填写数量"
+              label="数量"
+              type="digit"
+              required
+              readonly
+              input-align="right"
+              @input="item.quantity = $event.mp.detail"
+            />
+            <van-field
+              v-model="item.unitPrice"
+              placeholder="请填写单价"
+              label="单价"
+              type="digit"
+              required
+              readonly
+              input-align="right"
+              @input="item.unitPrice = $event.mp.detail"
+            />
+            <van-field
+              v-model="item.totalPrice"
+              label="金额"
+              type="digit"
+              readonly
+              required
+              input-align="right"
+              @input="item.totalPrice = $event.mp.detail"
+            />
+          </van-cell-group>
+        </div>
+
+        <!-- 附件 -->
+        <Accessroy :photoList="photoList" :onlyOne="false" :notShow="false"></Accessroy>
+        <van-field
           v-model="suggestion"
           rows="1"
           autosize
@@ -123,7 +97,7 @@
           placeholder="请输入意见"
           v-if="isApproval"
         />
-    <van-button type="info" size="normal" @click="operate" v-if="showoperate">操作</van-button>
+        <van-button type="info" size="normal" @click="operate" v-if="showoperate">操作</van-button>
       </van-tab>
       <van-tab title="日志">
         <div class="header">
@@ -132,7 +106,7 @@
         <Card :cardList="HistoryList"></Card>
       </van-tab>
     </van-tabs>
-   
+
     <van-dialog2 id="van-dialog" />
   </div>
 </template>
@@ -144,23 +118,18 @@ import { backFlow, agree, disagree } from "../../../api/api";
 import Dialog2 from "../../../../dist/wx/vant-weapp/dist/dialog2/dialog";
 import Card from "../../../components/card.vue";
 export default {
- components: { Card, Accessroy },
+  components: { Card, Accessroy },
   data() {
     return {
       data: data,
       uuid: "",
       //问题描述
       formData: {
-        userId: "",
-        isPay: "",
-        userName: "",
         month: "",
-        accountName: "",
-        bankName: "",
-        bankAccount: "",
+        collectionDate: "",
         totalPrice: "",
       },
-       //tab栏激活页
+      //tab栏激活页
       hisTitle: ["审批步骤", "处理人", "处理时间", "结果"],
       active: 0,
       HistoryList: [],
@@ -170,18 +139,18 @@ export default {
       listData: [],
       //表单
       formData: {},
- 
+
       //费用报销明细
       content: [],
       //审批相关
-       isBack: false,
+      isBack: false,
       isEdit: false,
-      isDel:false,
+      isDel: false,
       isApproval: false,
       showoperate: true,
       orderId: "",
       //意见
-      suggestion:''
+      suggestion: "",
     };
   },
   onLoad() {
@@ -193,35 +162,24 @@ export default {
   onReady() {
     this.formData.userName = wx.getStorageSync("applyUserName");
     this.formData.userId = wx.getStorageSync("UserId");
-      wx.setNavigationBarTitle({
-          title: '费用报销-详情'+'('+wx.getStorageSync("factoryName")+')',
+     wx.setNavigationBarTitle({
+          title: '结算单-详情'+'('+wx.getStorageSync("factoryName")+')',
       });
   },
   watch: {
-    content: {
-      handler(newValue, oldValue) {
-        this.formData.totalPrice = newValue.reduce(
-          (total, item) => total + item.money * 1,
-          0
-        );
-      },
-      //首次监听
-      //  immediate: true,
-      //深度监听
-      deep: true,
-    },
+  
   },
   methods: {
-     //操作
+    //操作
     operate() {
       let a1 = this.isEdit ? ["编辑"] : [];
       let a2 = this.isBack ? ["回撤"] : [];
       let a3 = this.isApproval ? ["同意", "驳回"] : [];
-      let a4 = this.isDel?['删除']:[];
+      let a4 = this.isDel ? ["删除"] : [];
       let b1 = this.isEdit ? ["edit"] : [];
       let b2 = this.isBack ? ["back"] : [];
       let b3 = this.isApproval ? ["agree", "disagree"] : [];
-      let b4 = this.isDel ? [ "del"] : [];
+      let b4 = this.isDel ? ["del"] : [];
       let a0 = [...a1, ...a2, ...a3, ...a4];
       let b0 = [...b1, ...b2, ...b3, ...b4];
       wx.showActionSheet({
@@ -257,17 +215,13 @@ export default {
         formId: this.$store.state.formId,
         id: this.$route.query.id,
       };
-      data["cost"].getData(params).then((res) => {
+      data["settle"].getData(params).then((res) => {
         this.formData = {
-          isPay: res.data.data.isPay ==0?'否':'是',
-          userName: res.data.data.userName,
           month: res.data.data.month,
-          accountName: res.data.data.accountName,
-          bankName: res.data.data.bankName,
-          bankAccount: res.data.data.bankAccount,
+          collectionDate: res.data.data.collectionDate,
           totalPrice: res.data.data.totalPrice,
         };
-         this.isEdit =
+        this.isEdit =
           res.data.data.isEdit == 1 || res.data.data.isEdit === "undefined"
             ? true
             : false;
@@ -281,26 +235,25 @@ export default {
                 type: item.type == 0 ? "image" : "video",
                 img: item.type == 0 ? item.address : "",
                 video: item.type == 1 ? item.address : "",
-                 id: item.id ? item.id : "",
+                id: item.id ? item.id : "",
               };
             })
           : [];
-          this.content=res.data.data.costReimburseDetailVoList.map((item)=>{
-            return {
-              id:item.id?item.id:'',
-              money:item.money,
-              purpose:item.purpose,
-              remark:item.remark,
-              type:item.typeName
-            }
-          })
+        this.content = res.data.data.costStatementDetailVoList.map((item) => {
+          return {
+            id: item.id ? item.id : "",
+            unitPrice: item.unitPrice,
+            quantity: item.quantity,
+            totalPrice: item.totalPrice,
+            type: item.typeName,
+          };
+        });
       });
     },
-  
-  
-  edit() {
+
+    edit() {
       this.$router.push({
-        path: "/pages/extraPages/costEdit/main",
+        path: "/pages/extraPages/settleEdit/main",
         query: {
           id: this.$route.query.id,
         },
@@ -311,7 +264,7 @@ export default {
         id: this.$route.query.id,
         formId: this.$store.state.formId,
       };
-      data["cost"].delFlow(params).then((res) => {
+      data["settle"].delFlow(params).then((res) => {
         mpvue.showToast({
           title: res.data.message,
           icon: "none",
@@ -354,20 +307,20 @@ export default {
     },
     //不同意
     disagree() {
-       Dialog2.confirm({
+      Dialog2.confirm({
         title: "操作",
         message: "审批驳回",
         //开启按空白处关闭弹窗
-        closeOnClickOverlay:true
+        closeOnClickOverlay: true,
       })
         .then((res) => {
-          let params={
+          let params = {
             orderId: this.orderId,
             suggestion: this.suggestion,
-            dealResult:res.type
-          }
+            dealResult: res.type,
+          };
           disagree(params).then((res) => {
-             this.$router.back();
+            this.$router.back();
           });
         })
         .catch(() => {
@@ -412,5 +365,4 @@ export default {
     font-weight: 500;
   }
 }
-
 </style>

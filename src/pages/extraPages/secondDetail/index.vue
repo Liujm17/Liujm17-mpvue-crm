@@ -60,7 +60,6 @@ export default {
       hisTitle: ["审批步骤", "处理人", "处理时间", "结果"],
       active: 0,
       HistoryList: [],
-      radioList: [],
       //采购清单list
       purchaseDetailList: [],
       //该页面字段方法数据
@@ -86,6 +85,9 @@ export default {
     this.formData = this.data[this.page].formData;
     this.listData = this.data[this.page].vanFormData.formData;
     this.getData();
+     wx.setNavigationBarTitle({
+          title: '借调结算-详情'+'('+wx.getStorageSync("factoryName")+')',
+      });
   },
   watch: {
     formData: {

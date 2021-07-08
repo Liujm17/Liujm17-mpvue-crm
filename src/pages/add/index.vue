@@ -85,6 +85,9 @@ export default {
   },
   onReady(){
     this.getData();
+     wx.setNavigationBarTitle({
+          title: '新增'+'('+wx.getStorageSync("factoryName")+')',
+        });
   },
   watch: {
     formData:function(val){

@@ -109,6 +109,9 @@ export default {
     this.formData = data["upkeep"].formData;
     this.listData = data["upkeep"].vanFormData.formData;
     this.uuid= data.get_uuid()
+     wx.setNavigationBarTitle({
+          title: '保养记录-新增'+'('+wx.getStorageSync("factoryName")+')',
+      });
   },
   watch: {
     'formData.maintainTime':{
@@ -165,7 +168,7 @@ export default {
         repairResult: this.active,
         remarks: this.remarks,
         batchId: "",
-        factoryId: 2020001,
+        factoryId: wx.getStorageSync("factoryId"),
         reportUser:wx.getStorageSync("UserId"),
         reportUserName:wx.getStorageSync("applyUserName"),
         userId: wx.getStorageSync("UserId"),

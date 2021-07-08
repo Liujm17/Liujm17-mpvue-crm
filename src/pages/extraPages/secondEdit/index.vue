@@ -137,6 +137,7 @@ export default {
     };
   },
   onLoad() {
+    this.deleteList=[]
     this.formData = this.data[this.page].formData;
     this.listData = this.data[this.page].vanFormData.formData;
     this.uuid = data.get_uuid();
@@ -144,6 +145,9 @@ export default {
   onReady() {
     this.getData();
     this.getData2()
+     wx.setNavigationBarTitle({
+          title: '借调结算-编辑'+'('+wx.getStorageSync("factoryName")+')',
+      });
   },
   watch: {
      //监听图片列表，看有无新上传的
@@ -245,7 +249,7 @@ export default {
       let params = {
         id:this.$route.query.id,
         userId: wx.getStorageSync("UserId"),
-        factoryId: 2020001,
+        factoryId: wx.getStorageSync("factoryId"),
         systemCode: "05",
         ...this.formData,
         batchId: "",

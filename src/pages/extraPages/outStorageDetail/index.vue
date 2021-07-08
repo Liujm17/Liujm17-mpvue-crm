@@ -124,6 +124,9 @@ export default {
     this.formData = this.data[this.page].formData;
     this.listData = this.data[this.page].vanFormData.formData;
     this.getData();
+     wx.setNavigationBarTitle({
+          title: '出库单-详情'+'('+wx.getStorageSync("factoryName")+')',
+      });
   },
   watch: {
       formData: {

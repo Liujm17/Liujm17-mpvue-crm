@@ -1,7 +1,8 @@
 <template>
   <div class="bg">
     <div class="card" v-for="(item, index) in cardList" :key="index" @click="toDetail(item)">
-      <div class="text" v-for="(label,index2) in item" :key="index2" :style="{color:index2 == 'title'?'black':'#888'}" v-show="index2 !== 'id'&&index2 !== 'orderId'&&index2 !== 'formId'">{{label}}</div>
+      <div class="text" v-for="(label,index2) in item" :key="index2" :style="{color:index2 == 'title'?'black':'#888'}" v-show="index2 !== 'id'&&index2 !== 'orderId'&&index2 !== 'fieldInfoVos'&&index2 !== 'formId'">{{label}}</div>
+      <div class="text" v-for="(label2,index22) in item.fieldInfoVos"  :key="index22" :style="{color:index22 == 'title'?'black':'#888'}" v-show="index22 !== 'id'&&index22 !== 'orderId'&&index22 !== 'formId'">{{label2.name?label2.name:''}}:{{label2.value?label2.value:''}}</div>
     </div>
     <div v-show="more&&cardList.length>10">下拉加载</div>
     <div v-show="!more||cardList.length<=10">没有更多了</div>
@@ -53,8 +54,8 @@ export default {
     justify-content: space-between;
     align-items: center;
     .text{
-      width: 50%;
-      text-align: center;
+      min-width: 50%;
+      text-align: left;
     }
   }
 }

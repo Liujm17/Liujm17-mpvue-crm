@@ -137,7 +137,7 @@ export default {
     queding() {
       let params = {
         id: this.$route.query.id,
-        factoryId: 2020001,
+        factoryId: wx.getStorageSync("factoryId"),
       };
       data["deviceInfo"].delFlow(params).then((res) => {
         mpvue.showToast({

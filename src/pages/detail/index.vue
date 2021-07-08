@@ -110,16 +110,19 @@ export default {
     this.page = this.$route.query.data;
     this.pageType = this.$route.query.type;
     this.getData();
+     wx.setNavigationBarTitle({
+          title: '详情'+'('+wx.getStorageSync("factoryName")+')',
+        });
   },
   methods: {
     //操作
     operate() {
-     let a1=this.isEdit?['编辑','删除']:[];
+     let a1=['编辑','删除'];
      let a2=this.isBack?['回撤']:[];
      let a3 =this.isApproval?['同意','驳回']:[];
      let a0=[...a1,...a2,...a3];
         wx.showActionSheet({
-          itemList: a0,
+          itemList: a1,
         success:(res) =>{
           if(res.tapIndex == 0){
             this.changeText()

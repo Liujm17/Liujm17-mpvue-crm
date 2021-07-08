@@ -89,6 +89,9 @@ export default {
   },
   onLoad(){
     this.getData()
+     wx.setNavigationBarTitle({
+          title: '巡检记录-详情'+'('+wx.getStorageSync("factoryName")+')',
+      });
   },
   methods:{
     getData(){

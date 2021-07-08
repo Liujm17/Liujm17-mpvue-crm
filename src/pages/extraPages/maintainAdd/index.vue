@@ -100,6 +100,9 @@ export default {
     this.formData = data["maintain"].formData;
     this.listData = data["maintain"].vanFormData.formData;
     this.uuid= data.get_uuid()
+      wx.setNavigationBarTitle({
+          title: '故障维修-新增'+'('+wx.getStorageSync("factoryName")+')',
+      });
   },
   watch: {},
   methods: {
@@ -141,7 +144,7 @@ export default {
         repairResult: this.active,
         repairDetail: this.repairDetail,
         batchId: "",
-        factoryId: 2020001,
+        factoryId: wx.getStorageSync("factoryId"),
         reportUser:wx.getStorageSync("UserId"),
         reportUserName:wx.getStorageSync("applyUserName"),
         userId: wx.getStorageSync("UserId"),

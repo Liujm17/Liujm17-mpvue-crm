@@ -101,6 +101,9 @@ export default {
     this.formData = data["breakdown"].formData;
     this.listData = data["breakdown"].vanFormData.formData;
     this.uuid= data.get_uuid()
+      wx.setNavigationBarTitle({
+          title: '故障报修-新增'+'('+wx.getStorageSync("factoryName")+')',
+        });
   },
   watch: {},
   methods: {
@@ -142,7 +145,7 @@ export default {
         deviceStatus: this.active == "0" ? "运行中" : (this.active == '1'?'停机维护':'未上线'),
         faultReason: this.faultReason,
         batchId: "",
-        factoryId: 2020001,
+        factoryId: wx.getStorageSync("factoryId"),
         reportUser:wx.getStorageSync("UserId"),
         reportUserName:wx.getStorageSync("applyUserName"),
         userId: wx.getStorageSync("UserId"),

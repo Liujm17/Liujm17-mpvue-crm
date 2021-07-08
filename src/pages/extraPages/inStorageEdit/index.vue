@@ -218,6 +218,9 @@ export default {
   },
   onReady() {
     this.getData();
+      wx.setNavigationBarTitle({
+          title: '入库单-编辑'+'('+wx.getStorageSync("factoryName")+')',
+      });
   },
   watch: {
     active: {
@@ -376,7 +379,7 @@ export default {
     save(val) {
       let params = {
         id: Number(this.$route.query.id),
-        factoryId: 2020001,
+        factoryId: wx.getStorageSync("factoryId"),
         systemCode: "05",
         userId: wx.getStorageSync("UserId"),
         ...this.formData,

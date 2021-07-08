@@ -125,6 +125,9 @@ export default {
   },
    onReady() {
     this.getData2()
+    wx.setNavigationBarTitle({
+          title: '请求单-新增'+'('+wx.getStorageSync("factoryName")+')',
+        });
   },
   watch: {},
   methods: {
@@ -213,7 +216,7 @@ export default {
         reason: this.reason,
         applyDate:this.applyDate,
         batchId: "",
-        factoryId: 2020001,
+        factoryId: wx.getStorageSync("factoryId"),
         userId: wx.getStorageSync("UserId"),
         userName: wx.getStorageSync("applyUserName"),
          startFlowDto:{

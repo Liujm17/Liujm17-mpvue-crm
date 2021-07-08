@@ -203,6 +203,9 @@ export default {
   },
   onReady() {
     this.getData();
+      wx.setNavigationBarTitle({
+          title: '入库单-新增'+'('+wx.getStorageSync("factoryName")+')',
+      });
   },
   watch: {
     active: {
@@ -331,7 +334,7 @@ export default {
     //保存或发起
     save(val) {
       let params = {
-        factoryId: 2020001,
+        factoryId: wx.getStorageSync("factoryId"),
         systemCode: "05",
         userId: wx.getStorageSync("UserId"),
         ...this.formData,

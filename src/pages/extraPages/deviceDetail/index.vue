@@ -147,6 +147,9 @@ export default {
     this.formData = this.data[this.page].formData;
     this.listData = this.data[this.page].vanFormData.formData;
     this.getData();
+      wx.setNavigationBarTitle({
+          title: '费用报销-详情'+'('+wx.getStorageSync("factoryName")+')',
+      });
   },
   methods: {
      //操作
@@ -269,7 +272,7 @@ export default {
     queding() {
       let params = {
         id: this.$route.query.id,
-        factoryId: 2020001,
+        factoryId: wx.getStorageSync("factoryId"),
       };
       data["deviceInfo"].delFlow(params).then((res) => {
         mpvue.showToast({

@@ -106,6 +106,9 @@ export default {
     this.formData = this.data[this.page].formData;
     this.listData = this.data[this.page].vanFormData.formData;
     this.getData();
+      wx.setNavigationBarTitle({
+          title: '备用金-详情'+'('+wx.getStorageSync("factoryName")+')',
+        });
   },
   watch: {
     formData: {

@@ -48,7 +48,7 @@ function get_uuid(){
           return {
             title:  item.nodeTitle,
             userName:item.userName,
-            dealTime: item.dealTime? formattingTime(item.dealTime + ''):'',
+            dealTime: item.dealTime? (item.dealTime + ''):'',
             status:(item.dealResult == 1 ? "同意" : (item.dealResult == 2 ? "驳回到发起人" :(item.dealResult == 3 ? "驳回上一步" :'转审'))),
           };
         })
@@ -287,7 +287,7 @@ const applyCash = {
           return {
             title:  item.nodeTitle,
             userName:item.userName,
-            dealTime: item.dealTime? formattingTime(item.dealTime + ''):'',
+            dealTime: item.dealTime? (item.dealTime + ''):'',
             status:(item.dealResult == 1 ? "同意" : (item.dealResult == 2 ? "驳回到发起人" :(item.dealResult == 3 ? "驳回上一步" :'转审'))),
           };
         })
@@ -1087,7 +1087,7 @@ const polling ={
           index:index+1,
           deviceId:item.deviceId,
           deviceName:item.deviceName,
-          inspectTime:formattingTime(item.inspectTime),
+          inspectTime:item.inspectTime,
           inspectUserName:item.inspectUserName,
           color:item.deviceStatus=='正常'?'#009933':'#FF0000'
         };
@@ -1175,7 +1175,7 @@ const breakdown ={
           id: item.id,
           index:index+1,
           deviceName:item.deviceName,
-          faultTime:formattingTime(item.faultTime),
+          faultTime:item.faultTime,
           repairResultStr:item.repairResultStr,
           color:item.repairResultStr == '已解决'?'#00CC99':(item.repairResultStr == '未解决'?'#FF0000':(item.repairResultStr == '密切关注'?'#6699FF':''))
         };
@@ -1256,7 +1256,7 @@ const maintain ={
           id: item.id,
           index:index+1,
           deviceName:item.deviceName,
-          repairTime:formattingTime(item.repairTime),
+          repairTime:item.repairTime,
           faultReason:item.faultReason,
         };
       });
@@ -1345,8 +1345,8 @@ const upkeep ={
           id: item.id,
           index:index+1,
           deviceName:item.deviceName,
-          maintainTime:formattingTime(item.maintainTime),
-          nextMaintainTime:formattingTime(item.nextMaintainTime),
+          maintainTime:item.maintainTime,
+          nextMaintainTime:item.nextMaintainTime,
         };
       });
       return data
@@ -1445,7 +1445,7 @@ const payment ={
           index:index+1,
           supplierName:item.supplierName,
           totalPrice:item.totalPrice,
-          paymentDate:formattingTime(item.paymentDate)
+          paymentDate:item.paymentDate
         };
       });
       return data
@@ -1805,10 +1805,10 @@ const cost ={
   //状态选择数组
     radioList:[{text:'采购',value:1},{text:'调拨',value:2},],
     // 搜索词
-    searchValues:'申请人,入库类别',
+    searchValues:'申请人,报销类别',
     //历史tab栏
     typeList:[{value:'',text:'全部'},{value:-1,text:'草稿'},{value:0,text:'审批中'},{value:1,text:'已结束'},{value:2,text:'已驳回'}],
-    typeList2:[{value:1,text:'库存采购付款'},{value:2,text:'现场采购付款'}],
+    typeList2:[],
     //历史里类型判断关键词
     keyword:'approveStatus',
      //是否有日志
@@ -1867,7 +1867,7 @@ const cost ={
       supplierPhone:'',
       paymentDate:'',
     },
-     //付款申请列表
+     //费用报销列表
    getRecord:function(params) {
     return request.get(`/api-ep-project/costReimburse/getPage`, params)
     .then((res) => {
@@ -1877,6 +1877,7 @@ const cost ={
           id: item.id,
           index:index+1,
           userName:item.userName,
+          month:item.month,
           totalPrice:item.totalPrice,
         };
       });
@@ -1885,22 +1886,86 @@ const cost ={
   },
    //获取付款表单详情
    getData: function (params) {
-    return request.get(`/api-ep-project/payment/getInfo`, params)
+    return request.get(`/api-ep-project/costReimburse/get`, params)
   },
   //付款申请---新增中(新增)
   saveOrStart:function(params){
-    return request.post(`/api-ep-project/payment/add`,params)
+    return request.post(`/api-ep-project/costReimburse/addReimburse`,params)
   },
    //付款申请---详情中(修改)
   editOrStart:function(params){
-    return request.post(`/api-ep-project/payment/edit`,params)           
+    return request.post(`/api-ep-project/costReimburse/editReimburse`,params)           
   },
    //--(删除)
    delFlow:function(params){
-    return request.post(`/api-ep-project/payment/del`,params)
+    return request.post(`/api-ep-project/costReimburse/deleteReimburse`,params)
   },
 }
 
+//请示单
+const settle= {
+  //状态选择数组
+  radioList:[{text:'已经'},{text:'还未'},{text:'测试2'}],
+   // 搜索词
+   searchValues:'运维项目',
+   typeList:[{value:'',text:'全部'},{value:-1,text:'草稿'},{value:0,text:'审批中'},{value:1,text:'已结束'},{value:2,text:'已驳回'}],
+  //历史里类型判断关键词
+  keyword:'approveStatus',
+   //有日志
+   hasHistory:false,
+   //是否是审批
+   isApprove:false,
+  vanFormData: {
+    formData: [
+  
+      {
+        name: 'name',
+        value: '名称',
+        click: 'normal',
+        type:'',
+        required:true,
+        readonly:false
+      },
+    
+  
+    ]
+  },
+  formData: {
+     name:''
+  },
+   //结算单列表
+ getRecord:function(params) {
+  return request.get(`/api-ep-project/costStatement/getPage`, params)
+  .then((res) => {
+    let data = []
+    data  = res.data.data.list.map((item,index) => {
+      return {
+        id: item.id,
+        index:index+1,
+        userName:item.userName,
+        month:item.month
+      };
+    });
+    return data
+  })
+},
+ //获取表单详情
+ getData: function (params) {
+  return request.get(`/api-ep-project/costStatement/getInfo`, params)
+},
+//结算单---新增中(新增)
+saveOrStart:function(params){
+  return request.post(`/api-ep-project/costStatement/add`,params)
+},
+ //结算单---详情中(修改)
+editOrStart:function(params){
+  return request.post(`/api-ep-project/costStatement/edit`,params)
+},
+ //--(删除)
+ delFlow:function(params){
+  return request.post(`/api-ep-project/ccostStatement/delete`,params)
+},
+}
 
 //请示单
 const askfor= {
@@ -1964,7 +2029,7 @@ editOrStart:function(params){
 },
  //--(删除)
  delFlow:function(params){
-  return request.post(`//api-ep-project/apply/delete`,params)
+  return request.post(`/api-ep-project/apply/delete`,params)
 },
 }
 //项目资料
@@ -2062,6 +2127,8 @@ export default {
   second,
   //请示单16
   askfor,
+  //结算单17
+  settle,
   //付费用报销15
   cost,
   //项目资料20

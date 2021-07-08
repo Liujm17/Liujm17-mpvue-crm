@@ -1,6 +1,7 @@
 <template>
-   <van-popup :show="show"  position="bottom" custom-style="width: 100%; height: 50%;">
-            <Calendar v-if="click == 'date'" @cancel="cancel" @submit="submit"></Calendar>
+   <div>
+       <van-popup :show="show"  position="bottom" custom-style="width: 100%; height: 50%;" v-if="showDay">
+            <Calendar v-if="click == 'date'" @cancel="cancel" @submit="submit" :showDay='showDay'></Calendar>
               <van-picker
              :title="poptitle"
              show-toolbar
@@ -10,6 +11,18 @@
              v-else
             />
         </van-popup>
+         <van-popup :show="show"  position="bottom" custom-style="width: 100%; height: 20%;" v-else>
+            <Calendar v-if="click == 'date'" @cancel="cancel" @submit="submit" :showDay='showDay'></Calendar>
+              <van-picker
+             :title="poptitle"
+             show-toolbar
+             :columns="columns"
+             @cancel="onCancel"
+             @confirm="onConfirm"
+             v-else
+            />
+        </van-popup>
+   </div>
 </template>
 
 <script>
@@ -44,6 +57,11 @@ export default {
          poptitle:{
              type:String,
              default:''
+         },
+         //显示日
+         showDay:{
+             type:Boolean,
+             default:true
          }
      },
      data(){

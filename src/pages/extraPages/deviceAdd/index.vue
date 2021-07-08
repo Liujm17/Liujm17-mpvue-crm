@@ -122,6 +122,9 @@ export default {
     this.radioList = this.data[this.page].radioList;
      this.uuid= data.get_uuid(),
     this.formData.statusName=''
+      wx.setNavigationBarTitle({
+          title: '设备信息-新增'+'('+wx.getStorageSync("factoryName")+')',
+      });
   },
   methods: {
     //按钮群点击更换高亮事件
@@ -133,7 +136,7 @@ export default {
       let params = {
         ...this.formData,
         fileCode: "",
-        factoryId: 2020001,
+        factoryId: wx.getStorageSync("factoryId"),
         systemCode: "05",
         userId: wx.getStorageSync("UserId"),
       };

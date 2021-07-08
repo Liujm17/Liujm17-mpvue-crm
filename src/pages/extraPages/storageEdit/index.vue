@@ -145,6 +145,9 @@ export default {
   },
   onShow() {
     this.getData();
+     wx.setNavigationBarTitle({
+          title: '库存盘点-编辑'+'('+wx.getStorageSync("factoryName")+')',
+      });
   },
   watch: {
      content:{
@@ -276,7 +279,7 @@ export default {
     save(val) {
       let params={
         id:this.$route.query.id,
-        factoryId: 2020001,
+        factoryId: wx.getStorageSync("factoryId"),
         userId: wx.getStorageSync("UserId"),
         stockCheckDetailList:this.purchaseDetailList,
         startFlowDto:{
