@@ -110,7 +110,7 @@ export default {
       this.$router.push({
         path:this.filterInfo.addpage,
         query: {
-          data: this.filterInfo.data,
+          data: '',
         },
       });
     },

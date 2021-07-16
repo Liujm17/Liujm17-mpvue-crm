@@ -16,6 +16,7 @@
             :key="index"
           >
             <div class="name">{{ item.name }}</div>
+             <div class="name">{{ item.contacts }}({{item.phone}})</div>
           </van-radio>
         </van-radio-group>
       </van-tab>
@@ -57,6 +58,8 @@ export default {
           return {
             id: item.id + "",
             name: item.name,
+            phone:item.phone,
+            contacts:item.contacts
           };
         });
       });
@@ -77,6 +80,8 @@ export default {
       var value = {
         name: this.ProviderList.filter((item) => item.id == this.radio)[0].name,
         id: this.radio,
+        phone: this.ProviderList.filter((item) => item.id == this.radio)[0].phone,
+         contacts: this.ProviderList.filter((item) => item.id == this.radio)[0].contacts,
       };
 
       this.$emit("submit", value);

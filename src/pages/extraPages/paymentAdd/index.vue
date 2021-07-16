@@ -359,7 +359,7 @@ export default {
       };
        }else if(this.active == 1){
          params = {
-        factoryId: wx.getStorageSync("factoryId"),
+         factoryId: wx.getStorageSync("factoryId"),
         systemCode: "05",
         userId: wx.getStorageSync("UserId"),
         ...this.formData2,
@@ -376,7 +376,6 @@ export default {
      
       params.startFlowDto.type = val;
       params.paymentType=this.active+1
-      console.log(params)
       if (this.photoList.length > 0) {
         data.upLoadFile(this.photoList, 0, this.uuid).then((res) => {
           //文件code
@@ -432,7 +431,6 @@ export default {
     //mpvue的更改选择，异步，更改流程列表
     radioChange(val) {
       this.flowId = val.mp.detail;
-      this.$route.query = {};
       this.getByFlowId();
     },
     //关闭弹窗

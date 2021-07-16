@@ -15,16 +15,11 @@
         readonly
         :rules="[{ required: true, message: '请填写' + item.value }]"
         @input="formData[item.name] = $event.mp.detail"
-      >
-      </van-field>
+      ></van-field>
     </van-cell-group>
     <div class="polling-info">
       <div class="polling-title">巡检信息</div>
-      <RadioList
-        :typeList="typeList"
-        :active="active"
-        @changeData="changeData"
-      ></RadioList>
+      <RadioList :typeList="typeList" :active="active" @changeData="changeData"></RadioList>
     </div>
     <div class="polling-text">
       <van-field
@@ -34,7 +29,7 @@
         label="问题描述"
         type="textarea"
         placeholder="该设备巡检描述信息"
-          @input="remarks = $event.mp.detail"
+        @input="remarks = $event.mp.detail"
       />
     </div>
     <!-- 附件 -->
@@ -70,7 +65,7 @@ export default {
   data() {
     return {
       data: data,
-      uuid: '',
+      uuid: "",
       //问题描述
       remarks: "",
       //附件
@@ -90,11 +85,16 @@ export default {
   onLoad() {
     this.formData = this.data["polling"].formData;
     this.listData = this.data["polling"].vanFormData.formData;
-     this.uuid= data.get_uuid(),
-    this.getData();
-     wx.setNavigationBarTitle({
-          title: '巡检记录-新增'+'('+wx.getStorageSync("factoryName")+')',
-      });
+    (this.uuid = data.get_uuid()), this.getData();
+    wx.setNavigationBarTitle({
+      title: "巡检记录-新增" + "(" + wx.getStorageSync("factoryName") + ")",
+    });
+  },
+  onShow(){
+     this.active=0
+     this.radio='1'
+     this.photoList=[]
+     this.remarks=''
   },
   watch: {},
   methods: {
@@ -127,41 +127,65 @@ export default {
         userName: wx.getStorageSync("applyUserName"),
       };
       if (this.photoList.length > 0) {
-        console.log(this.uuid)
         data.upLoadFile(this.photoList, 0, this.uuid).then((res) => {
           //文件code
           let resData = JSON.parse(res.data);
           params.batchId = resData.data.batchId;
           data["polling"].saveOrStart(params).then((res) => {
-            if(res.data.code == 10000){
+            if (res.data.code == 10000) {
               mpvue.showToast({
-              title: res.data.message,
-              icon: "none",
-              duration: 3000,
-              mask: true,
-            });
-            //重启到某页面，如不是tabar页面会有回主页按钮
-            this.$router.back();
+                title: res.data.message,
+                icon: "none",
+                duration: 3000,
+                mask: true,
+              });
+              //重启到某页面，如不是tabar页面会有回主页按钮
+              //需要报修进入报修
+              if (this.radio == "2") {
+                this.$router.push({
+                  path: '/pages/extraPages/breakdownAdd/main',
+                  query: {
+                    data: "",
+                  },
+                });
+              } else {
+                this.$router.back();
+              }
             }
           });
         });
       } else {
         data["polling"].saveOrStart(params).then((res) => {
-           if(res.data.code == 10000){
-              mpvue.showToast({
+          if (res.data.code == 10000) {
+            mpvue.showToast({
               title: res.data.message,
               icon: "none",
               duration: 3000,
               mask: true,
             });
             //重启到某页面，如不是tabar页面会有回主页按钮
-            this.$router.back();
-            }
+           //需要报修进入报修
+              if (this.radio == "2") {
+                this.$router.push({
+                  path: '/pages/extraPages/breakdownAdd/main',
+                  query: {
+                    data: "",
+                    type:'polling',
+                    deviceId:this.formData.id,
+                    deviceName:this.formData.name
+                  },
+                });
+              } else {
+                this.$router.back();
+              }
+          }
         });
       }
     },
     //取消
-    cancel() {},
+    cancel() {
+      this.$router.back();
+    },
   },
 };
 </script>

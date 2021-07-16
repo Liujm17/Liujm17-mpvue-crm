@@ -2,15 +2,8 @@
   <div class="auth-wrapper">
     <div class="auth">
       <div class="auth-info">
-        <div class="auth-img">
-          <ImageView
-            src="https://www.youbaobao.xyz/mpvue-res/logo.jpg"
-            height="100%"
-            round
-          />
-        </div>
         <div class="sub-title">个人信息微信授权</div>
-        <div class="title">xxxxx</div>
+        <div class="title">本次授权用于该小程序获取用户微信部分信息。</div>
       </div>
        <div class="bt"><button @click="getUserInfo">授权</button></div>
     </div>
@@ -18,9 +11,7 @@
 </template>
 
 <script>
-import ImageView from "./imageView";
 export default {
-  components: { ImageView },
   methods: {
       getUserInfo() {
         this.$emit('getUserInfo')

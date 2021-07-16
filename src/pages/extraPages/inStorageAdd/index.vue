@@ -45,14 +45,14 @@
       <div class="table-content" v-for="(item, index) in content" :key="index">
         <div class="content-title">{{ item.name }}</div>
         <div class="content-title">{{ item.specs }}</div>
-         <div class="content-title">
+         <!-- <div class="content-title">
           <van-stepper
             v-model="item.unitPrice"
             @change="content[index].unitPrice = $event.mp.detail"
             min="0"
             :disabled='stepDisabled'
           />
-        </div>
+        </div> -->
         <div class="content-title">
           <van-stepper
             v-model="item.inQuantity"
@@ -162,7 +162,7 @@ export default {
        //符合的产品选项列表
        ProductItemList:[],
       //采购清单
-      title: ["产品名称", "规格型号",'单价', "数量", "操作"],
+      title: ["产品名称", "规格型号", "数量", "操作"],
       content: [],
       //采购清单list
       purchaseDetailList: [],
@@ -251,33 +251,16 @@ export default {
       //深度监听
       deep: true,
     },
-    // "formData.purchaseId":{
-    //   handler(newValue,oldValue){
-    //     //有采购订单的时候
-    //     if(newValue){
-    //       let params={
-    //         id:newValue
-    //       }
-    //       getProductItemOptions(params).then((res)=>{
-    //         this.ProductItemList=res.data.data.map((item)=>{
-    //           return{
-    //             id:item.id,
-    //             productId:item.productId,
-    //             name:item.productName,
-    //             specs:item.specs,
-    //             inQuantity:item.inQuantity,
-    //             unitPrice:item.unitPrice?item.unitPrice:''
-    //           }
-    //         })
-    //       })
-    //       //没有的时候
-    //     }else{
-    //       console.log('无')
-    //     }
-    //   },
-    //   //深度监听
-    //   deep: true,
-    // },
+       "formData.purchaseId":{
+      handler(newValue,oldValue){
+        //有采购订单的时候
+         if(newValue){
+           this.content=[]
+         }
+      },
+      //深度监听
+      deep: true,
+    },
     //产品列表
     content: {
       handler(newValue, oldValue) {
@@ -410,7 +393,6 @@ export default {
     //mpvue的更改选择，异步，更改流程列表
     radioChange(val) {
       this.flowId = val.mp.detail;
-      this.$route.query = {};
       this.getByFlowId();
     },
     //关闭弹窗
@@ -434,8 +416,17 @@ export default {
     },
     //产品确认
     submit3(val) {
+      if(this.content.filter(item=>item.id==val.id).length==0){
       this.show2 = false;
       this.content.push(val);
+      }else{
+         mpvue.showToast({
+          title: '请不要重复添加产品',
+          icon: "none",
+          duration: 1000,
+          mask: true,
+        });
+      }
     },
     //删除产品列表对应产品
     delList(val) {

@@ -63,10 +63,11 @@
     <van-popup
       :show="factoryshow"
       position="right"
-      custom-style="width: 80%; height: 100%;"
+      custom-style="width: 60%; height: 100%;"
       @close="onClose"
     >
-      <Factory @submit="factorysubmit" :radio="factooryradio" @cancel="onClose"></Factory>
+    <!-- <Factory /> -->
+      <Factory @submit="factorysubmit"  @cancel="onClose"></Factory>
     </van-popup>
 
     <!-- 底部按钮 -->
@@ -255,7 +256,6 @@ export default {
     //mpvue的更改选择，异步，更改流程列表
     radioChange(val) {
       this.flowId = val.mp.detail;
-      this.$route.query = {};
       this.getByFlowId();
     },
     //关闭弹窗

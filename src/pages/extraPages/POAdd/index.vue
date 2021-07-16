@@ -327,7 +327,6 @@ export default {
     //mpvue的更改选择，异步，更改流程列表
     radioChange(val) {
       this.flowId = val.mp.detail;
-      this.$route.query = {};
       this.getByFlowId();
     },
     //关闭弹窗
@@ -348,6 +347,8 @@ export default {
     submit(val) {
       this.$set(this.formData, "supplierId", val.id);
       this.$set(this.formData, "supplierName", val.name);
+       this.$set(this.formData, "supplierContacts", val.contacts);
+      this.$set(this.formData, "supplierPhone", val.phone);
       this.show = false;
     },
     //产品确认

@@ -235,7 +235,6 @@ export default {
     //mpvue的更改选择，异步
     radioChange(val) {
       this.flowId = val.mp.detail;
-      this.$route.query = {};
       this.getByFlowId();
     },
     //mpvue设置对应输入框的值

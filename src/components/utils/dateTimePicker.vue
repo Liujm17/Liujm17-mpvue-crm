@@ -50,15 +50,33 @@ export default {
           defaultIndex: 1,
         },
          {
-          values: Array.from({ length: 24 }, (v, k) => (k)+''),
+          values: Array.from({ length: 24 }, (v, k) => {
+           if(k<10){
+            return  '0'+(k)+''
+           }else{
+            return  (k)+''
+           }
+          }),
           defaultIndex: 1,
         },
          {
-          values: Array.from({ length: 60 }, (v, k) => (k)+''),
+          values: Array.from({ length: 60 }, (v, k) => {
+           if(k<10){
+            return  '0'+(k)+''
+           }else{
+            return  (k)+''
+           }
+          }),
           defaultIndex: 1,
         },
          {
-          values: Array.from({ length: 60 }, (v, k) => (k)+''),
+          values: Array.from({ length: 60 }, (v, k) =>{
+           if(k<10){
+            return  '0'+(k)+''
+           }else{
+            return  (k)+''
+           }
+          }),
           defaultIndex: 1,
         },
       ],

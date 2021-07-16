@@ -58,9 +58,129 @@ export default {
   data() {
     return {
       //表单列表
-      listData: [],
+      listData: [
+        {
+          name: 'name',
+          value: '设备名称',
+          click: 'normal',
+          type:'',
+          required:true,
+          readonly:false
+        },
+        {
+          name: 'serialNumber',
+          value: '设备序号',
+          click: 'normal',
+          type:'',
+          required:true,
+          readonly:false
+        },
+        {
+          name: 'address',
+          value: '设备地点',
+          click: 'normal',
+          type:'',
+          required:true,
+          readonly:false
+        },
+        {
+          name: 'statusName',
+          value: '设备状态',
+          click: 'radioGroup',
+          type:'',
+          required:true,
+          readonly:true
+        },
+        {
+          name: 'producer',
+          value: '生产商名称',
+          click: 'normal',
+          type:'',
+          required:true,
+          readonly:false
+        },
+        {
+          name: 'salesman',
+          value: '售后联系人',
+          click: 'normal',
+          type:'',
+          required:true,
+          readonly:false
+        },
+        {
+          name: 'salesmanPhone',
+          value: '售后电话',
+          click: 'normal',
+          type:'digit',
+          required:false,
+          readonly:false
+        },
+        {
+          name: 'specification',
+          value: '规格型号',
+          click: 'normal',
+          type:'',
+          required:true,
+          readonly:false
+        },
+        {
+          name: 'productionTime',
+          value: '出厂日期',
+          click: 'date',
+          type:'',
+          required:true,
+          readonly:true
+        },
+        {
+          name: 'scrapTime',
+          value: '预计报废日期',
+          click: 'date',
+          type:'',
+          required:true,
+          readonly:true
+        },
+        {
+          name: 'maintenanceDay',
+          value: '保养周期(单位：天)',
+          click: 'normal',
+          type:'digit',
+          required:false,
+          readonly:false
+        },
+        {
+          name: 'nextMaintainTime',
+          value: '下次保养日期',
+          click: 'date',
+          type:'',
+          required:true,
+          readonly:true
+        },
+        {
+          name: 'nameplate',
+          value: '铭牌信息',
+          click: 'normal',
+          type:'',
+          required:true,
+          readonly:false
+        },
+      ],
       //表单值
-      formData: {},
+      formData: {
+        name:"",
+      serialNumber:'',
+      address:'',
+      status:'',
+      statusName:'',
+      producer:'',
+      salesman:'',
+      salesmanPhone:'',
+      specification: '',
+      productionTime:'',
+      scrapTime:'',
+      maintenanceDay:'',
+      nextMaintainTime:'',
+      nameplate: '',
+      },
       //状态多选按钮
       radioList: [],
       //附件列表
@@ -84,19 +204,25 @@ export default {
       deviceId: "",
     };
   },
-  onShow() {},
-  onReady() {},
+  onShow() {
+   
+  },
+  onReady() {
+    
+  },
   watch: {
     dataId: {
       handler(newVal, oldVal) {
-        this.formData = data[this.page].formData;
-        this.listData = data[this.page].vanFormData.formData;
-        this.getData();
+        if(newVal){
+          this.getData()
+        }
       },
+      deep:true,
+      immediate:true
     },
   },
   methods: {
-    getData() {
+    async getData() {
       let params = {
         id: this.dataId,
       };

@@ -13,7 +13,7 @@
         >
         <div>{{ year }} 年 {{ month }} 月</div>
         <van-button type="default" size="small" @click="dateDown"
-          >上个月</van-button
+          >下个月</van-button
         >
       </div>
     </div>

@@ -5,6 +5,14 @@
         <div class="title">基本信息</div>
         <van-cell-group>
           <van-field
+            v-model="id"
+            label="采购订单编号"
+            required
+            readonly
+            input-align="right"
+            @input="id = $event.mp.detail"
+          />
+          <van-field
             v-for="(item, index) in listData"
             :key="index"
             v-model="formData[item.name]"
@@ -46,9 +54,10 @@
           v-if="isApproval"
         />
         <van-button type="info" size="normal" @click="operate" v-if="showoperate">操作</van-button>
+        <van-button type="info" size="normal" @click="operate2" v-if="!showoperate">操作</van-button>
       </van-tab>
 
-      <van-tab title="付款申请" v-if="$route.query.type=='历史'">
+      <van-tab title="付款申请" v-if="!showoperate">
         <div>
           <Card
             :more="false"
@@ -59,7 +68,7 @@
           <div class="empty-text" v-else>暂无记录</div>
         </div>
       </van-tab>
-      <van-tab title="入库单" v-if="$route.query.type=='历史'">
+      <van-tab title="入库单" v-if="!showoperate">
         <div>
           <Card
             :more="false"
@@ -70,6 +79,7 @@
           <div class="empty-text" v-else>暂无记录</div>
         </div>
       </van-tab>
+
       <van-tab title="日志">
         <div class="header">
           <div v-for="(item, index) in hisTitle" :key="index" class="title">{{ item }}</div>
@@ -78,31 +88,6 @@
       </van-tab>
     </van-tabs>
 
-    <!-- <van-goods-action>
-      <van-goods-action-button
-        type="info"
-        text="编辑"
-        @click="edit"
-        v-if="isEdit"
-      />
-      <van-goods-action-button
-        type="warning"
-        text="删除"
-        @click="del"
-        v-if="isEdit"
-      />
-      <van-goods-action-button
-        type="primary"
-        text="回撤"
-        @click="back"
-        v-if="isBack"
-      />
-       <van-goods-action-button
-        type="primary"
-        text="同意"
-        @click="agree"
-      />
-    </van-goods-action>-->
     <van-dialog2 id="van-dialog" />
   </div>
 </template>
@@ -119,6 +104,7 @@ export default {
   components: { Accessroy, BottomButton, Delete, Card },
   data() {
     return {
+      id: "",
       //tab栏激活页
       hisTitle: ["审批步骤", "处理人", "处理时间", "结果"],
       active: 0,
@@ -157,25 +143,26 @@ export default {
       ],
       isBack: false,
       isEdit: false,
-      isDel:false,
+      isDel: false,
       isApproval: false,
       showoperate: true,
-      suggestion:'',
-      orderId: "",
+      suggestion: "",
+      purchaseId: "",
+      orderId:''
     };
   },
   onLoad() {
     this.formData = this.data[this.page].formData;
     this.listData = this.data[this.page].vanFormData.formData;
     this.getData();
-     wx.setNavigationBarTitle({
-          title: '采购订单-详情'+'('+wx.getStorageSync("factoryName")+')',
-      });
+    wx.setNavigationBarTitle({
+      title: "采购订单-详情" + "(" + wx.getStorageSync("factoryName") + ")",
+    });
   },
   watch: {
     formData: {
       handler(newVal, oldVal) {
-        if (!this.isBack && !this.isEdit && !this.isApproval&&!this.isDel) {
+        if (!this.isBack && !this.isEdit && !this.isApproval && !this.isDel) {
           this.showoperate = false;
         } else {
           this.showoperate = true;
@@ -190,11 +177,11 @@ export default {
       let a1 = this.isEdit ? ["编辑"] : [];
       let a2 = this.isBack ? ["回撤"] : [];
       let a3 = this.isApproval ? ["同意", "驳回"] : [];
-      let a4 = this.isDel?['删除']:[];
+      let a4 = this.isDel ? ["删除"] : [];
       let b1 = this.isEdit ? ["edit"] : [];
       let b2 = this.isBack ? ["back"] : [];
       let b3 = this.isApproval ? ["agree", "disagree"] : [];
-      let b4 = this.isDel ? [ "del"] : [];
+      let b4 = this.isDel ? ["del"] : [];
       let a0 = [...a1, ...a2, ...a3, ...a4];
       let b0 = [...b1, ...b2, ...b3, ...b4];
       wx.showActionSheet({
@@ -207,10 +194,46 @@ export default {
         },
       });
     },
+    //操作2
+    operate2() {
+      let a0 = ["创建付款申请", "入库"];
+      wx.showActionSheet({
+        itemList: a0,
+        success: (res) => {
+          if (res.tapIndex == 0) {
+            this.$router.push({
+              path: "pages/extraPages/paymentAdd/main",
+              query: {
+                data: "payment",
+              },
+            });
+          } else if (res.tapIndex == 1) {
+            this.$router.push({
+              path: "pages/extraPages/inStorageAdd/main",
+              query: {
+                data: "inStorage",
+              },
+            });
+          }
+        },
+        fail: (res) => {
+          console.log(res.errMsg);
+        },
+      });
+    },
     //付款详情
     payToDetail(val) {
       this.$router.push({
         path: "/pages/extraPages/paymentDetail/main",
+        query: {
+          id: val.id,
+        },
+      });
+    },
+    //入库信息详情
+    inToDetail(val) {
+      this.$router.push({
+        path: "/pages/extraPages/inStorageDetail/main",
         query: {
           id: val.id,
         },
@@ -238,7 +261,7 @@ export default {
           searchValues: "",
           approveStatus: "",
           paymentType: "",
-          orderId: this.orderId ? this.orderId : "",
+          purchaseId: this.purchaseId ? this.purchaseId : "",
         };
         data["payment"].getRecord(params).then((res) => {
           mpvue.showToast({
@@ -255,7 +278,7 @@ export default {
           pageSize: 999999999,
           searchValues: "",
           approveStatus: "",
-          orderId: this.orderId ? this.orderId : "",
+          purchaseId: this.purchaseId ? this.purchaseId : "",
         };
         data["inStorage"].getRecord(params).then((res) => {
           mpvue.showToast({
@@ -275,8 +298,9 @@ export default {
       };
       //获取表单数据
       data["PO"].getData(params).then((res) => {
+        this.id = res.data.data.id;
         this.formData = {
-          userName: wx.getStorageSync("applyUserName"),
+          userName: res.data.data.userName,
           supplierId: res.data.data.supplierId,
           supplierName: res.data.data.supplierName,
           supplierContacts: res.data.data.supplierContacts,
@@ -289,10 +313,11 @@ export default {
           res.data.data.isEdit == 1 || res.data.data.isEdit === "undefined"
             ? true
             : false;
-        this.isDel =res.data.data.isDel == 1?true:false;
+        this.isDel = res.data.data.isDel == 1 ? true : false;
         this.isBack = res.data.data.isBack == 1 ? true : false;
         this.isApproval = res.data.data.isApproval == 1 ? true : false;
-        this.orderId = res.data.data.orderId ? res.data.data.orderId : "";
+        this.purchaseId = res.data.data.id ? res.data.data.id : "";
+         this.orderId = res.data.data.orderId ? res.data.data.orderId : "";
         this.content = res.data.data.purchaseDetailVoList.map((item) => {
           return {
             id: item.id,
@@ -372,20 +397,20 @@ export default {
     },
     //不同意
     disagree() {
-       Dialog2.confirm({
+      Dialog2.confirm({
         title: "操作",
         message: "审批驳回",
         //开启按空白处关闭弹窗
-        closeOnClickOverlay:true
+        closeOnClickOverlay: true,
       })
         .then((res) => {
-          let params={
+          let params = {
             orderId: this.orderId,
             suggestion: this.suggestion,
-            dealResult:res.type
-          }
+            dealResult: res.type,
+          };
           disagree(params).then((res) => {
-             this.$router.back();
+            this.$router.back();
           });
         })
         .catch(() => {

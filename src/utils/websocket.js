@@ -5,7 +5,7 @@ module.exports = (function () {
     function connect() { // 发起链接
       //建立连接
       wx.connectSocket({
-        url: `wss://www.hxhb-test.icu:8004/api-ep-user/taskSocket/${wx.getStorageSync("UserId")}`,
+        url: `wss://test.saddlepoint.cn:8004/api-ep-user/taskSocket/${wx.getStorageSync("UserId")}`,
         header: {
           "Content-Type": 'application/json',
           "Authorization": wx.getStorageSync("Authorization")

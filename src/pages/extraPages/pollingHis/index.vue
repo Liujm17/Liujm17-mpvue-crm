@@ -101,7 +101,12 @@ export default {
       })
     },
     toDetail(val){
-      console.log(val)
+     this.$router.push({
+        path: '/pages/extraPages/pollingDetail/main',
+        query: {
+          id: val.id,
+        },
+      });
     },
     //更换异常全部
     changeData(item,index){
@@ -109,7 +114,7 @@ export default {
      this.getTime(this.time,item.value)
     },
     //点击日期事件
-    getTime(val,deviceStatus="异常") {  
+    getTime(val,status="异常") {  
     const time = this.year + "-" + this.month + "-" + val;
     this.time=val
       let params={
@@ -117,7 +122,7 @@ export default {
         pageNum:1,
         pageSize:99999,
         deviceId:'',
-        deviceStatus:deviceStatus
+        status:status
       }
       data['polling'].getRecord(params).then((res)=>{
         this.cardList=res

@@ -15,7 +15,7 @@
             :key="index"
             @click="test"
           >
-            <div class="name">{{ item.id}}</div>
+            <div class="name">采购订单编号:{{ item.id}}</div>
           </van-radio>
         </van-radio-group>
       </van-tab>

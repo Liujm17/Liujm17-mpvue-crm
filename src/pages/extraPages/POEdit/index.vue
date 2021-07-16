@@ -192,7 +192,7 @@ export default {
      this.uuid= data.get_uuid()
   },
   onReady() {
-    this.getData();
+    this.getData()
      wx.setNavigationBarTitle({
           title: '采购订单-编辑'+'('+wx.getStorageSync("factoryName")+')',
       });
@@ -242,7 +242,17 @@ export default {
        }
         //获取表单数据
       data['PO'].getData(params).then((res) => {
-       Object.keys(this.formData).map((item)=>this.formData[item]=res.data.data[item])
+       this.formData={
+         purchaseDate: res.data.data.purchaseDate,
+         purpose: res.data.data.purpose,
+         supplierContacts: res.data.data.supplierContacts,
+         supplierId: res.data.data.supplierId,
+         supplierName:res.data.data.supplierName,
+         supplierPhone: res.data.data.supplierPhone,
+         totalPrice: res.data.data.totalPrice,
+         type: res.data.data.type,
+         userName: res.data.data.userName,
+       }
        this.content=res.data.data.purchaseDetailVoList.map((item)=>{
          return{
            id:item.productId,
@@ -379,7 +389,6 @@ export default {
     //mpvue的更改选择，异步，更改流程列表
     radioChange(val) {
       this.flowId = val.mp.detail;
-      this.$route.query = {};
       this.getByFlowId();
     },
     //关闭弹窗

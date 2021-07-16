@@ -222,14 +222,6 @@ export default {
         this.cardList = res;
       });
       }
-      // else if(val.mp.detail.index == 2){
-      //   let params = {
-      //   id: this.deviceId,
-      // };
-      //  data['deviceInfo'].getData(params).then((res)=>{
-         
-      //  })
-      // }
     },
     onClose() {
       this.usershow = false;

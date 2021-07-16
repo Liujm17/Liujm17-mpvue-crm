@@ -148,7 +148,7 @@ export default {
     this.listData = this.data[this.page].vanFormData.formData;
     this.getData();
       wx.setNavigationBarTitle({
-          title: '费用报销-详情'+'('+wx.getStorageSync("factoryName")+')',
+          title: '设备信息-详情'+'('+wx.getStorageSync("factoryName")+')',
       });
   },
   methods: {

@@ -10,7 +10,7 @@
     @showPopup='showPopup'
     v-if="showComponents[0]"
     ></BaseInfo>
-    <Flow
+    <!-- <Flow
     :flowStatus='flowStatus'
     :flowId='flowId'
     :flowList='flowList'
@@ -18,7 +18,7 @@
     @showPopup2='showPopup2'
     @radioChange='radioChange'
     v-if="showComponents[1]"
-    ></Flow>
+    ></Flow> -->
     <van-goods-action>
       <van-goods-action-button
         type="info"
@@ -51,6 +51,7 @@ import User from "../../components/userOptions";
 import data from "../../api/mockData";
 import BaseInfo from '../../components/apply/baseInfo';
 import Flow from '../../components/apply/flow'
+import indexVue from '../extraPages/POAdd/index.vue';
 export default {
   data() {
     return {
@@ -79,12 +80,12 @@ export default {
      this.filterInfo = this.$store.state.allData.filter(
       (item) => item.formId == this.$store.state.formId
     )[0];
-    this.page=this.$route.query.data
+    this.page=this.filterInfo.data
     this.formData = data[this.page].formData;
     this.radioList=data[this.page].radioList
   },
   onReady(){
-    this.getData();
+    // this.getData();
      wx.setNavigationBarTitle({
           title: '新增'+'('+wx.getStorageSync("factoryName")+')',
         });
@@ -100,9 +101,7 @@ export default {
   },
   methods: {
      changeData(item,index){
-      this.active=index
-      console.log(item,index)
-      console.log(this.formData)
+      this.active=indexVue
     },
     //选用户后的确认事件
     submit(val) {
@@ -196,7 +195,6 @@ export default {
     //mpvue的更改选择，异步
     radioChange(val) {
       this.flowId = val.mp.detail;
-      this.$route.query = {};
       this.getByFlowId();
     },
     //mpvue设置对应输入框的值
@@ -216,7 +214,7 @@ export default {
         type: val == "save" ? 0 : 1,
         optionalJson: val == "save" ? "" : JSON.stringify(this.fitNodeList),
       };
-      data[this.$route.query.data].saveOrStart(params).then((res)=>{
+      data[this.page].saveOrStart(params).then((res)=>{
           if(res.data.code == 10000){
               mpvue.showToast({
               title: res.data.message,

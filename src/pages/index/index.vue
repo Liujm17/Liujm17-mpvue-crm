@@ -1,10 +1,12 @@
 <template>
   <div class="bg">
     <van-dialog2 id="van-dialog" />
+    <MoveButton @send='send' @openPrj='openPrj' :title3='"("+prjName+")"'></MoveButton>
     <div style="width:100%;height:10px"></div>
-    <div style="width:100%" class="header-prj">
+    <!-- <div style="width:100%" class="header-prj">
       <div class="prj-bt" @click="openPrj">当前项目:{{prjName}}(点击切换项目)</div>
-    </div>
+       <div class="prj-send" @click="send">扫码巡检</div>
+    </div> -->
     <!-- <van-button plain type="primary" size="small" @click="openPrj">{{prjName}}</van-button> -->
     <div class="prj-box" v-show="showPrj">
       <div class="prj-box-content">
@@ -41,6 +43,7 @@ import { getMenus, getCount, getProjects } from "../../api/api";
 import ImageView from "../../components/imageView";
 import { getStorageSync } from "../../api/wechat";
 import Dialog2 from "../../../dist/wx/vant-weapp/dist/dialog2/dialog";
+import MoveButton from '../../components/utils/moveBotton.vue'
 export default {
   data() {
     return {
@@ -54,7 +57,7 @@ export default {
       btLeft: "0",
     };
   },
-  components: { ImageView, Dialog2 },
+  components: { ImageView, Dialog2,MoveButton},
   onShow() {
     //接收websocket消息
     if (getStorageSync("UserId") && getStorageSync("Authorization")) {
@@ -89,6 +92,21 @@ export default {
     },
   },
   methods: {
+     //扫码
+    send() {
+      // 允许从相机和相册扫码
+      wx.scanCode({
+        success:(res) =>{
+         this.$router.push({
+           path:'/pages/extraPages/pollingAdd/main',
+           query:{
+              qrCode:res.result
+           }
+         })
+        },
+      });
+    },
+    //选择项目
     openPrj() {
       this.showPrj = !this.showPrj;
     },
@@ -275,6 +293,7 @@ export default {
 }
 .header-prj {
   display: flex;
+  flex-direction: column;
   justify-content: center;
   align-items: center;
 }
@@ -290,13 +309,22 @@ export default {
   border-radius: 30px;
   background: #ffdead;
 }
+.prj-send{
+   height: 50px;
+  width: 30%;
+   line-height: 50px;
+  border: 1px solid #07c160;
+  text-align: center;
+  border-radius: 30px;
+  background: #ffdead;
+}
 .prj-box {
   position: absolute;
   top: 0;
   left: 0;
   width: 30%;
   height: 50%;
-  z-index: 100;
+  z-index: 10001;
   background: #242f42;
   animation: fadeInDown 0.4s;
   color: white;

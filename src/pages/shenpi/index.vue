@@ -138,8 +138,9 @@ export default {
               id: item.dataId ? item.dataId : "",
               orderId: item.orderId ? item.orderId : "",
               formId: item.formId ? item.formId : "",
-              title: "申请类型:" + item.orderTitle+'(单号'+item.dataId+')',
+              title: "申请类型:" + item.orderTitle+'('+item.dataId+')',
               user: "申请人:" + item.startUserName,
+              startTime:'发起时间:'+item.startTime,
               fieldInfoVos:item.fieldInfoVos
             };
           });
@@ -150,8 +151,9 @@ export default {
               id: item.dataId ? item.dataId : "",
               orderId: item.orderId ? item.orderId : "",
               formId: item.formId ? item.formId : "",
-              title: "申请类型:" + item.orderTitle+'(单号'+item.dataId+')',
+              title: "申请类型:" + item.orderTitle+'('+item.dataId+')',
               user: "申请人:" + item.startUserName,
+              startTime:'发起时间:'+item.startTime,
                fieldInfoVos:item.fieldInfoVos
             };
           });
@@ -162,8 +164,9 @@ export default {
               id: item.dataId ? item.dataId : "",
               orderId: item.orderId ? item.orderId : "",
               formId: item.formId ? item.formId : "",
-              title: "申请类型:" + item.orderTitle+'(单号'+item.dataId+')',
+              title: "申请类型:" + item.orderTitle+'('+item.dataId+')',
               user: "申请人:" + item.startUserName,
+              startTime:'发起时间:'+item.startTime,
                fieldInfoVos:item.fieldInfoVos
             };
           });

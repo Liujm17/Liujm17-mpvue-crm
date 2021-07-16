@@ -253,6 +253,7 @@ export default {
   watch: {
     'formData.supplierId':{
       handler(newVal,oldVal){
+        console.log(newVal)
         if(newVal){
             this.cardList=[]
             let params={
@@ -281,7 +282,11 @@ export default {
     },
     paymentList:{
         handler(newVal,oldVal){
-          this.payData.totalPrice=Number(newVal.reduce((total,item)=>total+item.paymentPrice,0))
+          if(this.showDetail){
+            this.payData.totalPrice=Number(newVal.reduce((total,item)=>total+item.paymentPrice,0))
+          }else{
+            return
+          }
         },
         deep:true,
     },
@@ -311,6 +316,7 @@ export default {
       //   bankAccount:'',
       //   totalPrice:''
       // },
+      this.payData.totalPrice=0
        this.active = index;
       if(item.text == '现场采购付款'){
        this.showDetail=false
@@ -327,6 +333,8 @@ export default {
         //获取表单数据
       data['payment'].getData(params).then((res) => {
         const data=res.data.data
+          this.active=data.paymentType-1
+          console.log('getdata')
         if(data.paymentType == 1){
           this.formData={
             userName:wx.getStorageSync('applyUserName'),
@@ -344,6 +352,7 @@ export default {
           }
           this.paymentList=data.purchasePaymentVoList
         }else{
+          this.showDetail=false
             this.formData2={
              userName:wx.getStorageSync('applyUserName'),
              paymentDate:data.paymentDate,
@@ -501,7 +510,6 @@ export default {
     //mpvue的更改选择，异步，更改流程列表
     radioChange(val) {
       this.flowId = val.mp.detail;
-      this.$route.query = {};
       this.getByFlowId();
     },
     //关闭弹窗

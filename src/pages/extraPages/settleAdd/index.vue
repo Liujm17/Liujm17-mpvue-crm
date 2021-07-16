@@ -298,7 +298,6 @@ export default {
     //mpvue的更改选择，异步，更改流程列表
     radioChange(val) {
       this.flowId = val.mp.detail;
-      this.$route.query = {};
       this.getByFlowId();
     },
     //流程选用户后的确认事件
@@ -319,6 +318,7 @@ export default {
     onClose() {
       this.usershow = false;
       this.dateShow = false;
+      this.dateShow2=false
     },
 
     //日期选择

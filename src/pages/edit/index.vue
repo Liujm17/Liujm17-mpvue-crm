@@ -12,7 +12,7 @@
           @showPopup="showPopup"
             v-if="showComponents[0]"
         ></BaseInfo>
-        <Flow
+        <!-- <Flow
           :flowStatus="flowStatus"
           :flowId="flowId"
           :flowList="flowList"
@@ -20,7 +20,7 @@
           @showPopup2="showPopup2"
           @radioChange='radioChange'
             v-if="showComponents[1]"
-        ></Flow>
+        ></Flow> -->
       </van-tab>
 
       <van-tab title="日志"  v-if="data[page].hasHistory">
@@ -140,14 +140,11 @@ export default {
    watch: {
     filterInfo(val){
        this.showComponents=val.components
-       console.log(this.showComponents)
     }
   },
   methods: {
      changeData(item,index){
       this.active=index
-      console.log(item)
-      console.log(this.formData)
     },
     //回撤
     backFlow() {
@@ -237,19 +234,19 @@ export default {
       });
        
 
-      if(this.showComponents[1]){
-          //获取流程数据
-      data[this.$route.query.data].getFlowList(params2).then((res) => {
-        if (res.length >= 1) {
-          this.flowStatus = "流程数:" + res.length;
-          this.flowList = res;
-          this.flowId = res[0].id + "";
-          this.getListByFlowId();
-        } else if (res.length == 0) {
-          console.log("bukeyi");
-        }
-      });
-      }
+      // if(this.showComponents[1]){
+      //     //获取流程数据
+      // data[this.$route.query.data].getFlowList(params2).then((res) => {
+      //   if (res.length >= 1) {
+      //     this.flowStatus = "流程数:" + res.length;
+      //     this.flowList = res;
+      //     this.flowId = res[0].id + "";
+      //     this.getListByFlowId();
+      //   } else if (res.length == 0) {
+      //     console.log("bukeyi");
+      //   }
+      // });
+      // }
     },
     //根据流程id查询节点
     getListByFlowId() {

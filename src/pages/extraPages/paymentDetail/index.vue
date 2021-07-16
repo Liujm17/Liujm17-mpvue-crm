@@ -26,7 +26,6 @@
  <!-- 供应商订单信息 ---产品列表-->
  <Purchase :paymentList='paymentList' :addPage="false"></Purchase>
 
-
         <Accessroy
           :photoList="photoList"
           :onlyOne="false"

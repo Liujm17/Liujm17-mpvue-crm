@@ -83,6 +83,7 @@
         v-if="isBack"
       />
     </van-goods-action> -->
+    <van-dialog2 id="van-dialog" />
   </div>
 </template>
 
@@ -90,6 +91,7 @@
 import data from "../../../api/mockData";
 import { backFlow,agree,disagree } from "../../../api/api";
 import Card from '../../../components/card.vue'
+import Dialog2 from "../../../../dist/wx/vant-weapp/dist/dialog2/dialog";
 export default {
   components:{Card},
   data() {
@@ -259,9 +261,29 @@ export default {
         this.$router.back();
       });
     },
-    disagree(){
-      
-    }
+    //不同意
+    disagree() {
+       Dialog2.confirm({
+        title: "操作",
+        message: "审批驳回",
+        //开启按空白处关闭弹窗
+        closeOnClickOverlay:true
+      })
+        .then((res) => {
+          let params={
+            orderId: this.orderId,
+            suggestion: this.suggestion,
+            dealResult:res.type
+          }
+          disagree(params).then((res) => {
+             this.$router.back();
+          });
+        })
+        .catch(() => {
+          // close
+          console.log("close");
+        });
+    },
   },
 };
 </script>

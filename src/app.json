@@ -1,9 +1,9 @@
 {
   "pages": [
     "pages/index/main",
-    "pages/test/main",
-    "pages/style/main",
-    "pages/self/main",
+    "pages/jiankong/main",
+    "pages/myself/main",
+    "pages/report/main",
     "pages/login/main",
     "pages/history/main",
     "pages/add/main",
@@ -98,24 +98,24 @@
     },
  
     {
-      "pagePath": "pages/self/main",
+      "pagePath": "pages/report/main",
       "iconPath": "static/images/self.png",
       "selectedIconPath": "static/images/self_active.png",
-      "text": "我"
+      "text": "报表"
     },
 
     {
-      "pagePath": "pages/style/main",
+      "pagePath": "pages/myself/main",
       "iconPath": "static/images/self.png",
       "selectedIconPath": "static/images/self_active.png",
-      "text": "样式"
+      "text": "个人信息"
     },
 
     {
-      "pagePath": "pages/test/main",
+      "pagePath": "pages/jiankong/main",
       "iconPath": "static/images/self.png",
       "selectedIconPath": "static/images/self_active.png",
-      "text": "测试"
+      "text": "监控"
     }
   ]
 

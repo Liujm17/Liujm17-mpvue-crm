@@ -24,6 +24,13 @@ import request from '../utils/request'
   return uniques;
 }
 
+//获取当前时间
+function getNowTime(){
+
+  let  date=new Date();
+  let  newdate=date.toLocaleString('chinese', { hour12: false });
+  return newdate.split('/').join('-')
+}
 //生成uuid
 function get_uuid(){
   var s = [];
@@ -60,7 +67,7 @@ function get_uuid(){
  function upLoadFile(list,index,uuid){
   return new Promise((resolve,reject)=>{
     const uploadTask = wx.uploadFile({
-    url: `https://www.hxhb-test.icu:8004/api-ep-project/file/upload`, //仅为示例，非真实的接口地址
+    url: `https://test.saddlepoint.cn:8004/api-ep-project/file/upload`, //仅为示例，非真实的接口地址
     filePath: list[index].type == 'image'?list[index].img:list[index].video,
     method: "POST",
     name: "file",
@@ -1345,8 +1352,8 @@ const upkeep ={
           id: item.id,
           index:index+1,
           deviceName:item.deviceName,
-          maintainTime:item.maintainTime,
-          nextMaintainTime:item.nextMaintainTime,
+          maintainTime:item.maintainTime.slice(0,10),
+          nextMaintainTime:item.nextMaintainTime.slice(0,10),
         };
       });
       return data
@@ -2143,5 +2150,7 @@ export default {
   //日志
   getHistory,
   //数组去重
-  sliceList
+  sliceList,
+  //获取当前时间
+  getNowTime
 }

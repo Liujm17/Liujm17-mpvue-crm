@@ -229,7 +229,6 @@ export default {
      //mpvue的更改选择，异步，更改流程列表
     radioChange(val) {
       this.flowId = val.mp.detail;
-      this.$route.query = {};
       this.getByFlowId();
     },
       //流程选用户后的确认事件
@@ -265,7 +264,7 @@ export default {
     //保存
     save(val) {
       let params = {
-         id: this.$route.query.id,
+         id:this.$route.query.id,
         userName: this.userName,
         reason: this.reason,
         applyDate:this.applyDate,

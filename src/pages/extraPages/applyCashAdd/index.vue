@@ -85,9 +85,9 @@ export default {
      this.filterInfo = this.$store.state.allData.filter(
       (item) => item.formId == this.$store.state.formId
     )[0];
-    this.page=this.$route.query.data
-    this.formData = data[this.page].formData;
-    this.radioList=data[this.page].radioList
+    this.formData = data['applyCash'].formData;
+      this.listData = this.data['applyCash'].vanFormData.formData;
+    this.radioList=data['applyCash'].radioList
      this.uuid= data.get_uuid()
   },
   onReady(){
@@ -201,7 +201,6 @@ export default {
     //mpvue的更改选择，异步
     radioChange(val) {
       this.flowId = val.mp.detail;
-      this.$route.query = {};
       this.getByFlowId();
     },
     //mpvue设置对应输入框的值

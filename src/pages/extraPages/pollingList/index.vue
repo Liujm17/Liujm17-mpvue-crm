@@ -146,9 +146,6 @@ export default {
     },
     //扫码
     send() {
-        // this.$router.push({
-        //    path:'/pages/extraPages/pollingAdd/main',
-        //  })
       // 允许从相机和相册扫码
       wx.scanCode({
         success:(res) =>{

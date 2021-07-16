@@ -155,7 +155,7 @@ export default {
   data() {
     return {
       //采购清单
-      title: ["产品名称", "规格型号", "单价", "数量", "总金额(元)", "操作"],
+      title: ["产品名称", "规格型号", "单价", "数量", "总金额(元)"],
       agotitle: ["产品名称", "规格型号", "单价", "数量", "总金额(元)"],
       content: [],
       agocontent:[],
@@ -378,7 +378,6 @@ export default {
     //mpvue的更改选择，异步，更改流程列表
     radioChange(val) {
       this.flowId = val.mp.detail;
-      this.$route.query = {};
       this.getByFlowId();
     },
     //关闭弹窗

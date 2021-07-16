@@ -13,7 +13,34 @@
             :key="index"
             @click="test"
           >
-            <div class="name">{{ item.id}}</div>
+                <!-- 关联产品 -->
+        <div class="title">
+          <span>采购详情:{{item.id}}</span>
+        </div>
+         <div class="table">
+          <div class="table-header">
+            <div
+              v-for="(item2, index2) in title"
+              :key="index2"
+              class="header-title"
+            >
+              {{ item2 }}
+            </div>
+          </div>
+          <div
+            class="table-content"
+            v-for="(item3, index3) in item.purchaseDetailVoList"
+            :key="index3"
+          >
+            <div class="content-title">{{ item3.productName }}</div>
+            <div class="content-title">{{ item3.specs }}</div>
+            <div class="content-title">{{ item3.unitPrice }}</div>
+            <div class="content-title">{{ item3.purchaseQuantity }}</div>
+            <div class="content-title">{{ item3.totalPrice }}</div>
+          </div>
+          <div><span>采购总金额:{{item.totalPrice}}</span></div>
+          <div><span>采购时间:{{item.purchaseDate}}</span></div>
+        </div> 
           </van-radio>
         </van-radio-group>
       <BottomButton :btList='btList'  @clickBt='clickBt'></BottomButton>
@@ -28,6 +55,8 @@ export default {
       active: 0,
       value: "",
       PostList: [],
+      //采购清单
+      title: ["产品名称", "规格型号", "单价", "数量", "总金额"],
       btList:[{name:'取消',click:'cancel'},{name:'确定',click:'submit',color:'blue'}],
       radio:''
     };
@@ -53,6 +82,9 @@ export default {
           return {
             id: item.id + "",
             batchNo: item.batchNo,
+            purchaseDate:item.purchaseDate,
+            totalPrice:item.totalPrice,
+            purchaseDetailVoList:item.purchaseDetailVoList
           };
         });
       });

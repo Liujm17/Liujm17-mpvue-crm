@@ -1,10 +1,6 @@
 <template>
-  <div  class="user-bg">
-    <van-search
-      v-model="value"
-      placeholder="请输入搜索关键词"
-      @search="onSearch"
-    />
+  <div class="user-bg">
+    <van-search v-model="value" placeholder="请输入搜索关键词" @search="onSearch" />
     <van-tabs :active="active">
       <van-tab title="用户">
         <van-radio-group v-model="radio" @change="radioChange1">
@@ -21,29 +17,12 @@
         </van-radio-group>
       </van-tab>
     </van-tabs>
-    <div class="bottom-bt">
-      <!-- <div class="" style="width:50%">取消</div>
-      <div class="" style="width:50%">确定</div> -->
-      <!-- <van-button color="#be99ff" type="warning" @click="cancel">取消</van-button>
-      <van-button color="#7232dd" type="info" @click="submit">确定</van-button> -->
-      <!-- <van-goods-action>
-        <van-goods-action-button
-          type="warning"
-          text="取消"
-          @click="cancel"
-        />
-        <van-goods-action-button
-          type="info"
-          text="确定"
-          @click="submit"
-        />
-      </van-goods-action> -->
-    </div>
-    <BottomButton :btList='btList'  @clickBt='clickBt'></BottomButton>
+    <div class="bottom-bt"></div>
+    <BottomButton :btList="btList" @clickBt="clickBt" />
   </div>
 </template>
 <script>
-import BottomButton from './bottomButton'
+import BottomButton from "./bottomButton";
 import { getUserOptions } from "../api/api";
 export default {
   data() {
@@ -51,16 +30,19 @@ export default {
       active: 0,
       value: "",
       UserList: [],
-      btList:[{name:'取消',click:'cancel'},{name:'确定',click:'submit',color:'blue'}]
+      btList: [
+        { name: "取消", click: "cancel" },
+        { name: "确定", click: "submit", color: "blue" },
+      ],
     };
   },
-  props:{
-      radio:{
-        type:String,
-        default:'1'
-      }
+  props: {
+    radio: {
+      type: String,
+      default: "1",
+    },
   },
-  components: {BottomButton},
+  components: { BottomButton },
   onLoad() {
     this.getData();
   },
@@ -99,8 +81,8 @@ export default {
     //   this.radio2 = val.mp.detail;
     // },
     //自定义底部按钮
-     clickBt(val){
-     this[val]()
+    clickBt(val) {
+      this[val]();
     },
     cancel() {
       this.$emit("cancel");

@@ -2,7 +2,7 @@
 import Fly from 'flyio/dist/npm/wx'
 //创建实例
 const request = new Fly()
-request.config.baseURL = 'https://www.hxhb-test.icu:8004'
+request.config.baseURL = 'https://test.saddlepoint.cn:8004'
 // request.config.baseURL = 'https://www.saddlepoint.cn:8003'
 request.config.timeout = 3000 
 
@@ -17,7 +17,7 @@ request.interceptors.request.use((request) => {
  }
   request.headers['Authorization'] = mpvue.getStorageSync('Authorization')// 让每个请求携带自定义token 请根据实际情况自行修改
   var defaults = {
-    factoryId:wx.getStorageSync("factoryId"),
+    factoryId:wx.getStorageSync("factoryId")?wx.getStorageSync("factoryId"):'',
     systemCode:'05',
     userId:wx.getStorageSync('UserId')
   }

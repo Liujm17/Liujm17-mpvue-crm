@@ -4,8 +4,8 @@
     <van-cell-group>
       <van-field
         v-model="materialName"
-        label="项目名称"
-        placeholder="请输入项目名称"
+        label="资料名称"
+        placeholder="请输入资料名称"
         required
         input-align="right"
         @input="materialName = $event.mp.detail"
@@ -19,7 +19,7 @@
         label="备注"
         type="textarea"
         input-align="right"
-        placeholder="项目描述信息"
+        placeholder="资料描述信息"
         @input="remark = $event.mp.detail"
       />
     </div>
