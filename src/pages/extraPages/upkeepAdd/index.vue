@@ -19,20 +19,13 @@
       >
       </van-field>
     </van-cell-group>
-   <!-- <div class="polling-info">
-      <div class="polling-title">维修结果</div>
-      <RadioList
-        :typeList="typeList"
-        :active="active"
-        @changeData="changeData"
-      ></RadioList>
-    </div> -->
     <div class="polling-text">
       <van-field
         v-model="remarks"
         rows="1"
         autosize
-        label="备注"
+        required
+        label="保养详情"
         type="textarea"
         placeholder="保养描述信息"
            @input="remarks = $event.mp.detail"
@@ -117,7 +110,7 @@ export default {
     'formData.maintainTime':{
       handler(newVal,oldVal){
         if(newVal){
-       this.formData.nextMaintainTime=data.formattingTime(new Date(newVal).getTime()+24*3600*1000*this.formData.maintenanceDay).replace('0:0:0','')
+       this.formData.nextMaintainTime=data.formattingTime(new Date(newVal.replace(/-/g,'/')).getTime()+24*3600*1000*this.formData.maintenanceDay).replace('0:0:0','')
         }
       },
       immediate:false
@@ -125,7 +118,7 @@ export default {
     'formData.maintenanceDay':{
       handler(newVal,oldVal){
         if(newVal&&this.formData.maintainTime){
-       this.formData.nextMaintainTime=data.formattingTime(new Date(this.formData.maintainTime).getTime()+24*3600*1000*newVal).replace('0:0:0','')
+       this.formData.nextMaintainTime=data.formattingTime(new Date(this.formData.maintainTime.replace(/-/g,'/')).getTime()+24*3600*1000*newVal).replace('0:0:0','')
         }
       },
       immediate:false
@@ -153,8 +146,9 @@ export default {
     },
     //设备列表确定
     deviceSubmit(val){
-         this.$set(this.formData, "deviceId", val.id);
+      this.$set(this.formData, "deviceId", val.id);
       this.$set(this.formData, "deviceName", val.name);
+      this.$set(this.formData,'maintenanceDay',val.maintenanceDay)
       this.diviceShow=false
     },
     //更换正常异常
@@ -175,13 +169,14 @@ export default {
         userName: wx.getStorageSync("applyUserName"),
       };
       if (this.photoList.length > 0) {
+         this.uuid= data.get_uuid()
         data.upLoadFile(this.photoList, 0, this.uuid).then((res) => {
           //文件code
           let resData = JSON.parse(res.data);
           params.batchId = resData.data.batchId;
           data["upkeep"].saveOrStart(params).then((res) => {
              if(res.data.code == 10000){
-              mpvue.showToast({
+              wx.showToast({
               title: res.data.message,
               icon: "none",
               duration: 3000,
@@ -195,7 +190,7 @@ export default {
       } else {
         data["upkeep"].saveOrStart(params).then((res) => {
            if(res.data.code == 10000){
-              mpvue.showToast({
+              wx.showToast({
               title: res.data.message,
               icon: "none",
               duration: 3000,
@@ -208,7 +203,9 @@ export default {
       }
     },
     //取消
-    cancel() {},
+    cancel() {
+      this.$router.back();
+    },
   },
 };
 </script>

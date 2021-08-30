@@ -26,6 +26,7 @@
         v-model="reason"
         rows="1"
         autosize
+        required
         label="申请事项"
         type="textarea"
         placeholder="申请事项描述信息"
@@ -126,7 +127,7 @@ export default {
    onReady() {
     this.getData2()
     wx.setNavigationBarTitle({
-          title: '请求单-新增'+'('+wx.getStorageSync("factoryName")+')',
+          title: '请示单-新增'+'('+wx.getStorageSync("factoryName")+')',
         });
   },
   watch: {},
@@ -169,7 +170,7 @@ export default {
        //流程相关方法
      //流程弹窗
     showPopup2(val) {
-      this.show = true;
+      this.usershow = true;
       (this.popUpType = "流程"), (this.nodeId = val.nodeId);
       this.userradio = val.userId + "";
     },
@@ -226,13 +227,14 @@ export default {
         }
       };
       if (this.photoList.length > 0) {
+         this.uuid= data.get_uuid()
         data.upLoadFile(this.photoList, 0, this.uuid).then((res) => {
           //文件code
           let resData = JSON.parse(res.data);
           params.batchId = resData.data.batchId;
           data["askfor"].saveOrStart(params).then((res) => {
             if (res.data.code == 10000) {
-              mpvue.showToast({
+              wx.showToast({
                 title: res.data.message,
                 icon: "none",
                 duration: 3000,
@@ -246,7 +248,7 @@ export default {
       } else {
         data["askfor"].saveOrStart(params).then((res) => {
           if (res.data.code == 10000) {
-            mpvue.showToast({
+            wx.showToast({
               title: res.data.message,
               icon: "none",
               duration: 3000,

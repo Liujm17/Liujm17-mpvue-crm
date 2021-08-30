@@ -12,7 +12,6 @@
             :label="item.value"
             :placeholder="item.value"
             :type="item.type"
-            :required="item.required"
             input-align="right"
             readonly
             :rules="[{ required: true, message: '请填写' + item.value }]"
@@ -31,10 +30,10 @@
             v-model="formData.repairDetail"
             rows="1"
             autosize
-            label="故障原因"
+            label="维修详情"
             type="textarea"
             readonly
-            placeholder="故障报修描述信息"
+            placeholder="维修详情描述信息"
             @input="repairDetail = $event.mp.detail"
           />
         </van-cell-group>
@@ -258,7 +257,7 @@ export default {
       };
       data["maintain"].editOrStart(params).then((res) => {
         if(res.data.code == 10000){
-              mpvue.showToast({
+              wx.showToast({
               title: res.data.message,
               icon: "none",
               duration: 3000,

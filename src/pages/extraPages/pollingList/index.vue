@@ -22,7 +22,7 @@
 </template>
 <script>
 import RadioButton from "../../../components/radioButton";
-import Card from "../../../components/card";
+import Card from "../../../components/boxCard";
 import Search from "../../../components/searchView";
 import BottomButton from "../../../components/bottomButton.vue";
 import data from "../../../api/mockData";
@@ -53,7 +53,7 @@ export default {
     //下拉刷新
   onPullDownRefresh() {
     //doing something
-    mpvue.showToast({
+    wx.showToast({
       title: "下拉刷新成功",
       icon: "none",
       duration: 1000,
@@ -120,7 +120,7 @@ export default {
       let params = {
         pageNum: 1,
         pageSize: this.pageSize,
-        applyUserId: mpvue.getStorageSync("UserId"),
+        applyUserId: wx.getStorageSync("UserId"),
         searchValues: this.value,
         formId: this.$store.state.formId,
         deviceId: this.$route.query.deviceId ? this.$route.query.deviceId : "",
@@ -148,6 +148,7 @@ export default {
     send() {
       // 允许从相机和相册扫码
       wx.scanCode({
+        onlyFromCamera: true,
         success:(res) =>{
          this.$router.push({
            path:'/pages/extraPages/pollingAdd/main',

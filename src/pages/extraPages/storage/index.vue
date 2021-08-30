@@ -76,6 +76,7 @@ export default {
   width: 100%;
   padding: 10px;
   box-sizing: border-box;
+  margin-bottom: 150px;
   .table-header {
     display: flex;
     line-height: 40px;
@@ -87,6 +88,7 @@ export default {
       text-align: center;
       color: #666666;
       font-weight: 700;
+      font-size:15px;
       border-right: 1px solid;
       border-bottom: 1px solid;
     }

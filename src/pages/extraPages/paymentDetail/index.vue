@@ -13,7 +13,6 @@
             :placeholder=" item.value"
             :type="item.type"
             :autosize="item.type == 'textarea' ? true : false"
-            :required="item.required"
             input-align="right"
             :readonly="true"
             :rules="[{ required: true, message: '请填写' + item.value }]"
@@ -32,7 +31,7 @@
           :notShow="false"
         ></Accessroy>
         <van-field
-          v-model="suggestion"
+          v-model="suggestion" @input="suggestion = $event.mp.detail"
           rows="1"
           autosize
           label="意见"
@@ -81,7 +80,7 @@ import data from "../../../api/mockData";
 import Accessroy from "../../../components/apply/accessory";
 import BottomButton from "../../../components/bottomButton.vue";
 import Delete from "../../../components/sureDelete";
-import Card from "../../../components/card.vue";
+import Card from "../../../components/boxCard.vue";
 import Purchase from '../../../components/apply/PurchaseDetails.vue'
 import { backFlow,agree,disagree } from "../../../api/api";
 import Dialog2 from "../../../../dist/wx/vant-weapp/dist/dialog2/dialog";
@@ -92,7 +91,7 @@ export default {
       //订单详情
       paymentList:[],
       //tab栏激活页
-      hisTitle: ["审批步骤", "处理人", "处理时间", "结果"],
+      hisTitle: [],
       active: 0,
       HistoryList: [],
       //采购清单
@@ -134,7 +133,7 @@ export default {
       orderId: "",
     };
   },
-  onLoad() {
+  onShow() {
     this.getData();
      wx.setNavigationBarTitle({
           title: '付款申请-详情'+'('+wx.getStorageSync("factoryName")+')',
@@ -182,7 +181,7 @@ export default {
           orderId: this.orderId,
         };
         data.getHistory(params).then((res) => {
-          mpvue.showToast({
+          wx.showToast({
             title: "正在加载",
             icon: "loading",
             duration: 500,
@@ -194,7 +193,7 @@ export default {
     },
     getData() {
       let params = {
-        formId: this.$store.state.formId,
+        formId: 11,
         id: this.$route.query.id,
       };
       //获取表单数据
@@ -370,10 +369,10 @@ export default {
     del() {
       let params = {
         id: this.$route.query.id,
-        formId: this.$store.state.formId,
+        formId: 11,
       };
       data["payment"].delFlow(params).then((res) => {
-        mpvue.showToast({
+        wx.showToast({
           title: res.data.message,
           icon: "none",
           duration: 1000,
@@ -391,7 +390,7 @@ export default {
         orderId: this.orderId,
       };
       backFlow(params).then((res) => {
-        mpvue.showToast({
+        wx.showToast({
           title: res.data.message,
           icon: "none",
           duration: 1000,
@@ -410,6 +409,7 @@ export default {
         suggestion: this.suggestion,
       };
       agree(params).then((res) => {
+        this.getData();
         this.$router.back();
       });
     },
@@ -428,6 +428,7 @@ export default {
             dealResult:res.type
           }
           disagree(params).then((res) => {
+          this.getData()
              this.$router.back();
           });
         })

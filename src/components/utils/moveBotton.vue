@@ -1,11 +1,11 @@
 <template>
-  <movable-area class="movable-area">
-    <movable-view :class="show1?'movable-view':'movable-view2'" direction="all" inertia @change="change">
+  <movable-area class="movable-area" :style="{opacity:opacity}">
+    <movable-view :class="show1?'movable-view':'movable-view2'" direction="all" inertia @change="change" :x='width' y='200'>
         <div class="movable-hide" @click="showDetail"></div>
         <div class="movable-content" v-if="show">
-          <div class="content-item" @click="send">扫码巡检</div>
-          <div class="content-item" @click="openPrj">切换项目</div>
-          <div class="content-item2">{{title3}}</div>
+          <div class="content-item" @click="send"></div>
+          <div class="content-item" @click="openPrj"></div>
+          <!-- <div class="content-item2">{{title3}}</div> -->
         </div>
     </movable-view>
   </movable-area>
@@ -19,6 +19,7 @@ export default {
       show1: true,
       width: wx.getSystemInfoSync().windowWidth,
       height: wx.getSystemInfoSync().windowHeight,
+      opacity:0.5
     };
   },
   props: {
@@ -26,6 +27,17 @@ export default {
       type: String,
       default: "",
     },
+  },
+  watch:{
+     show:{
+       handler(newVal,oldVal){
+         if(newVal){
+           this.opacity=1
+         }else{
+           this.opacity=0.5
+         }
+       }
+     }
   },
   methods: {
     showDetail() {
@@ -75,11 +87,24 @@ export default {
   width: 50px;
 }
 .movable-content {
-  background: #ffdead;
+  // background: #ffdead;
 }
 .content-item {
-  border: 1px solid black;
   text-align: center;
+}
+.content-item:nth-child(1) {
+   height: 50px;
+  width: 50px;
+  text-align: center;
+    background: url("../../../static/images/saoma.png") no-repeat;
+  background-size: 100% 100%;
+}
+.content-item:nth-child(2) {
+   height: 50px;
+  width: 50px;
+  text-align: center;
+    background: url("../../../static/images/qiehuan.png") no-repeat;
+  background-size: 100% 100%;
 }
 .content-item2 {
   border: 1px solid black;

@@ -50,6 +50,7 @@
         >添加配件</van-button
       >
     </div>
+    <div style="width:100%;height:300px"></div>
 
     <!-- 日期 -->
     <Picker
@@ -118,6 +119,7 @@ export default {
       //产品弹窗相关
       productShow: false,
       productRadio: "1",
+      fileCode:''
     };
   },
   onLoad() {
@@ -128,7 +130,7 @@ export default {
      this.uuid= data.get_uuid(),
     this.getData()
       wx.setNavigationBarTitle({
-          title: '费用报销-编辑'+'('+wx.getStorageSync("factoryName")+')',
+          title: '设备信息-编辑'+'('+wx.getStorageSync("factoryName")+')',
       });
   },
    watch:{
@@ -172,18 +174,7 @@ export default {
              id:item.id?item.id:''
           }
         }):[]
-        // let list =[]
-        // if(res.data.data.fileVo.id){
-        //    list.push(res.data.data.fileVo)
-        // this.photoList=list.length>0?list.map((item)=>{
-        //   return{
-        //      type:item.type==0?'image':'video',
-        //      img:item.type==0?item.address:'',
-        //      video:item.type==1?item.address:'',
-        //      id:item.id?item.id:''
-        //   }
-        // }):[]
-        // }
+        this.fileCode=res.data.data.fileCode?res.data.data.fileCode:this.uuid
         })
     },
     //按钮群点击更换高亮事件
@@ -195,7 +186,7 @@ export default {
       let params = {
         id: this.$route.query.id,
         ...this.formData,
-        fileCode: "",
+        fileCode: this.fileCode,
         deleteIds:this.deleteList,
         factoryId: wx.getStorageSync("factoryId"),
         systemCode: "05",
@@ -210,7 +201,7 @@ export default {
           params.fileCode = resData.data.code;
           data["deviceInfo"].editOrStart(params).then((res) => {
               if(res.data.code == 10000){
-              mpvue.showToast({
+              wx.showToast({
               title: res.data.message,
               icon: "none",
               duration: 3000,
@@ -227,7 +218,7 @@ export default {
       } else {
         data["deviceInfo"].editOrStart(params).then((res) => {
            if(res.data.code == 10000){
-              mpvue.showToast({
+              wx.showToast({
               title: res.data.message,
               icon: "none",
               duration: 3000,
@@ -311,6 +302,7 @@ export default {
       text-align: center;
       color: #666666;
       font-weight: 700;
+      font-size:15px;
       border-right: 1px solid;
       border-bottom: 1px solid;
     }

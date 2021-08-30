@@ -1,10 +1,8 @@
 <template>
   <div>
-    <van-tabs :active="active" @change="change">
-      <van-tab title="详情">
         <BaseInfo
           title='基本信息'
-          :listData="data[page].vanFormData.formData"
+          :listData="listData"
           :formData="formData"
            :radioList='radioList'
           :active='active'
@@ -12,21 +10,7 @@
           @showPopup="showPopup"
             v-if="showComponents[0]"
         ></BaseInfo>
-        <!-- <Flow
-          :flowStatus="flowStatus"
-          :flowId="flowId"
-          :flowList="flowList"
-          :fitNodeList="fitNodeList"
-          @showPopup2="showPopup2"
-          @radioChange='radioChange'
-            v-if="showComponents[1]"
-        ></Flow> -->
-      </van-tab>
 
-      <van-tab title="日志"  v-if="data[page].hasHistory">
-        <Card :cardList="HistoryList"></Card>
-      </van-tab>
-    </van-tabs>
 
     <van-goods-action>
       <van-goods-action-button
@@ -103,6 +87,7 @@ export default {
       data: data,
       active: 0,
       formData: {},
+      listData:[],
       // disabled: true,
       show: false,
       show2: false,
@@ -133,9 +118,23 @@ export default {
       (item) => item.formId == this.$store.state.formId
     )[0];
     this.page = this.$route.query.data;
+    this.listData=data[this.$route.query.data].vanFormData.formData
     this.text = "编辑";
     this.getData();
     this.pageType = this.$route.query.type;
+    if (this.$route.query.formId == 2) {
+     this.listData[0].readonly=true
+      wx.setNavigationBarTitle({
+        title: "员工--编辑"+'('+wx.getStorageSync("factoryName")+')',
+      });
+    } else if (this.$route.query.formId == 3) {
+      wx.setNavigationBarTitle({
+        title: "供应商--编辑"+'('+wx.getStorageSync("factoryName")+')',
+      });
+    }
+  },
+   onUnload(){
+     this.show=false
   },
    watch: {
     filterInfo(val){
@@ -158,7 +157,7 @@ export default {
         };
         //获取日志
         data[this.$route.query.data].getHistory(params).then((res) => {
-          mpvue.showToast({
+          wx.showToast({
             title: "正在加载",
             icon: "loading",
             duration: 500,
@@ -217,12 +216,12 @@ export default {
       let params = {
         id: this.$route.query.id,
         formId: this.$store.state.formId,
-        userId: mpvue.getStorageSync("UserId"),
+        userId: wx.getStorageSync("UserId"),
       };
 
       let params2 = {
         formId: this.$store.state.formId,
-        userId: mpvue.getStorageSync("UserId"),
+        userId: wx.getStorageSync("UserId"),
       };
       //获取表单数据
       data[this.$route.query.data].getData(params).then((res) => {
@@ -252,7 +251,7 @@ export default {
     getListByFlowId() {
       let paramFlow = {
         flowId: this.flowId,
-        userId: mpvue.getStorageSync("UserId"),
+        userId: wx.getStorageSync("UserId"),
       };
       //根据流程id查询节点
       data[this.$route.query.data].getByFlowId(paramFlow).then((res) => {
@@ -279,14 +278,15 @@ export default {
         ...this.formData,
         formId: this.$store.state.formId,
         flowId: this.flowId,
-        userId: mpvue.getStorageSync("UserId"),
+        userId: wx.getStorageSync("UserId"),
+         factoryId: wx.getStorageSync("factoryId"),
         type: val == "save" ? 0 : 1,
         optionalJson: val == "save" ? "" : JSON.stringify(this.fitNodeList),
       };
       data.dataFilter2(params);
       data[this.$route.query.data].editOrStart(params).then((res) => {
         if(res.data.code == 10000){
-              mpvue.showToast({
+              wx.showToast({
               title: res.data.message,
               icon: "none",
               duration: 3000,
@@ -314,12 +314,12 @@ export default {
     queding(val) {
       let params = {
         ...val,
-        userId: mpvue.getStorageSync("UserId"),
+        userId: wx.getStorageSync("UserId"),
         orderId: this.$route.query.orderId,
       };
       if (this.dealType == "agree") {
         agree(params).then((res) => {
-          mpvue.showToast({
+          wx.showToast({
             title: res.data.message,
             icon: "none",
             duration: 1000,
@@ -330,7 +330,7 @@ export default {
         });
       } else {
         disagree(params).then((res) => {
-          mpvue.showToast({
+          wx.showToast({
             title: res.data.message,
             icon: "none",
             duration: 1000,
@@ -346,10 +346,10 @@ export default {
       let params = {
         id: this.formData.id,
         formId: this.$store.state.formId,
-         userId: mpvue.getStorageSync("UserId"),
+         userId: wx.getStorageSync("UserId"),
       };
       data[this.$route.query.data].delFlow(params).then((res) => {
-        mpvue.showToast({
+        wx.showToast({
           title: res.data.message,
           icon: "none",
           duration: 1000,

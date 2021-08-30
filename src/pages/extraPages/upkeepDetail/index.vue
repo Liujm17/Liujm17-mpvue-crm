@@ -12,7 +12,6 @@
             :label="item.value"
             :placeholder="item.value"
             :type="item.type"
-            :required="item.required"
             input-align="right"
             readonly
             :rules="[{ required: true, message: '请填写' + item.value }]"
@@ -23,7 +22,7 @@
             v-model="formData.remarks"
             rows="1"
             autosize
-            label="备注"
+            label="保养详情"
             type="textarea"
             readonly
             placeholder="保养描述信息"
@@ -212,7 +211,7 @@ export default {
       };
       data["upkeep"].editOrStart(params).then((res) => {
           if(res.data.code == 10000){
-              mpvue.showToast({
+              wx.showToast({
               title: res.data.message,
               icon: "none",
               duration: 3000,

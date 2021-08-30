@@ -11,9 +11,9 @@
         :label="item.value"
         :placeholder="item.value"
         :type="item.type"
-        :required="item.required"
         input-align="right"
          :readonly="readonly?readonly:item.readonly"
+         :required="required?false:item.required"
         :rules="[{ required: true, message: '请填写' + item.value }]"
         @input="formData[item.name] = $event.mp.detail"
         @click="item.click == 'user' ? showPopup('表单') : (item.click == 'post'?showPost(item):(item.click == 'date'?showDate(item):''))"
@@ -56,6 +56,10 @@ import data from '../../api/mockData'
 export default {
      props:{
          readonly:{
+             type:Boolean,
+             default:'',
+         },
+         required:{
              type:Boolean,
              default:'',
          },

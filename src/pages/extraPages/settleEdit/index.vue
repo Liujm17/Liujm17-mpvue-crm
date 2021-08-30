@@ -62,7 +62,7 @@
         v-model="item.unitPrice"
         placeholder="请填写单价"
         label="单价"
-        type="digit"
+        type=""
         required
         input-align="right"
         @input="item.unitPrice = $event.mp.detail"
@@ -203,7 +203,6 @@ export default {
   },
   onLoad() {
     this.deleteList=[]
-    this.uuid = data.get_uuid();
   },
   onReady() {
     this.formData.userName = wx.getStorageSync("applyUserName");
@@ -266,6 +265,7 @@ export default {
               };
             })
           : [];
+           this.uuid=res.data.data.batchId?res.data.data.batchId:this.data.get_uuid()
         this.content = res.data.data.costStatementDetailVoList.map((item) => {
           return {
             id: item.id ? item.id : "",
@@ -347,7 +347,7 @@ export default {
     //流程相关方法
     //流程弹窗
     showPopup2(val) {
-      this.show = true;
+      this.usershow = true;
       (this.popUpType = "流程"), (this.nodeId = val.nodeId);
       this.userradio = val.userId + "";
     },
@@ -398,7 +398,7 @@ export default {
       let params = {
          id: this.$route.query.id,
         ...this.formData,
-        batchId: "",
+        batchId: this.needList.length > 0?this.uuid:null,
         factoryId: wx.getStorageSync("factoryId"),
         deleteIds: this.deleteList,
         costStatementDetailList:this.content,
@@ -417,7 +417,7 @@ export default {
           params.batchId = resData.data.batchId;
           data["settle"].editOrStart(params).then((res) => {
             if (res.data.code == 10000) {
-              mpvue.showToast({
+              wx.showToast({
                 title: res.data.message,
                 icon: "none",
                 duration: 3000,
@@ -431,7 +431,7 @@ export default {
       } else {
         data["settle"].editOrStart(params).then((res) => {
           if (res.data.code == 10000) {
-            mpvue.showToast({
+            wx.showToast({
               title: res.data.message,
               icon: "none",
               duration: 3000,

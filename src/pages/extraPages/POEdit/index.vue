@@ -37,14 +37,14 @@
       </div>
       <div class="table-content" v-for="(item, index) in content" :key="index">
         <div class="content-title">{{ item.name }}</div>
-        <div class="content-title">{{ item.specs }}</div>
+        <!-- <div class="content-title">{{ item.specs }}</div>
         <div class="content-title">
           <van-stepper
             v-model="item.unitPrice"
             @change="content[index].unitPrice = $event.mp.detail"
              min="0"
           />
-        </div>
+        </div> -->
         <div class="content-title">
           <van-stepper
             v-model="item.purchaseQuantity"
@@ -52,9 +52,9 @@
              min="0"
           />
         </div>
-        <div class="content-title">
+        <!-- <div class="content-title">
           {{item.totalPrice?item.totalPrice:0}}
-        </div>
+        </div> -->
         <div class="content-title" style="color: red" @click="delList(index)">
           删除
         </div>
@@ -144,7 +144,7 @@ export default {
   data() {
     return {
       //采购清单
-      title: ["产品名称", "规格型号", "单价", "数量", "总金额(元)", "操作"],
+      title: ["产品名称", "数量", "操作"],
       content: [],
       //采购清单list
       purchaseDetailList: [],
@@ -200,16 +200,16 @@ export default {
   watch:{
        content: {
       handler(newValue, oldValue) {
-       newValue.forEach((item)=>{
-         item.totalPrice=item.unitPrice*item.purchaseQuantity
-       })
-       this.formData.totalPrice=newValue.reduce((total,item)=>total+item.unitPrice*item.purchaseQuantity,0)
+      //  newValue.forEach((item)=>{
+      //    item.totalPrice=item.unitPrice*item.purchaseQuantity
+      //  })
+      //  this.formData.totalPrice=newValue.reduce((total,item)=>total+item.unitPrice*item.purchaseQuantity,0)
        this.purchaseDetailList=newValue.map((item)=>{
          return{
            productId:item.id,
-           unitPrice:item.unitPrice,
+          //  unitPrice:item.unitPrice,
            purchaseQuantity:item.purchaseQuantity,
-           totalPrice:item.totalPrice
+          //  totalPrice:item.totalPrice
          }
        })
       },
@@ -237,7 +237,7 @@ export default {
     //获取流程列表
     getData() {
        let params={
-          formId: this.$store.state.formId,
+          formId: 5,
           id: this.$route.query.id,
        }
         //获取表单数据
@@ -245,22 +245,23 @@ export default {
        this.formData={
          purchaseDate: res.data.data.purchaseDate,
          purpose: res.data.data.purpose,
-         supplierContacts: res.data.data.supplierContacts,
-         supplierId: res.data.data.supplierId,
-         supplierName:res.data.data.supplierName,
-         supplierPhone: res.data.data.supplierPhone,
-         totalPrice: res.data.data.totalPrice,
+        //  supplierContacts: res.data.data.supplierContacts,
+        //  supplierId: res.data.data.supplierId,
+        //  supplierName:res.data.data.supplierName,
+        //  supplierPhone: res.data.data.supplierPhone,
+        //  totalPrice: res.data.data.totalPrice,
          type: res.data.data.type,
          userName: res.data.data.userName,
+         estimateArrivalDate:res.data.data.estimateArrivalDate
        }
        this.content=res.data.data.purchaseDetailVoList.map((item)=>{
          return{
            id:item.productId,
            name:item.productName,
-           specs:item.specs,
+          //  specs:item.specs,
            purchaseQuantity:item.purchaseQuantity,
-           unitPrice:item.unitPrice,
-           totalPrice:item.totalPrice
+          //  unitPrice:item.unitPrice,
+          //  totalPrice:item.totalPrice
          }
        })
         this.photoList=res.data.data.fileList?res.data.data.fileList.map((item)=>{
@@ -273,7 +274,7 @@ export default {
         }):[]
       });
        let params2 = {
-        formId:this.$store.state.formId,
+        formId:5,
       };
         getFlowList(params2).then((res) => {
         if (res.data.data.length >= 1) {
@@ -314,12 +315,12 @@ export default {
         userId: wx.getStorageSync("UserId"),
         ...this.formData,
         purchaseDetailList:this.purchaseDetailList,
-         batchId: "",
+         batchId: this.needList.length > 0?this.uuid:null,
          deleteIds:this.deleteList,
          id:Number(this.$route.query.id),
         startFlowDto: {
           optionalJson: JSON.stringify(this.fitNodeList),
-          formId: this.$store.state.formId,
+          formId: 5,
           flowId: Number(this.flowId),
         },
       };
@@ -331,7 +332,7 @@ export default {
           params.batchId = resData.data.batchId;
           data["PO"].editOrStart(params).then((res) => {
                 if(res.data.code == 10000){
-              mpvue.showToast({
+              wx.showToast({
               title: res.data.message,
               icon: "none",
               duration: 3000,
@@ -348,7 +349,7 @@ export default {
       } else {
         data["PO"].editOrStart(params).then((res) => {
              if(res.data.code == 10000){
-              mpvue.showToast({
+              wx.showToast({
               title: res.data.message,
               icon: "none",
               duration: 3000,
@@ -382,7 +383,7 @@ export default {
     },
     //流程弹窗
     showPopup2(val) {
-      this.show = true;
+      this.usershow = true;
       (this.popUpType = "流程"), (this.nodeId = val.nodeId);
       this.userradio = val.userId + "";
     },
@@ -409,6 +410,8 @@ export default {
     submit(val) {
       this.$set(this.formData, "supplierId", val.id);
       this.$set(this.formData, "supplierName", val.name);
+       this.$set(this.formData, "supplierContacts", val.contacts);
+      this.$set(this.formData, "supplierPhone", val.phone);
       this.show = false;
     },
     //产品确认

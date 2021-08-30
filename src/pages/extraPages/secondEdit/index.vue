@@ -83,8 +83,8 @@ import Accessroy from "../../../components/apply/accessory";
 // import BottomButton from "../../../components/bottomButton";
 import Picker from "../../../components/utils/picker.vue";
 import Flow from "../../../components/apply/flow.vue";
-import User from "../../../components/userOptions";
-import Factory from "../../../components/factoryOptions.vue";
+import User from "../../../components/userOptions2";
+import Factory from "../../../components/factoryOptions2.vue";
 import { getFlowList, getByFlowId, getWaitPaymentList } from "../../../api/api";
 export default {
   components: { Accessroy, Picker, Flow, User, Factory },
@@ -140,7 +140,6 @@ export default {
     this.deleteList=[]
     this.formData = this.data[this.page].formData;
     this.listData = this.data[this.page].vanFormData.formData;
-    this.uuid = data.get_uuid();
   },
   onReady() {
     this.getData();
@@ -207,6 +206,7 @@ export default {
               };
             })
           : [];
+           this.uuid=res.data.data.batchId?res.data.data.batchId:this.data.get_uuid()
       });
     },
     //获取流程列表
@@ -252,7 +252,7 @@ export default {
         factoryId: wx.getStorageSync("factoryId"),
         systemCode: "05",
         ...this.formData,
-        batchId: "",
+        batchId: this.needList.length > 0?this.uuid:null,
         deleteIds:this.deleteList,
         startFlowDto: {
           type: val,
@@ -268,7 +268,7 @@ export default {
           params.batchId = resData.data.batchId;
           data["second"].editOrStart(params).then((res) => {
             if (res.data.code == 10000) {
-              mpvue.showToast({
+              wx.showToast({
                 title: res.data.message,
                 icon: "none",
                 duration: 3000,
@@ -282,7 +282,7 @@ export default {
       } else {
         data["second"].editOrStart(params).then((res) => {
           if (res.data.code == 10000) {
-            mpvue.showToast({
+            wx.showToast({
               title: res.data.message,
               icon: "none",
               duration: 3000,
@@ -310,7 +310,7 @@ export default {
     },
     //流程弹窗
     showPopup2(val) {
-      this.show = true;
+      this.usershow = true;
       (this.popUpType = "流程"), (this.nodeId = val.nodeId);
       this.userradio = val.userId + "";
     },
@@ -328,15 +328,29 @@ export default {
     },
     //日期确认
     submit2(val) {
-      if (this.active == 0) {
+      if (this.clickName == "endDate") {
+        if (this.formData.startDate) {
+          if (new Date().setFullYear(val.split('-')[0],val.split('-')[1],val.split('-')[2]) >new Date().setFullYear(this.formData.startDate.split('-')[0],this.formData.startDate.split('-')[1],this.formData.startDate.split('-')[2])) {
+            this.formData[this.clickName] = val;
+            this.dateShow = false;
+          } else {
+            wx.showToast({
+              title: "结束日期请大于开始日期",
+              icon: "none",
+              duration: 2000,
+              mask: true,
+            });
+          }
+        } else {
+          wx.showToast({
+            title: "请先选择开始日期",
+            icon: "none",
+            duration: 2000,
+            mask: true,
+          });
+        }
+      } else {
         this.formData[this.clickName] = val;
-        //这个的时候他不需要id值 只需要name，value为undifined
-        // this.formData[this.clickValue] = val;
-        this.dateShow = false;
-      } else if (this.active == 1) {
-        this.formData2[this.clickName] = val;
-        //这个的时候他不需要id值 只需要name，value为undifined
-        // this.formData[this.clickValue] = val;
         this.dateShow = false;
       }
     },

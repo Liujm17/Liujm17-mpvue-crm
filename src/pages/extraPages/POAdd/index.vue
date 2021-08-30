@@ -37,17 +37,14 @@
       </div>
       <div class="table-content" v-for="(item, index) in content" :key="index">
         <div class="content-title">{{ item.name }}</div>
-        <div class="content-title">{{ item.specs }}</div>
-        <div class="content-title">
-           <!-- <van-field v-model="item.unitPrice" type="number"
-            @input="content[index].unitPrice = $event.mp.detail"
-           /> -->
+        <!-- <div class="content-title">{{ item.specs }}</div> -->
+        <!-- <div class="content-title">
           <van-stepper
             v-model="item.unitPrice"
             @change="content[index].unitPrice = $event.mp.detail"
             min="0"
           />
-        </div>
+        </div> -->
         <div class="content-title">
           <van-stepper
             v-model="item.purchaseQuantity"
@@ -55,9 +52,9 @@
              min="0"
           />
         </div>
-        <div class="content-title">
+        <!-- <div class="content-title">
           {{item.totalPrice?item.totalPrice:0}}
-        </div>
+        </div> -->
         <div class="content-title" style="color: red" @click="delList(index)">
           删除
         </div>
@@ -68,8 +65,6 @@
         >添加产品</van-button
       >
     </div>
-    <!-- 附件 -->
-    <Accessroy :photoList="photoList" :onlyOne="false"></Accessroy>
 
     <!-- 日期 -->
     <Picker
@@ -147,7 +142,7 @@ export default {
   data() {
     return {
       //采购清单
-      title: ["产品名称", "规格型号", "单价", "数量", "总金额(元)", "操作"],
+      title: ["产品名称", "数量", "操作"],
       content: [],
       //采购清单list
       purchaseDetailList: [],
@@ -189,6 +184,7 @@ export default {
      this.uuid= data.get_uuid()
   },
   onReady() {
+    this.content=[]
     this.getData();
      wx.setNavigationBarTitle({
           title: '采购订单-新增'+'('+wx.getStorageSync("factoryName")+')',
@@ -197,16 +193,16 @@ export default {
   watch:{
        content: {
       handler(newValue, oldValue) {
-       newValue.forEach((item)=>{
-         item.totalPrice=item.unitPrice*item.purchaseQuantity
-       })
-       this.formData.totalPrice=newValue.reduce((total,item)=>total+item.unitPrice*item.purchaseQuantity,0)
+      //  newValue.forEach((item)=>{
+      //    item.totalPrice=item.unitPrice*item.purchaseQuantity
+      //  })
+      //  this.formData.totalPrice=newValue.reduce((total,item)=>total+item.unitPrice*item.purchaseQuantity,0)
        this.purchaseDetailList=newValue.map((item)=>{
          return{
            productId:item.id,
-           unitPrice:item.unitPrice,
+          //  unitPrice:item.unitPrice,
            purchaseQuantity:item.purchaseQuantity,
-           totalPrice:item.totalPrice
+          //  totalPrice:item.totalPrice
          }
        })
       },
@@ -269,13 +265,14 @@ export default {
       };
       params.startFlowDto.type = val;
       if (this.photoList.length > 0) {
+         this.uuid= data.get_uuid()
         data.upLoadFile(this.photoList, 0, this.uuid).then((res) => {
            //文件code
           let resData = JSON.parse(res.data);
           params.batchId = resData.data.batchId;
           data["PO"].saveOrStart(params).then((res) => {
              if(res.data.code == 10000){
-              mpvue.showToast({
+              wx.showToast({
               title: res.data.message,
               icon: "none",
               duration: 3000,
@@ -289,7 +286,7 @@ export default {
       } else {
         data["PO"].saveOrStart(params).then((res) => {
             if(res.data.code == 10000){
-              mpvue.showToast({
+              wx.showToast({
               title: res.data.message,
               icon: "none",
               duration: 3000,
@@ -320,7 +317,7 @@ export default {
     },
     //流程弹窗
     showPopup2(val) {
-      this.show = true;
+      this.usershow = true;
       (this.popUpType = "流程"), (this.nodeId = val.nodeId);
       this.userradio = val.userId + "";
     },
@@ -353,8 +350,17 @@ export default {
     },
     //产品确认
     submit3(val) {
+       if(this.content.filter(item=>item.id==val.id).length==0){
       this.show2 = false;
       this.content.push(val);
+      }else{
+         wx.showToast({
+          title: '请不要重复添加产品',
+          icon: "none",
+          duration: 1000,
+          mask: true,
+        });
+      }
     },
     //删除产品列表对应产品
     delList(val) {

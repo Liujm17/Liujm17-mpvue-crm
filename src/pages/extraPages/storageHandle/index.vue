@@ -164,7 +164,7 @@ export default {
     //流程相关方法
      //流程弹窗
     showPopup2(val) {
-      this.show = true;
+      this.usershow = true;
       (this.popUpType = "流程"), (this.nodeId = val.nodeId);
       this.userradio = val.userId + "";
     },
@@ -206,7 +206,7 @@ export default {
       params.startFlowDto.type = val;
       addStockCheck(params).then((res)=>{
          if(res.data.code == 10000){
-              mpvue.showToast({
+              wx.showToast({
               title: res.data.message,
               icon: "none",
               duration: 3000,

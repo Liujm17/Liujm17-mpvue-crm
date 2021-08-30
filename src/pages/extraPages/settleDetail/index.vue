@@ -8,7 +8,6 @@
             v-model="formData.collectionDate"
             label="收款日期"
             placeholder="请选择收款日期"
-            required
             readonly
             input-align="right"
             @input="formData.collectionDate = $event.mp.detail"
@@ -18,7 +17,6 @@
             v-model="formData.month"
             label="费用所属期"
             placeholder="请选择费用所属期"
-            required
             readonly
             input-align="right"
             @input="formData.month = $event.mp.detail"
@@ -27,7 +25,6 @@
           <van-field
             v-model="formData.totalPrice"
             label="总金额"
-            required
             readonly
             type="digit"
             input-align="right"
@@ -49,7 +46,6 @@
             <van-field
               v-model="item.type"
               label="类别"
-              required
               readonly
               input-align="right"
               @input="item.type = $event.mp.detail"
@@ -59,7 +55,6 @@
               placeholder="请填写数量"
               label="数量"
               type="digit"
-              required
               readonly
               input-align="right"
               @input="item.quantity = $event.mp.detail"
@@ -69,7 +64,6 @@
               placeholder="请填写单价"
               label="单价"
               type="digit"
-              required
               readonly
               input-align="right"
               @input="item.unitPrice = $event.mp.detail"
@@ -79,7 +73,6 @@
               label="金额"
               type="digit"
               readonly
-              required
               input-align="right"
               @input="item.totalPrice = $event.mp.detail"
             />
@@ -89,7 +82,7 @@
         <!-- 附件 -->
         <Accessroy :photoList="photoList" :onlyOne="false" :notShow="false"></Accessroy>
         <van-field
-          v-model="suggestion"
+          v-model="suggestion" @input="suggestion = $event.mp.detail"
           rows="1"
           autosize
           label="意见"
@@ -116,7 +109,7 @@ import Accessroy from "../../../components/apply/accessory";
 import data from "../../../api/mockData";
 import { backFlow, agree, disagree } from "../../../api/api";
 import Dialog2 from "../../../../dist/wx/vant-weapp/dist/dialog2/dialog";
-import Card from "../../../components/card.vue";
+import Card from "../../../components/boxCard.vue";
 export default {
   components: { Card, Accessroy },
   data() {
@@ -130,7 +123,7 @@ export default {
         totalPrice: "",
       },
       //tab栏激活页
-      hisTitle: ["审批步骤", "处理人", "处理时间", "结果"],
+      hisTitle: [],
       active: 0,
       HistoryList: [],
       //附件
@@ -167,7 +160,16 @@ export default {
       });
   },
   watch: {
-  
+   formData: {
+      handler(newVal, oldVal) {
+        if (!this.isBack && !this.isEdit && !this.isApproval && !this.isDel) {
+          this.showoperate = false;
+        } else {
+          this.showoperate = true;
+        }
+        // this.getData()
+      },
+    },
   },
   methods: {
     //操作
@@ -199,7 +201,7 @@ export default {
           orderId: this.orderId,
         };
         data.getHistory(params).then((res) => {
-          mpvue.showToast({
+          wx.showToast({
             title: "正在加载",
             icon: "loading",
             duration: 500,
@@ -212,7 +214,7 @@ export default {
     //获取数据
     getData() {
       let params = {
-        formId: this.$store.state.formId,
+        formId: 17,
         id: this.$route.query.id,
       };
       data["settle"].getData(params).then((res) => {
@@ -248,6 +250,7 @@ export default {
             type: item.typeName,
           };
         });
+        console.log(this.content)
       });
     },
 
@@ -262,10 +265,10 @@ export default {
     del() {
       let params = {
         id: this.$route.query.id,
-        formId: this.$store.state.formId,
+        formId: 17,
       };
       data["settle"].delFlow(params).then((res) => {
-        mpvue.showToast({
+        wx.showToast({
           title: res.data.message,
           icon: "none",
           duration: 1000,
@@ -283,7 +286,7 @@ export default {
         orderId: this.orderId,
       };
       backFlow(params).then((res) => {
-        mpvue.showToast({
+        wx.showToast({
           title: res.data.message,
           icon: "none",
           duration: 1000,
@@ -302,6 +305,7 @@ export default {
         suggestion: this.suggestion,
       };
       agree(params).then((res) => {
+        this.getData();
         this.$router.back();
       });
     },

@@ -25,12 +25,33 @@ import request from '../utils/request'
 }
 
 //获取当前时间
-function getNowTime(){
+// function getNowTime(){
+//   let  date=new Date();
+//   let  newdate=date.toLocaleString('chinese', { hour12: false });
+//   return newdate.split('/').join('-')
+// }
 
-  let  date=new Date();
-  let  newdate=date.toLocaleString('chinese', { hour12: false });
-  return newdate.split('/').join('-')
+function getNowTime() {//获取当前时间
+  let now= new Date();
+  let _month =  now.getMonth()+1;
+  let _day = now.getDate();
+  let _hour = ( 10 > now.getHours() ) ? '0' + now.getHours() : now.getHours();
+  let _minute = ( 10 > now.getMinutes() ) ? '0' + now.getMinutes() : now.getMinutes();
+  let _second = ( 10 > now.getSeconds() ) ? '0' + now.getSeconds() : now.getSeconds();
+  return now.getFullYear() + '-' + _month + '-' + _day +  ' '  + _hour + ':' + _minute + ':' + _second;
 }
+
+function getNowDay() {//获取当前日期
+  let now= new Date();
+  let _month =  now.getMonth()+1;
+  let _day = now.getDate();
+  let _hour = ( 10 > now.getHours() ) ? '0' + now.getHours() : now.getHours();
+  let _minute = ( 10 > now.getMinutes() ) ? '0' + now.getMinutes() : now.getMinutes();
+  let _second = ( 10 > now.getSeconds() ) ? '0' + now.getSeconds() : now.getSeconds();
+  return now.getFullYear() + '-' + _month + '-' + _day
+}
+
+
 //生成uuid
 function get_uuid(){
   var s = [];
@@ -52,12 +73,12 @@ function get_uuid(){
       .then((res) => {
         let data = []
         data = res.data.data.map((item) => {
-          return {
-            title:  item.nodeTitle,
-            userName:item.userName,
-            dealTime: item.dealTime? (item.dealTime + ''):'',
-            status:(item.dealResult == 1 ? "同意" : (item.dealResult == 2 ? "驳回到发起人" :(item.dealResult == 3 ? "驳回上一步" :'转审'))),
-          };
+          return{
+            title:item.nodeTitle+':'+item.userName,
+            dealTime:'处理时间:'+(item.dealTime? (item.dealTime + ''):''),
+            status:'审批结果:'+(item.dealResult == 1 ? "同意" : (item.dealResult == 2 ? "驳回到发起人" :(item.dealResult == 3 ? "驳回上一步" :'转审'))),
+            dealSuggestion:'审批意见:'+(item.dealSuggestion?item.dealSuggestion:'')
+          }
         })
         return data
       })
@@ -67,7 +88,7 @@ function get_uuid(){
  function upLoadFile(list,index,uuid){
   return new Promise((resolve,reject)=>{
     const uploadTask = wx.uploadFile({
-    url: `https://test.saddlepoint.cn:8004/api-ep-project/file/upload`, //仅为示例，非真实的接口地址
+    url: `https://www.saddlepoint.cn:8004/api-ep-project/file/upload`, //仅为示例，非真实的接口地址
     filePath: list[index].type == 'image'?list[index].img:list[index].video,
     method: "POST",
     name: "file",
@@ -132,7 +153,7 @@ function dataFilter2(data){
       for (var key in data) {
         if (
           data[key] == null ||
-          typeof data[key] == "undefined"  || key == 'createTime'|| key == 'undifined'|| key.includes('[')||typeof(data[key]) =='object'
+          typeof data[key] == "undefined"  || key == 'createTime'|| key == 'updateTime'|| key == 'undifined'|| key.includes('[')||typeof(data[key]) =='object'
         ) {
           delete data[key];
         }
@@ -140,8 +161,32 @@ function dataFilter2(data){
     }
 }
 
+//字段校验
+function textFilter(arr1,arr2){
+    let emptys=[]
+    arr1.forEach((item,index)=>{
+      if(this[item]||this[item.length>0]){
+         return
+       }else{
+         emptys.push(arr2[index])
+       }
+    })
+    if (emptys.length > 0) {
+      wx.showToast({
+        title: emptys.toString() + "不能为空",
+        icon: "none",
+        duration: 1000,
+        mask: true,
+      });
+    }else{
+      return true
+    }  
+}
+
 //备用金申请
 const applyCash = {
+  mustKeyCn:'借款金额,事由,账户,开户行,银行账号',
+  mustKeyEn:'money,subject,accountName,bankName,bankAccount',
   // 搜索词
   searchValues:'申请人',
   //历史tab栏
@@ -174,7 +219,7 @@ const applyCash = {
         value: '事由',
         click: 'normal',
         type:'',
-        required:false,
+        required:true,
         readonly:false
       },
       {
@@ -190,7 +235,7 @@ const applyCash = {
         value: '开户行',
         click: 'normal',
         type:'',
-        required:false,
+        required:true,
         readonly:false
       },
       {
@@ -253,11 +298,10 @@ const applyCash = {
     return request.get(`/api-ep-project/spareMoney/getPage`, params)
     .then((res) => {
       let data = []
-      data  = res.data.data.list.map((item) => {
+      data  = res.data.data.list.map((item,index) => {
         return {
           id: item.id,
-          orderId: item.orderId ? item.orderId : "",
-          title: "备用金申请",
+          index:"序号:"+(index+1+(res.data.data.pageNum-1>=0?res.data.data.pageNum-1:0)*15),
           money: "申请金额为:" + item.money,
           subject: "事由:" + item.subject,
           status:
@@ -268,6 +312,7 @@ const applyCash = {
               : item.approveStatus == 1
               ? "已通过"
               : "起始状态",
+          color:item.approveStatus==-1||item.approveStatus==2?'#87CEFA':(item.approveStatus==0?'#808080':(item.approveStatus==1?'#000000':''))
         };
       });
       return data
@@ -275,11 +320,29 @@ const applyCash = {
   },
   //发起或保存备用金申请---新增中(新增)
   saveOrStart:function(params){
-    return request.post(`/api-ep-project/spareMoney/add`,params)
+     if(textFilter.call(params,this.mustKeyEn.split(','),this.mustKeyCn.split(','))){
+      return request.post(`/api-ep-project/spareMoney/add`,params)
+     }else{
+       return  new Promise((resolve, reject) => {
+        let data={
+          data:{code:-1}
+        }
+          resolve(data);
+      });
+     }
   },
    //发起或保存备用金申请---详情中(修改)
  editOrStart:function(params){
+  if(textFilter.call(params,this.mustKeyEn.split(','),this.mustKeyCn.split(','))){
     return request.post(`/api-ep-project/spareMoney/edit`,params)
+   }else{
+     return  new Promise((resolve, reject) => {
+      let data={
+        data:{code:-1}
+      }
+        resolve(data);
+    });
+   }
   },
   //删除备用金可以编辑的流程--(删除)
   delFlow:function(params){
@@ -305,11 +368,13 @@ const applyCash = {
 
 //员工管理
 const staff= {
+  mustKeyCn:'账号,姓名,电话,岗位名称',
+  mustKeyEn:'account,name,phone,stationName',
   //状态选择数组
   radioList:[{text:'已经'},{text:'还未'},{text:'测试2'}],
    // 搜索词
    searchValues:'姓名',
-  typeList:[{value:'',text:'全部'},{value:0,text:'内部员工'},{value:1,text:'外部员工'}],
+  typeList:[{value:'',text:'全部'},{value:0,text:'内部员工'},{value:1,text:'外聘员工'}],
   //历史里类型判断关键词
   keyword:'isOutside',
    //有日志
@@ -356,7 +421,7 @@ const staff= {
         value: '入职日期',
         click: 'date',
         type:'',
-        required:true,
+        required:false,
         readonly:true,
       },
       {
@@ -364,7 +429,7 @@ const staff= {
         value: '开户行',
         click: 'normal',
         type:'',
-        required:true,
+        required:false,
         readonly:false
       },
       {
@@ -372,7 +437,7 @@ const staff= {
         value: '银行账号',
         click: 'normal',
         type:'digit',
-        required:true,
+        required:false,
         readonly:false
       },
       {
@@ -418,9 +483,9 @@ const staff= {
     data  = res.data.data.list.map((item,index) => {
       return {
         id: item.id,
-        index:index+1,
-        name:item.name,
-        stationName:item.stationName
+        index:"序号:"+(index+1+(res.data.data.pageNum-1>=0?res.data.data.pageNum-1:0)*15),
+        name:"姓名:"+item.name,
+        stationName:"岗位:"+item.stationName
       };
     });
     return data
@@ -439,11 +504,29 @@ const staff= {
 },
 //员工管理---新增中(新增)
 saveOrStart:function(params){
-  return request.post(`/api-ep-user/userController/addStaff`,params)
+  if(textFilter.call(params,this.mustKeyEn.split(','),this.mustKeyCn.split(','))){
+    return request.post(`/api-ep-user/userController/addStaff`,params)
+   }else{
+     return  new Promise((resolve, reject) => {
+      let data={
+        data:{code:-1}
+      }
+        resolve(data);
+    });
+   }
 },
  //员工管理---详情中(修改)
 editOrStart:function(params){
-  return request.post(`/api-ep-user/userController/editStaff`,params)
+  if(textFilter.call(params,this.mustKeyEn.split(','),this.mustKeyCn.split(','))){
+    return request.post(`/api-ep-user/userController/editStaff`,params)
+   }else{
+     return  new Promise((resolve, reject) => {
+      let data={
+        data:{code:-1}
+      }
+        resolve(data);
+    });
+   }
 },
  //--(删除)
  delFlow:function(params){
@@ -454,6 +537,8 @@ editOrStart:function(params){
 
 //供应商管理
 const provider= {
+  mustKeyCn:'供应商名称,供应商联系人,供应商电话,户名,开户行,银行账号',
+  mustKeyEn:'name,contacts,phone,accountName,bankName,bankAccount',
    // 搜索词
    searchValues:'供应商名称,联系人,联系电话',
   typeList:[],
@@ -486,7 +571,7 @@ const provider= {
         value: '供应商电话',
         click: 'normal',
         type:'digit',
-        required:false,
+        required:true,
         readonly:false
       },
       {
@@ -494,18 +579,9 @@ const provider= {
         value: '户名',
         click: 'normal',
         type:'',
-        required:false,
+        required:true,
         readonly:false,
       },
-      // {
-      //   name: 'typeName',
-      //   value: '供应商类型',
-      //   click: 'post',
-      //   type:'',
-      //   required:false,
-      //   readonly:true,
-      //   clickValue:"type"
-      // },
       {
         name: 'bankName',
         value: '开户行',
@@ -543,10 +619,10 @@ const provider= {
     data  = res.data.data.list.map((item,index) => {
       return {
         id: item.id,
-        index:index+1,
-        name:item.name,
-        contacts:item.contacts,
-        phone:item.phone
+        index:"序号:"+(index+1+(res.data.data.pageNum-1>=0?res.data.data.pageNum-1:0)*15),
+        name:"供应商名称:"+item.name,
+        contacts:"供应商联系人:"+item.contacts,
+        phone:"供应商电话:"+item.phone
       };
     });
     return data
@@ -558,11 +634,29 @@ const provider= {
 },
 //供应商---新增中(新增)
 saveOrStart:function(params){
-  return request.post(`/api-ep-project/supplier/add`,params)
+  if(textFilter.call(params,this.mustKeyEn.split(','),this.mustKeyCn.split(','))){
+    return request.post(`/api-ep-project/supplier/add`,params)
+   }else{
+     return  new Promise((resolve, reject) => {
+      let data={
+        data:{code:-1}
+      }
+        resolve(data);
+    });
+   }
 },
  //供应商---详情中(修改)
 editOrStart:function(params){
-  return request.post(`/api-ep-project/supplier/edit`,params)           
+  if(textFilter.call(params,this.mustKeyEn.split(','),this.mustKeyCn.split(','))){
+    return request.post(`/api-ep-project/supplier/edit`,params)
+   }else{
+     return  new Promise((resolve, reject) => {
+      let data={
+        data:{code:-1}
+      }
+        resolve(data);
+    });
+   }           
 },
  //--(删除)
  delFlow:function(params){
@@ -572,10 +666,12 @@ editOrStart:function(params){
 
 //设备信息
 const deviceInfo ={
+  mustKeyCn:'设备名称,设备序号,设备地点,保养周期',
+  mustKeyEn:'name,serialNumber,address,maintenanceDay',
   //状态选择数组
     radioList:[{text:'运行中',value:1},{text:'停机维修',value:2},{text:'未上线',value:3}],
     // 搜索词
-    searchValues:'供应商名称,联系人,联系电话',
+    searchValues:'设备名称,联系人,联系电话',
     typeList:[{text:'全部',value:''},{text:'运行中',value:1},{text:'停机维修',value:2},{text:'未上线',value:3}],
     //历史里类型判断关键词
     keyword:'status',
@@ -614,7 +710,7 @@ const deviceInfo ={
           value: '设备状态',
           click: 'radioGroup',
           type:'',
-          required:true,
+          required:false,
           readonly:true
         },
         {
@@ -622,7 +718,7 @@ const deviceInfo ={
           value: '生产商名称',
           click: 'normal',
           type:'',
-          required:true,
+          required:false,
           readonly:false
         },
         {
@@ -630,7 +726,7 @@ const deviceInfo ={
           value: '售后联系人',
           click: 'normal',
           type:'',
-          required:true,
+          required:false,
           readonly:false
         },
         {
@@ -646,7 +742,7 @@ const deviceInfo ={
           value: '规格型号',
           click: 'normal',
           type:'',
-          required:true,
+          required:false,
           readonly:false
         },
         {
@@ -654,7 +750,7 @@ const deviceInfo ={
           value: '出厂日期',
           click: 'date',
           type:'',
-          required:true,
+          required:false,
           readonly:true
         },
         {
@@ -662,7 +758,7 @@ const deviceInfo ={
           value: '预计报废日期',
           click: 'date',
           type:'',
-          required:true,
+          required:false,
           readonly:true
         },
         {
@@ -670,7 +766,7 @@ const deviceInfo ={
           value: '保养周期(单位：天)',
           click: 'normal',
           type:'digit',
-          required:false,
+          required:true,
           readonly:false
         },
         {
@@ -678,7 +774,7 @@ const deviceInfo ={
           value: '下次保养日期',
           click: 'date',
           type:'',
-          required:true,
+          required:false,
           readonly:true
         },
         {
@@ -686,7 +782,7 @@ const deviceInfo ={
           value: '铭牌信息',
           click: 'normal',
           type:'',
-          required:true,
+          required:false,
           readonly:false
         },
       ]
@@ -716,10 +812,10 @@ const deviceInfo ={
       data  = res.data.data.list.map((item,index) => {
         return {
           id: item.id,
-          index:index+1,
-          name:item.name,
-          address:item.address,
-          status:item.status == 1?'运行中':(item.status ==2?'停机维修中':'未上线')
+          index:"序号:"+(index+1+(res.data.data.pageNum-1>=0?res.data.data.pageNum-1:0)*15),
+          name:"设备名称:"+item.name,
+          address:"设备地址:"+item.address,
+          status:"设备状态:"+(item.status == 1?'运行中':(item.status ==2?'停机维修中':'未上线'))
         };
       });
       return data
@@ -731,11 +827,29 @@ const deviceInfo ={
   },
   //设备信息---新增中(新增)
   saveOrStart:function(params){
-    return request.post(`/api-ep-project/device/addDevice`,params)
+    if(textFilter.call(params,this.mustKeyEn.split(','),this.mustKeyCn.split(','))){
+      return request.post(`/api-ep-project/device/addDevice`,params)
+     }else{
+       return  new Promise((resolve, reject) => {
+        let data={
+          data:{code:-1}
+        }
+          resolve(data);
+      });
+     }
   },
    //供应商---详情中(修改)
   editOrStart:function(params){
-    return request.post(`/api-ep-project/device/updateDevice`,params)           
+    if(textFilter.call(params,this.mustKeyEn.split(','),this.mustKeyCn.split(','))){
+      return request.post(`/api-ep-project/device/updateDevice`,params)
+     }else{
+       return  new Promise((resolve, reject) => {
+        let data={
+          data:{code:-1}
+        }
+          resolve(data);
+      });
+     }           
   },
    //--(删除)
    delFlow:function(params){
@@ -745,6 +859,10 @@ const deviceInfo ={
 
 //采购订单
 const PO ={
+  mustKeyCn:'采购日期,采购清单',
+  mustKeyEn:'purchaseDate,purchaseDetailList',
+  mustKeyCn2:'供应商,预计到货日期',
+  mustKeyEn2:'supplierId,estimateArrivalDate',
   //状态选择数组
     radioList:[{text:'运行中',value:0},{text:'停机维修',value:1},{text:'未上线',value:2}],
     // 搜索词
@@ -768,30 +886,6 @@ const PO ={
           readonly:true
         },
         {
-          name: 'supplierName',
-          value: '供应商名称',
-          click: 'provider',
-          type:'',
-          required:true,
-          readonly:true
-        },
-        {
-          name: 'supplierContacts',
-          value: '供应商联系人',
-          click: 'normal',
-          type:'',
-          required:true,
-          readonly:false
-        },
-        {
-          name: 'supplierPhone',
-          value: '供应商电话',
-          click: 'normal',
-          type:'digit',
-          required:false,
-          readonly:false
-        },
-        {
           name: 'purchaseDate',
           value: '采购日期',
           click: 'date',
@@ -799,20 +893,52 @@ const PO ={
           required:true,
           readonly:true
         },
-        {
-          name: 'totalPrice',
-          value: '采购总金额',
-          click: '',
-          type:'',
-          required:false,
-          readonly:true
-        },
+        // {
+        //   name: 'supplierName',
+        //   value: '供应商名称',
+        //   click: 'provider',
+        //   type:'',
+        //   required:true,
+        //   readonly:true
+        // },
+        // {
+        //   name: 'supplierContacts',
+        //   value: '供应商联系人',
+        //   click: 'normal',
+        //   type:'',
+        //   required:true,
+        //   readonly:false
+        // },
+        // {
+        //   name: 'supplierPhone',
+        //   value: '供应商电话',
+        //   click: 'normal',
+        //   type:'digit',
+        //   required:false,
+        //   readonly:false
+        // },
+        // {
+        //   name: 'estimateArrivalDate',
+        //   value: '预计到货日期',
+        //   click: 'date',
+        //   type:'',
+        //   required:true,
+        //   readonly:true
+        // },
+        // {
+        //   name: 'totalPrice',
+        //   value: '采购总金额',
+        //   click: '',
+        //   type:'',
+        //   required:false,
+        //   readonly:true
+        // },
         {
           name: 'purpose',
           value: '用途',
           click: '',
           type:'textarea',
-          required:true,
+          required:false,
           readonly:false
         },
       ]
@@ -833,14 +959,17 @@ const PO ={
     return request.get(`/api-ep-project/purchase/getPage`, params)
     .then((res) => {
       let data = []
+      // let allData=[{title1:'序号',title2:'供应商',title3:'金额',title4:'付款状态',title5:'日期',},...data]
       data  = res.data.data.list.map((item,index) => {
         return {
           id: item.id,
-          index:index+1,
-          supplierName:item.supplierName,
-          totalPrice:'订单金额:'+item.totalPrice+"(元)",
-          paymentStatusName:item.paymentStatusName,
-          purchaseDate:item.purchaseDate
+          index:"序号:"+(index+1+(res.data.data.pageNum-1>=0?res.data.data.pageNum-1:0)*15),
+          number:"编号:"+item.id,
+          supplierName:"供应商名称:"+(item.supplierName?item.supplierName:''),
+          totalPrice:'订单金额:'+(item.totalPrice?item.totalPrice:'')+"(元)",
+          paymentStatusName:"付款状态:"+item.paymentStatusName,
+          purchaseDate:"申请日期:"+item.purchaseDate,
+          color:item.approveStatus==-1||item.approveStatus==2?'#87CEFA':(item.approveStatus==0?'#808080':(item.approveStatus==1?'#000000':''))
         };
       });
       return data
@@ -852,11 +981,43 @@ const PO ={
   },
   //采购订单---新增中(新增)
   saveOrStart:function(params){
-    return request.post(`/api-ep-project/purchase/add`,params)
+    if(textFilter.call(params,this.mustKeyEn.split(','),this.mustKeyCn.split(','))){
+      return request.post(`/api-ep-project/purchase/add`,params)
+     }else{
+       return  new Promise((resolve, reject) => {
+        let data={
+          data:{code:-1}
+        }
+          resolve(data);
+      });
+     }
+  
   },
    //采购订单---详情中(修改)
   editOrStart:function(params){
-    return request.post(`/api-ep-project/purchase/edit`,params)           
+    if(textFilter.call(params,this.mustKeyEn.split(','),this.mustKeyCn.split(','))){
+      return request.post(`/api-ep-project/purchase/edit`,params)
+     }else{
+       return  new Promise((resolve, reject) => {
+        let data={
+          data:{code:-1}
+        }
+          resolve(data);
+      });
+     }           
+  },
+   //采购订单---审批中(修改)
+   editOrStart2:function(params){
+    if(textFilter.call(params,this.mustKeyEn2.split(','),this.mustKeyCn2.split(','))){
+      return request.post(`/api-ep-project/purchase/editAgree`,params)
+     }else{
+       return  new Promise((resolve, reject) => {
+        let data={
+          data:{code:-1}
+        }
+          resolve(data);
+      });
+     }           
   },
    //--(删除)
    delFlow:function(params){
@@ -867,6 +1028,8 @@ const PO ={
 
 //入库单
 const inStorage ={
+  mustKeyCn:'采购订单,入库日期',
+  mustKeyEn:'purchaseId,inDate',
   //状态选择数组
     radioList:[{text:'采购',value:1},{text:'调拨',value:2},],
     // 搜索词
@@ -910,7 +1073,7 @@ const inStorage ={
           value: '入库类型',
           click: 'radioGroup',
           type:'',
-          required:true,
+          required:false,
           readonly:true
         }
       ]
@@ -929,9 +1092,11 @@ const inStorage ={
       data  = res.data.data.list.map((item,index) => {
         return {
           id: item.id,
-          index:index+1,
-          userName:item.userName,
-          inTypeName:item.inTypeName,
+          index:"序号:"+(index+1+(res.data.data.pageNum-1>=0?res.data.data.pageNum-1:0)*15),
+          userName:"申请人:"+item.userName,
+          inTypeName:"入库类别:"+item.inTypeName,
+          inDate:"入库日期:"+item.inDate,
+          color:item.approveStatus==-1||item.approveStatus==2?'#87CEFA':(item.approveStatus==0?'#808080':(item.approveStatus==1?'#000000':''))
         };
       });
       return data
@@ -943,11 +1108,29 @@ const inStorage ={
   },
   //入库单---新增中(新增)
   saveOrStart:function(params){
-    return request.post(`/api-ep-project/stockIn/add`,params)
+    if(textFilter.call(params,this.mustKeyEn.split(','),this.mustKeyCn.split(','))){
+      return request.post(`/api-ep-project/stockIn/add`,params)
+     }else{
+       return  new Promise((resolve, reject) => {
+        let data={
+          data:{code:-1}
+        }
+          resolve(data);
+      });
+     }
   },
    //入库单---详情中(修改)
   editOrStart:function(params){
-    return request.post(`/api-ep-project/stockIn/edit`,params)           
+    if(textFilter.call(params,this.mustKeyEn.split(','),this.mustKeyCn.split(','))){
+      return request.post(`/api-ep-project/stockIn/edit`,params)   
+     }else{
+       return  new Promise((resolve, reject) => {
+        let data={
+          data:{code:-1}
+        }
+          resolve(data);
+      });
+     }       
   },
    //--(删除)
    delFlow:function(params){
@@ -992,7 +1175,7 @@ const polling ={
           value: '设备地点',
           click: 'normal',
           type:'',
-          required:true,
+          required:false,
           readonly:false
         },
         {
@@ -1000,7 +1183,7 @@ const polling ={
           value: '生产商名称',
           click: 'normal',
           type:'',
-          required:true,
+          required:false,
           readonly:false
         },
         {
@@ -1008,7 +1191,7 @@ const polling ={
           value: '售后联系人',
           click: 'normal',
           type:'',
-          required:true,
+          required:false,
           readonly:false
         },
         {
@@ -1024,7 +1207,7 @@ const polling ={
           value: '规格型号',
           click: 'normal',
           type:'',
-          required:true,
+          required:false,
           readonly:false
         },
         {
@@ -1032,7 +1215,7 @@ const polling ={
           value: '出厂日期',
           click: 'date',
           type:'',
-          required:true,
+          required:false,
           readonly:true
         },
         {
@@ -1040,7 +1223,7 @@ const polling ={
           value: '预计报废日期',
           click: 'date',
           type:'',
-          required:true,
+          required:false,
           readonly:true
         },
         {
@@ -1048,7 +1231,7 @@ const polling ={
           value: '保养周期(单位：天)',
           click: 'normal',
           type:'digit',
-          required:false,
+          required:true,
           readonly:false
         },
         {
@@ -1056,7 +1239,7 @@ const polling ={
           value: '下次保养日期',
           click: 'date',
           type:'',
-          required:true,
+          required:false,
           readonly:true
         },
         {
@@ -1064,7 +1247,7 @@ const polling ={
           value: '铭牌信息',
           click: 'normal',
           type:'',
-          required:true,
+          required:false,
           readonly:false
         },
       ]
@@ -1091,11 +1274,11 @@ const polling ={
       data  = res.data.data.list.map((item,index) => {
         return {
           id: item.id,
-          index:index+1,
-          deviceId:item.deviceId,
-          deviceName:item.deviceName,
-          inspectTime:item.inspectTime,
-          inspectUserName:item.inspectUserName,
+          index:"序号:"+(index+1+(res.data.data.pageNum-1>=0?res.data.data.pageNum-1:0)*15),
+          deviceId:"设备编号:"+item.deviceId,
+          deviceName:"设备名称:"+item.deviceName,
+          inspectUserName:"巡检人:"+item.inspectUserName,
+          inspectTime:"巡检时间:"+item.inspectTime,
           color:item.deviceStatus=='正常'?'#009933':'#FF0000'
         };
       });
@@ -1126,14 +1309,18 @@ const polling ={
 
 //故障报修
 const breakdown ={
+  mustKeyCn:'设备名称,故障原因',
+  mustKeyEn:'deviceName,faultReason',
+  mustKeyCn1:'故障原因',
+  mustKeyEn1:'faultReason',
   //状态选择数组
     radioList:[{text:'采购',value:1},{text:'调拨',value:2},],
     // 搜索词
-    searchValues:'故障设备',
+    searchValues:'设备名称',
     //历史tab栏
-    typeList:[{value:'',text:'全部'},{value:'密切关注',text:'密切关注'},{value:'未解决',text:'未解决'},{value:'已解决',text:'已解决'},{value:'暂不处理',text:'暂不处理'}],
+    typeList:[{value:'',text:'全部'},{value:0,text:'未解决'},{value:1,text:'已解决'},{value:2,text:'暂无'}],
     //历史里类型判断关键词
-    keyword:'status',
+    keyword:'repairResult',
      //是否有日志
      hasHistory:false,
      //是否是审批
@@ -1180,11 +1367,11 @@ const breakdown ={
       data  = res.data.data.list.map((item,index) => {
         return {
           id: item.id,
-          index:index+1,
-          deviceName:item.deviceName,
-          faultTime:item.faultTime,
-          repairResultStr:item.repairResultStr,
-          color:item.repairResultStr == '已解决'?'#00CC99':(item.repairResultStr == '未解决'?'#FF0000':(item.repairResultStr == '密切关注'?'#6699FF':''))
+          index:"序号:"+(index+1+(res.data.data.pageNum-1>=0?res.data.data.pageNum-1:0)*15),
+          deviceName:"设备名称:"+item.deviceName,
+          faultTime:"故障时间:"+item.faultTime,
+          repairResultStr:"故障状态:"+item.repairResultStr,
+          color:item.repairResultStr == '已解决'?'#00CC99':(item.repairResultStr == '未解决'?'#FF0000':(item.repairResultStr == '暂无'?'#6699FF':''))
         };
       });
       return data
@@ -1196,21 +1383,42 @@ const breakdown ={
   },
   //故障报修---新增中(新增)
   saveOrStart:function(params){
-    return request.post(`/api-ep-project/device/addDeviceReport`,params)
+    if(textFilter.call(params,this.mustKeyEn.split(','),this.mustKeyCn.split(','))){
+      return request.post(`/api-ep-project/device/addDeviceReport`,params)
+     }else{
+       return  new Promise((resolve, reject) => {
+        let data={
+          data:{code:-1}
+        }
+          resolve(data);
+      });
+     }  
   },
    //故障报修---详情中(处理)
   editOrStart:function(params){
-    return request.post(`/api-ep-project/device/managerHandle`,params)           
+    return request.post(`/api-ep-project/device/managerHandle`,params)  
+    // if(textFilter.call(params,this.mustKeyEn1.split(','),this.mustKeyCn1.split(','))){
+    //   return request.post(`/api-ep-project/device/managerHandle`,params)    
+    //  }else{
+    //    return  new Promise((resolve, reject) => {
+    //     let data={
+    //       data:{code:-1}
+    //     }
+    //       resolve(data);
+    //   });
+    //  }         
   },
 
 }
 
 //故障维修
 const maintain ={
+  mustKeyCn:'设备名称,故障时间,维修时间,维修详情',
+  mustKeyEn:'deviceName,faultTime,repairTime,repairDetail',
   //状态选择数组
     radioList:[{text:'采购',value:1},{text:'调拨',value:2},],
     // 搜索词
-    searchValues:'故障设备',
+    searchValues:'设备名称',
     //历史tab栏
     typeList:[],
     //历史里类型判断关键词
@@ -1251,7 +1459,8 @@ const maintain ={
       deviceName:'',
       deviceId:'',
       faultTime:'',
-      repairTime:''
+      repairTime:'',
+      reportId:''
     },
      //故障维修列表
    getRecord:function(params) {
@@ -1261,10 +1470,10 @@ const maintain ={
       data  = res.data.data.list.map((item,index) => {
         return {
           id: item.id,
-          index:index+1,
-          deviceName:item.deviceName,
-          repairTime:item.repairTime,
-          faultReason:item.faultReason,
+          index:"序号:"+(index+1+(res.data.data.pageNum-1>=0?res.data.data.pageNum-1:0)*15),
+          deviceName:"设备名称:"+item.deviceName,
+          repairTime:"维修时间:"+item.repairTime,
+          repairDetail:"维修详情:"+item.repairDetail,
         };
       });
       return data
@@ -1276,21 +1485,41 @@ const maintain ={
   },
   //故障维修---新增中(新增)
   saveOrStart:function(params){
-    return request.post(`/api-ep-project/device/addDeviceRepair`,params)
+    if(textFilter.call(params,this.mustKeyEn.split(','),this.mustKeyCn.split(','))){
+      return request.post(`/api-ep-project/device/addDeviceRepair`,params)
+     }else{
+       return  new Promise((resolve, reject) => {
+        let data={
+          data:{code:-1}
+        }
+          resolve(data);
+      });
+     }
   },
    //故障报修---详情中(处理)
   editOrStart:function(params){
-    return request.post(`/api-ep-project/device/managerHandle`,params)           
+    if(textFilter.call(params,this.mustKeyEn.split(','),this.mustKeyCn.split(','))){
+      return request.post(`/api-ep-project/device/managerHandle`,params)   
+     }else{
+       return  new Promise((resolve, reject) => {
+        let data={
+          data:{code:-1}
+        }
+          resolve(data);
+      });
+     }        
   },
 
 }
 
 //设备保养
 const upkeep ={
+  mustKeyCn:'保养设备,保养周期,保养时间,保养详情',
+  mustKeyEn:'deviceName,maintenanceDay,maintainTime,remarks',
   //状态选择数组
     radioList:[{text:'采购',value:1},{text:'调拨',value:2},],
     // 搜索词
-    searchValues:'故障设备',
+    searchValues:'设备名称',
     //历史tab栏
     typeList:[],
     //历史里类型判断关键词
@@ -1315,7 +1544,7 @@ const upkeep ={
           click: '',
           type:'dight',
           required:true,
-          readonly:false
+          readonly:true
         },
         {
           name: 'maintainTime',
@@ -1350,10 +1579,10 @@ const upkeep ={
       data  = res.data.data.list.map((item,index) => {
         return {
           id: item.id,
-          index:index+1,
-          deviceName:item.deviceName,
-          maintainTime:item.maintainTime.slice(0,10),
-          nextMaintainTime:item.nextMaintainTime.slice(0,10),
+          index:"序号:"+(index+1+(res.data.data.pageNum-1>=0?res.data.data.pageNum-1:0)*15),
+          deviceName:"设备名称:"+item.deviceName,
+          maintainTime:"保养时间:"+item.maintainTime.slice(0,10),
+          nextMaintainTime:"下次保养时间:"+item.nextMaintainTime.slice(0,10),
         };
       });
       return data
@@ -1365,11 +1594,29 @@ const upkeep ={
   },
   //保养---新增中(新增)
   saveOrStart:function(params){
-    return request.post(`/api-ep-project/device/addDeviceMaintain`,params)
+    if(textFilter.call(params,this.mustKeyEn.split(','),this.mustKeyCn.split(','))){
+      return request.post(`/api-ep-project/device/addDeviceMaintain`,params)
+     }else{
+       return  new Promise((resolve, reject) => {
+        let data={
+          data:{code:-1}
+        }
+          resolve(data);
+      });
+     }
   },
    //故障报修---详情中(处理)
   editOrStart:function(params){
-    return request.post(`/api-ep-project/device/managerHandle`,params)           
+    if(textFilter.call(params,this.mustKeyEn.split(','),this.mustKeyCn.split(','))){
+      return request.post(`/api-ep-project/device/managerHandle`,params) 
+     }else{
+       return  new Promise((resolve, reject) => {
+        let data={
+          data:{code:-1}
+        }
+          resolve(data);
+      });
+     }          
   },
 
 }
@@ -1410,18 +1657,18 @@ const payment ={
         {
           name: 'supplierContacts',
           value: '供应商联系人',
-          click: 'normal',
+          click: 'provider',
           type:'',
           required:true,
-          readonly:false
+          readonly:true
         },
         {
           name: 'supplierPhone',
           value: '供应商电话',
-          click: 'normal',
-          type:'digit',
-          required:false,
-          readonly:false
+          click: 'provider',
+          type:'',
+          required:true,
+          readonly:true
         },
         {
           name: 'paymentDate',
@@ -1449,10 +1696,11 @@ const payment ={
       data  = res.data.data.list.map((item,index) => {
         return {
           id: item.id,
-          index:index+1,
-          supplierName:item.supplierName,
-          totalPrice:item.totalPrice,
-          paymentDate:item.paymentDate
+          index:"序号:"+(index+1+(res.data.data.pageNum-1>=0?res.data.data.pageNum-1:0)*15),
+          supplierName:"供应商名称:"+(item.supplierName?item.supplierName:'无供应商'),
+          totalPrice:"总金额:"+item.totalPrice,
+          paymentDate:"付款日期:"+item.paymentDate,
+          color:item.approveStatus==-1||item.approveStatus==2?'#87CEFA':(item.approveStatus==0?'#808080':(item.approveStatus==1?'#000000':''))
         };
       });
       return data
@@ -1560,10 +1808,11 @@ const changeOrder ={
       data  = res.data.data.list.map((item,index) => {
         return {
           id: item.id,
-          index:index+1,
-          supplierName:item.supplierName,
+          index:"序号:"+(index+1+(res.data.data.pageNum-1>=0?res.data.data.pageNum-1:0)*15),
+          supplierName:"供应商名称:"+item.supplierName,
           oldTotalPrice:'原金额:'+item.oldTotalPrice+"(元)",
           newTotalPrice:'变更后金额:'+item.newTotalPrice+"(元)",
+          color:item.approveStatus==-1||item.approveStatus==2?'#87CEFA':(item.approveStatus==0?'#808080':(item.approveStatus==1?'#000000':''))
         };
       });
       return data
@@ -1590,6 +1839,8 @@ const changeOrder ={
 
 //出库单
 const outStorage ={
+  mustKeyCn:'出库日期,出库用途,出库产品',
+  mustKeyEn:'outDate,purpose,stockOutDetailList',
   //状态选择数组
     radioList:[{text:'领用',value:1},{text:'调拨',value:2},],
     // 搜索词
@@ -1652,9 +1903,11 @@ const outStorage ={
       data  = res.data.data.list.map((item,index) => {
         return {
           id: item.id,
-          index:index+1,
-          userName:item.userName,
-          outType:item.outType == 1?'领用':'调拨',
+          index:"序号:"+(index+1+(res.data.data.pageNum-1>=0?res.data.data.pageNum-1:0)*15),
+          userName:"申请人:"+item.userName,
+          outType:"出库类型:"+(item.outType == 1?'领用':'调拨'),
+          outDate:"出库日期:"+item.outDate,
+          color:item.approveStatus==-1||item.approveStatus==2?'#87CEFA':(item.approveStatus==0?'#808080':(item.approveStatus==1?'#000000':''))
         };
       });
       return data
@@ -1666,11 +1919,29 @@ const outStorage ={
   },
   //出库单---新增中(新增)
   saveOrStart:function(params){
-    return request.post(`/api-ep-project/stockOut/add`,params)
+    if(textFilter.call(params,this.mustKeyEn.split(','),this.mustKeyCn.split(','))){
+      return request.post(`/api-ep-project/stockOut/add`,params)
+     }else{
+       return  new Promise((resolve, reject) => {
+        let data={
+          data:{code:-1}
+        }
+          resolve(data);
+      });
+     }
   },
    //出库单---详情中(修改)
   editOrStart:function(params){
-    return request.post(`/api-ep-project/stockOut/edit`,params)           
+    if(textFilter.call(params,this.mustKeyEn.split(','),this.mustKeyCn.split(','))){
+      return request.post(`/api-ep-project/stockOut/edit`,params)  
+     }else{
+       return  new Promise((resolve, reject) => {
+        let data={
+          data:{code:-1}
+        }
+          resolve(data);
+      });
+     }         
   },
    //--(删除)
    delFlow:function(params){
@@ -1679,6 +1950,8 @@ const outStorage ={
 }
 //借调结算
 const second ={
+  mustKeyCn:'调入项目,派工人,派工原因,日结标准,开始日期,结束日期',
+  mustKeyEn:'toFactoryName,dispatchUserName,dispatchReason,dailySalary,startDate,endDate',
   //状态选择数组
     radioList:[{text:'采购',value:1},{text:'调拨',value:2},],
     // 搜索词
@@ -1723,7 +1996,7 @@ const second ={
           value: '日结标准',
           click: 'normal',
           type:'digit',
-          required:false,
+          required:true,
           readonly:false
         },
         {
@@ -1747,7 +2020,7 @@ const second ={
           value: '结算金额',
           click: 'normal',
           type:'digit',
-          required:true,
+          required:false,
           readonly:false
         },
         {
@@ -1781,10 +2054,12 @@ const second ={
       data  = res.data.data.list.map((item,index) => {
         return {
           id: item.id,
-          index:index+1,
-          toFactoryName:item.toFactoryName,
-          dispatchUserName:item.dispatchUserName,
-          dispatchReason:item.dispatchReason,
+          index:"序号:"+(index+1+(res.data.data.pageNum-1>=0?res.data.data.pageNum-1:0)*15),
+          toFactoryName:"调入项目:"+item.toFactoryName,
+          dispatchUserName:"派工人:"+item.dispatchUserName,
+          dispatchReason:"派遣原因:"+item.dispatchReason,
+          settlementMoney:"结算总金额:"+item.settlementMoney,
+          color:item.approveStatus==-1||item.approveStatus==2?'#87CEFA':(item.approveStatus==0?'#808080':(item.approveStatus==1?'#000000':''))
         };
       });
       return data
@@ -1796,11 +2071,29 @@ const second ={
   },
   //借调结算---新增中(新增)
   saveOrStart:function(params){
-    return request.post(`/api-ep-project/cost/lend/addCostLend`,params)
+    if(textFilter.call(params,this.mustKeyEn.split(','),this.mustKeyCn.split(','))){
+      return request.post(`/api-ep-project/cost/lend/addCostLend`,params)
+     }else{
+       return  new Promise((resolve, reject) => {
+        let data={
+          data:{code:-1}
+        }
+          resolve(data);
+      });
+     }
   },
    //借调结算---详情中(修改)
   editOrStart:function(params){
-    return request.post(`/api-ep-project/cost/lend/editCostLend`,params)           
+    if(textFilter.call(params,this.mustKeyEn.split(','),this.mustKeyCn.split(','))){
+      return request.post(`/api-ep-project/cost/lend/editCostLend`,params)  
+     }else{
+       return  new Promise((resolve, reject) => {
+        let data={
+          data:{code:-1}
+        }
+          resolve(data);
+      });
+     }         
   },
    //--(删除)
    delFlow:function(params){
@@ -1809,10 +2102,14 @@ const second ={
 }
 //费用报销
 const cost ={
+  mustKeyCn:'费用所属期,项目名称,账户,开户行,银行账号,费用报销明细',
+  mustKeyEn:'month,factoryId,accountName,bankName,bankAccount,costReimburseDetailList',
+  mustKeyCn1:'费用所属期,费用报销明细',
+  mustKeyEn1:'month,costReimburseDetailList',
   //状态选择数组
     radioList:[{text:'采购',value:1},{text:'调拨',value:2},],
     // 搜索词
-    searchValues:'申请人,报销类别',
+    searchValues:'申请人',
     //历史tab栏
     typeList:[{value:'',text:'全部'},{value:-1,text:'草稿'},{value:0,text:'审批中'},{value:1,text:'已结束'},{value:2,text:'已驳回'}],
     typeList2:[],
@@ -1882,10 +2179,11 @@ const cost ={
       data  = res.data.data.list.map((item,index) => {
         return {
           id: item.id,
-          index:index+1,
-          userName:item.userName,
-          month:item.month,
-          totalPrice:item.totalPrice,
+          index:"序号:"+(index+1+(res.data.data.pageNum-1>=0?res.data.data.pageNum-1:0)*15),
+          userName:"申请人:"+item.userName,
+          month:"所属期:"+item.month,
+          totalPrice:"总金额:"+item.totalPrice,
+          color:item.approveStatus==-1||item.approveStatus==2?'#87CEFA':(item.approveStatus==0?'#808080':(item.approveStatus==1?'#000000':''))
         };
       });
       return data
@@ -1897,11 +2195,55 @@ const cost ={
   },
   //付款申请---新增中(新增)
   saveOrStart:function(params){
-    return request.post(`/api-ep-project/costReimburse/addReimburse`,params)
+    if(params['isPay']==0){
+      if(textFilter.call(params,this.mustKeyEn.split(','),this.mustKeyCn.split(','))){
+        return request.post(`/api-ep-project/costReimburse/addReimburse`,params)
+       }else{
+         return  new Promise((resolve, reject) => {
+          let data={
+            data:{code:-1}
+          }
+            resolve(data);
+        });
+       }
+    }else{
+      if(textFilter.call(params,this.mustKeyEn1.split(','),this.mustKeyCn1.split(','))){
+        return request.post(`/api-ep-project/costReimburse/addReimburse`,params)
+       }else{
+         return  new Promise((resolve, reject) => {
+          let data={
+            data:{code:-1}
+          }
+            resolve(data);
+        });
+       }
+    }
   },
    //付款申请---详情中(修改)
   editOrStart:function(params){
-    return request.post(`/api-ep-project/costReimburse/editReimburse`,params)           
+    if(params['isPay']==0){
+      if(textFilter.call(params,this.mustKeyEn.split(','),this.mustKeyCn.split(','))){
+        return request.post(`/api-ep-project/costReimburse/editReimburse`,params)  
+       }else{
+         return  new Promise((resolve, reject) => {
+          let data={
+            data:{code:-1}
+          }
+            resolve(data);
+        });
+       }
+    }else{
+      if(textFilter.call(params,this.mustKeyEn1.split(','),this.mustKeyCn1.split(','))){
+        return request.post(`/api-ep-project/costReimburse/editReimburse`,params)  
+       }else{
+         return  new Promise((resolve, reject) => {
+          let data={
+            data:{code:-1}
+          }
+            resolve(data);
+        });
+       }
+    }      
   },
    //--(删除)
    delFlow:function(params){
@@ -1909,12 +2251,14 @@ const cost ={
   },
 }
 
-//请示单
+//结算单
 const settle= {
+  mustKeyCn:'收款日期,费用所属期,结算单明细',
+  mustKeyEn:'collectionDate,month,costStatementDetailList',
   //状态选择数组
   radioList:[{text:'已经'},{text:'还未'},{text:'测试2'}],
    // 搜索词
-   searchValues:'运维项目',
+   searchValues:'申请人',
    typeList:[{value:'',text:'全部'},{value:-1,text:'草稿'},{value:0,text:'审批中'},{value:1,text:'已结束'},{value:2,text:'已驳回'}],
   //历史里类型判断关键词
   keyword:'approveStatus',
@@ -1948,9 +2292,10 @@ const settle= {
     data  = res.data.data.list.map((item,index) => {
       return {
         id: item.id,
-        index:index+1,
-        userName:item.userName,
-        month:item.month
+        index:"序号:"+(index+1+(res.data.data.pageNum-1>=0?res.data.data.pageNum-1:0)*15),
+        userName:"申请人:"+item.userName,
+        month:"所属期:"+item.month,
+        color:item.approveStatus==-1||item.approveStatus==2?'#87CEFA':(item.approveStatus==0?'#808080':(item.approveStatus==1?'#000000':''))
       };
     });
     return data
@@ -1962,11 +2307,29 @@ const settle= {
 },
 //结算单---新增中(新增)
 saveOrStart:function(params){
-  return request.post(`/api-ep-project/costStatement/add`,params)
+  if(textFilter.call(params,this.mustKeyEn.split(','),this.mustKeyCn.split(','))){
+    return request.post(`/api-ep-project/costStatement/add`,params)
+   }else{
+     return  new Promise((resolve, reject) => {
+      let data={
+        data:{code:-1}
+      }
+        resolve(data);
+    });
+   }
 },
  //结算单---详情中(修改)
 editOrStart:function(params){
-  return request.post(`/api-ep-project/costStatement/edit`,params)
+  if(textFilter.call(params,this.mustKeyEn.split(','),this.mustKeyCn.split(','))){
+    return request.post(`/api-ep-project/costStatement/edit`,params)
+   }else{
+     return  new Promise((resolve, reject) => {
+      let data={
+        data:{code:-1}
+      }
+        resolve(data);
+    });
+   }
 },
  //--(删除)
  delFlow:function(params){
@@ -1976,6 +2339,8 @@ editOrStart:function(params){
 
 //请示单
 const askfor= {
+  mustKeyCn:'申请日期',
+  mustKeyEn:'applyDate',
   //状态选择数组
   radioList:[{text:'已经'},{text:'还未'},{text:'测试2'}],
    // 搜索词
@@ -2013,10 +2378,11 @@ const askfor= {
     data  = res.data.data.list.map((item,index) => {
       return {
         id: item.id,
-        index:index+1,
-        userName:item.userName,
-        reason:item.reason,
-        applyDate:item.applyDate
+        index:"序号:"+(index+1+(res.data.data.pageNum-1>=0?res.data.data.pageNum-1:0)*15),
+        userName:"申请人:"+item.userName,
+        reason:"事由:"+item.reason,
+        applyDate:"申请日期:"+item.applyDate,
+        color:item.approveStatus==-1||item.approveStatus==2?'#87CEFA':(item.approveStatus==0?'#808080':(item.approveStatus==1?'#000000':''))
       };
     });
     return data
@@ -2028,11 +2394,29 @@ const askfor= {
 },
 //请示单---新增中(新增)
 saveOrStart:function(params){
-  return request.post(`/api-ep-project/apply/add`,params)
+  if(textFilter.call(params,this.mustKeyEn.split(','),this.mustKeyCn.split(','))){
+    return request.post(`/api-ep-project/apply/add`,params)
+   }else{
+     return  new Promise((resolve, reject) => {
+      let data={
+        data:{code:-1}
+      }
+        resolve(data);
+    });
+   }
 },
  //请示单---详情中(修改)
 editOrStart:function(params){
-  return request.post(`/api-ep-project/apply/edit`,params)
+  if(textFilter.call(params,this.mustKeyEn.split(','),this.mustKeyCn.split(','))){
+    return request.post(`/api-ep-project/apply/edit`,params)
+   }else{
+     return  new Promise((resolve, reject) => {
+      let data={
+        data:{code:-1}
+      }
+        resolve(data);
+    });
+   }
 },
  //--(删除)
  delFlow:function(params){
@@ -2041,6 +2425,10 @@ editOrStart:function(params){
 }
 //项目资料
 const factory= {
+ mustKeyCn:'资料名称,备注,附件',
+ mustKeyEn:'materialName,remark,batchId',
+ mustKeyCn1:'资料名称,备注',
+ mustKeyEn1:'materialName,remark',
   //状态选择数组
   radioList:[{text:'已经'},{text:'还未'},{text:'测试2'}],
    // 搜索词
@@ -2078,9 +2466,9 @@ const factory= {
     data  = res.data.data.list.map((item,index) => {
       return {
         id: item.id,
-        index:index+1,
-        materialName:item.materialName,
-        createTime:item.createTime
+        index:"序号:"+(index+1+(res.data.data.pageNum-1>=0?res.data.data.pageNum-1:0)*15),
+        materialName:"资料名称:"+item.materialName,
+        createTime:"创建时间:"+item.createTime
       };
     });
     return data
@@ -2092,11 +2480,29 @@ const factory= {
 },
 //项目资料---新增中(新增)
 saveOrStart:function(params){
-  return request.post(`/api-ep-project/factoryMaterial/add`,params)
+  if(textFilter.call(params,this.mustKeyEn.split(','),this.mustKeyCn.split(','))){
+    return request.post(`/api-ep-project/factoryMaterial/add`,params)
+   }else{
+     return  new Promise((resolve, reject) => {
+      let data={
+        data:{code:-1}
+      }
+        resolve(data);
+    });
+   }
 },
  //项目资料---详情中(修改)
 editOrStart:function(params){
-  return request.post(`/api-ep-project/factoryMaterial/edit`,params)
+  if(textFilter.call(params,this.mustKeyEn1.split(','),this.mustKeyCn1.split(','))){
+    return request.post(`/api-ep-project/factoryMaterial/edit`,params)
+   }else{
+     return  new Promise((resolve, reject) => {
+      let data={
+        data:{code:-1}
+      }
+        resolve(data);
+    });
+   }
 },
  //--(删除)
  delFlow:function(params){
@@ -2152,5 +2558,9 @@ export default {
   //数组去重
   sliceList,
   //获取当前时间
-  getNowTime
+  getNowTime,
+  //获取当前日期
+  getNowDay,
+  //参数校验
+  textFilter
 }

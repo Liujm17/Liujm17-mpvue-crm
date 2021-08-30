@@ -39,6 +39,7 @@
         required
         input-align="right"
         @input="formData.accountName = $event.mp.detail"
+        v-if="active1==0"
       />
       <van-field
         v-model="formData.bankName"
@@ -47,6 +48,7 @@
         required
         input-align="right"
         @input="formData.bankName = $event.mp.detail"
+         v-if="active1==0"
       />
       <van-field
         v-model="formData.bankAccount"
@@ -56,6 +58,7 @@
         type="digit"
         input-align="right"
         @input="formData.bankAccount = $event.mp.detail"
+         v-if="active1==0"
       />
       <van-field
         v-model="formData.totalPrice"
@@ -226,6 +229,7 @@ export default {
     this.formData.userId = wx.getStorageSync("UserId");
     this.getData2();
     this.getType()
+    this.getUserInfo()
      wx.setNavigationBarTitle({
           title: '费用报销-新增'+'('+wx.getStorageSync("factoryName")+')',
       });
@@ -255,6 +259,17 @@ export default {
            }
          })
        })
+    },
+    //获取员工信息
+    getUserInfo(){
+         let params={
+           id: wx.getStorageSync("UserId"),
+         }
+         data['staff'].getData(params).then((res)=>{
+           this.formData.bankName=res.data.data.bankName
+           this.formData.accountName=res.data.data.name
+           this.formData.bankAccount=res.data.data.bankAccount
+         })
     },
     //添加明细
     addProduct(){
@@ -311,7 +326,7 @@ export default {
     //流程相关方法
     //流程弹窗
     showPopup2(val) {
-      this.show = true;
+      this.usershow = true;
       (this.popUpType = "流程"), (this.nodeId = val.nodeId);
       this.userradio = val.userId + "";
     },
@@ -347,7 +362,11 @@ export default {
     },
     //日期确认
     submit2(val) {
-      this.formData.month = val;
+         var time=val.split('-')
+      if(time[1].length == 1){
+         time[1]='0'+time[1]
+      }
+      this.$set(this.formData, "month", time.join('-'));
       this.dateShow = false;
     },
     //保存
@@ -368,13 +387,14 @@ export default {
       };
       params.isPay=this.active1
       if (this.photoList.length > 0) {
+         this.uuid= data.get_uuid()
         data.upLoadFile(this.photoList, 0, this.uuid).then((res) => {
           //文件code
           let resData = JSON.parse(res.data);
           params.batchId = resData.data.batchId;
           data["cost"].saveOrStart(params).then((res) => {
             if (res.data.code == 10000) {
-              mpvue.showToast({
+              wx.showToast({
                 title: res.data.message,
                 icon: "none",
                 duration: 3000,
@@ -388,7 +408,7 @@ export default {
       } else {
         data["cost"].saveOrStart(params).then((res) => {
           if (res.data.code == 10000) {
-            mpvue.showToast({
+            wx.showToast({
               title: res.data.message,
               icon: "none",
               duration: 3000,

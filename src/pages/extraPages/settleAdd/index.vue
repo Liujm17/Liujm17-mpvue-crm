@@ -62,7 +62,7 @@
         v-model="item.unitPrice"
         placeholder="请填写单价"
         label="单价"
-        type="digit"
+        type=""
         required
         input-align="right"
         @input="item.unitPrice = $event.mp.detail"
@@ -331,9 +331,14 @@ export default {
     },
     //日期确认
     submit2(val) {
-      this.formData.month = val;
+          var time=val.split('-')
+      if(time[1].length == 1){
+         time[1]='0'+time[1]
+      }
+      this.$set(this.formData, "month", time.join('-'));
       this.dateShow = false;
     },
+    //
     submit3(val){
        this.formData.collectionDate=val
        this.dateShow2 = false;
@@ -354,13 +359,14 @@ export default {
         },
       };
       if (this.photoList.length > 0) {
+         this.uuid= data.get_uuid()
         data.upLoadFile(this.photoList, 0, this.uuid).then((res) => {
           //文件code
           let resData = JSON.parse(res.data);
           params.batchId = resData.data.batchId;
           data["settle"].saveOrStart(params).then((res) => {
             if (res.data.code == 10000) {
-              mpvue.showToast({
+              wx.showToast({
                 title: res.data.message,
                 icon: "none",
                 duration: 3000,
@@ -374,7 +380,7 @@ export default {
       } else {
         data["settle"].saveOrStart(params).then((res) => {
           if (res.data.code == 10000) {
-            mpvue.showToast({
+            wx.showToast({
               title: res.data.message,
               icon: "none",
               duration: 3000,

@@ -66,20 +66,14 @@
     <van-cell-group>
       <van-field v-model="payData.accountName"    @input="payData.accountName = $event.mp.detail" required input-align="right" label="账户" type="text" placeholder="请输入账户" />
       <van-field v-model="payData.bankName"    @input="payData.bankName = $event.mp.detail" required input-align="right" label="开户行" type="text" placeholder="请输入开户行" />
-      <van-field v-model="payData.bankAccount"    @input="payData.bankAccount = $event.mp.detail" required input-align="right" label="银行账户" type="digit" placeholder="请输入银行账户" />
+      <van-field v-model="payData.bankAccount"    @input="payData.bankAccount = $event.mp.detail" required input-align="right" label="银行账号" type="digit" placeholder="请输入银行账号" />
       <van-field v-model="payData.totalPrice"    @input="payData.totalPrice = $event.mp.detail" :readonly="showDetail?true:false" input-align="right" type="digit" label="合计付款金额" placeholder="0" />
     </van-cell-group>
 
-   <!-- 供应商订单信息 -->
- <div class="title" v-if="showDetail">供应商订单信息</div>
-   <div class="card-bg" v-if="showDetail">
-    <div class="card" v-for="(item, index) in cardList" :key="index" @click="toDetail(item)">
-      <div class="text" v-for="(label,index2) in item" :key="index2" :style="{color:index2 == 'title'?'black':'#888'}" v-show="index2 !== 'id'&&index2 !== 'orderId'&&index2 !== 'formId'">{{label}}</div>
-    </div>
-   </div>
+  
 
  <!-- 供应商订单信息 ---产品列表-->
- <Purchase :paymentList='paymentList' v-if="showDetail"></Purchase>
+ <Purchase :paymentList='paymentList' v-if="showDetail" :addPage="true"></Purchase>
 
 
   
@@ -134,6 +128,28 @@
         @click="save(1)"
       />
     </van-goods-action>
+     <div class="mask" v-if="maskShow">
+      <div class="mask-item">
+        <!-- 供应商订单信息 -->
+        <div class="title" v-if="showDetail">供应商订单信息</div>
+        <div class="card-bg" v-if="showDetail">
+          <div class="card" v-for="(item, index) in cardList" :key="index" @click="toDetail(item)">
+            <div class="text" v-for="(label,index2) in item" :key="index2" :style="{color:index2 == 'title'?'black':'#888'}" v-show="index2 !== 'id'&&index2 !== 'orderId'&&index2 !== 'formId'">
+              {{label}}</div>
+          </div>
+        </div>
+
+        <div class="mask-group">
+          <div  class="select" v-for="(item, index) in maskList" :key="index" :style="{background:item.color}">
+            <div class="name" @click="chooseItem(item,index)">{{'采购单编号'+item.id}}</div>
+          </div>
+        </div>
+        <div class="mask-bt">
+          <span @click="maskShow=false">取消</span>
+          <span @click="maskSubmit">确定</span>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -236,13 +252,17 @@ export default {
       //流程中的用户弹窗
       usershow: false,
       userradio: "1",
+        show10: false,
+      maskShow: false,
+      radioMask:'',
+      maskList:[],
+      chooseList:[]
     };
   },
   onLoad() {
     this.deleteList=[]
     this.formData = this.data[this.page].formData;
     this.listData = this.data[this.page].vanFormData.formData;
-    this.uuid = data.get_uuid();
   },
   onReady() {
     this.getData();
@@ -250,11 +270,23 @@ export default {
           title: '付款申请-编辑'+'('+wx.getStorageSync("factoryName")+')',
       });
   },
+   onUnload() {
+    (this.radio = ""),
+      (this.userradio = ""),
+      (this.formData.supplierName = ""),
+      (this.formData.supplierContacts = ""),
+      (this.formData.supplierPhone = ""),
+      (this.formData.paymentDate = ""),
+      (this.formData.supplierId = ""),
+      (this.cardList = []);
+    this.paymentList = [];
+    this.chooseList=[];
+    this.maskList=[]
+  },
   watch: {
     'formData.supplierId':{
       handler(newVal,oldVal){
-        console.log(newVal)
-        if(newVal){
+           if(oldVal){
             this.cardList=[]
             let params={
                 supplierId:newVal
@@ -266,16 +298,19 @@ export default {
                  unpaidPrice:'未付金额:'+res.data.data.unpaidPrice+'元',
                 approvalPrice:'在途金额:'+res.data.data.approvalPrice+'元',
               })
-              this.paymentList=res.data.data.unpaidPurchaseVoList.map((item)=>{
-                    return{
-                      id:item.id,
-                      totalPrice:item.totalPrice,
-                      unpaidPrice:item.unpaidPrice,
-                      approvalPrice:item.approvalPrice,
-                      paymentPrice:null,
-                      purchaseDetailVoList:item.purchaseDetailVoList
-                    }
-              })
+               this.maskList = res.data.data.unpaidPurchaseVoList.map(
+              (item) => {
+                return {
+                  id: item.id,
+                  totalPrice: item.totalPrice,
+                  unpaidPrice: item.unpaidPrice,
+                  approvalPrice: item.approvalPrice,
+                  paymentPrice: null,
+                  purchaseDetailVoList: item.purchaseDetailVoList,
+                  color:''
+                };
+              }
+            );
             })
         } 
       }
@@ -307,6 +342,26 @@ export default {
 
   },
   methods: {
+    //选择采购订单
+    chooseItem(item,index){
+         if(item.color==''){
+           item.color='#ccc'
+           if(!this.chooseList.includes(item.id)){
+             this.chooseList.push(item.id)
+           }
+         }else{
+           item.color=''
+           this.chooseList.splice(index,1)
+         }
+    },
+     //mask确认
+    async maskSubmit(){
+      await this.paymentList.splice(0, this.paymentList.length);
+      await this.chooseList.forEach((item)=>{
+        this.paymentList.push(this.maskList.filter((item2)=>item2.id==item)[0])
+      })
+      this.maskShow=false
+    },
     //更换付款类型
     changeData(item, index) {
       //切换不清空收款信息
@@ -327,7 +382,7 @@ export default {
     //获取流程列表和列表数据
     getData() {
       let params={
-          formId: this.$store.state.formId,
+          formId: 11,
           id: this.$route.query.id,
        }
         //获取表单数据
@@ -376,9 +431,10 @@ export default {
               };
             })
           : [];
+           this.uuid=data.batchId?data.batchId:this.data.get_uuid()
       });
       let params2 = {
-        formId: this.$store.state.formId,
+        formId: 11,
       };
       getFlowList(params2).then((res) => {
         if (res.data.data.length >= 1) {
@@ -421,22 +477,24 @@ export default {
       let params ={}
        if(this.active == 0){
         params = {
+            id:this.$route.query.id,
         factoryId: wx.getStorageSync("factoryId"),
         systemCode: "05",
         userId: wx.getStorageSync("UserId"),
         ...this.formData,
         ...this.payData,
         purchasePaymentList,
-        batchId: "",
+        batchId: this.needList.length > 0?this.uuid:null,
         deleteIds:this.deleteList,
         startFlowDto: {
           optionalJson: JSON.stringify(this.fitNodeList),
-          formId: this.$store.state.formId,
+          formId: 11,
           flowId: Number(this.flowId),
         },
       };
        }else if(this.active == 1){
          params = {
+              id:this.$route.query.id,
         factoryId: wx.getStorageSync("factoryId"),
         systemCode: "05",
         userId: wx.getStorageSync("UserId"),
@@ -444,10 +502,10 @@ export default {
         ...this.payData,
         purchasePaymentList,
         deleteIds:this.deleteList,
-        batchId: "",
+        batchId: this.needList.length > 0?this.uuid:null,
         startFlowDto: {
           optionalJson: JSON.stringify(this.fitNodeList),
-          formId: this.$store.state.formId,
+          formId: 11,
           flowId: Number(this.flowId),
         },
       };
@@ -460,9 +518,9 @@ export default {
           //文件code
           let resData = JSON.parse(res.data);
           params.batchId = resData.data.batchId;
-          data["payment"].saveOrStart(params).then((res) => {
+          data["payment"].editOrStart(params).then((res) => {
             if(res.data.code == 10000){
-              mpvue.showToast({
+              wx.showToast({
               title: res.data.message,
               icon: "none",
               duration: 3000,
@@ -474,9 +532,9 @@ export default {
           });
         });
       } else {
-        data["payment"].saveOrStart(params).then((res) => {
+        data["payment"].editOrStart(params).then((res) => {
          if(res.data.code == 10000){
-              mpvue.showToast({
+              wx.showToast({
               title: res.data.message,
               icon: "none",
               duration: 3000,
@@ -503,7 +561,7 @@ export default {
     },
     //流程弹窗
     showPopup2(val) {
-      this.show = true;
+      this.usershow = true;
       (this.popUpType = "流程"), (this.nodeId = val.nodeId);
       this.userradio = val.userId + "";
     },
@@ -535,8 +593,11 @@ export default {
     },
     //供应商确认
     submit(val) {
+      this.maskShow=true
       this.$set(this.formData, "supplierId", val.id);
       this.$set(this.formData, "supplierName", val.name);
+       this.$set(this.formData, "supplierContacts", val.contacts);
+      this.$set(this.formData, "supplierPhone", val.phone);
       this.show = false;
     },
     //流程选用户后的确认事件
@@ -561,6 +622,52 @@ export default {
 @import "../../../style/list.scss";
 </style>
 <style lang="scss" scoped>
+.mask {
+  position: fixed;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  right: 0;
+  z-index: 100000;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  .mask-item {
+    min-width: 300px;
+    min-height: 300px;
+    background: white;
+    box-sizing: border-box;
+    position: relative;
+    .mask-group{
+      width: 100%;
+      padding: 0 10px;
+      min-height: 150px;
+      overflow-y: auto;
+      .select{
+        text-align: center;
+        font-size: 20px;
+        line-height: 30px;
+        border-bottom: 1px solid #1ba9ba;
+      }
+    }
+    .mask-bt{
+      position: absolute;
+      bottom: 0;
+      width: 100%;
+      height: 25px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      span{
+        height: 100%;
+        flex:1;
+        text-align: center;
+        border: 1px solid gray;
+      }
+    }
+  }
+}
 .allbg {
   margin-bottom: 150px;
 }

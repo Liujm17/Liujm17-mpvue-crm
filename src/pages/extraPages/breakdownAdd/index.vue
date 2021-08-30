@@ -27,6 +27,8 @@
         v-model="faultReason"
         rows="1"
         autosize
+        required
+         input-align="right"
         label="故障原因"
         type="textarea"
         placeholder="故障报修描述信息"
@@ -95,12 +97,17 @@ export default {
       title: "故障报修-新增" + "(" + wx.getStorageSync("factoryName") + ")",
     });
   },
+  onShow(){
+      this.formData.faultTime=data.getNowTime()
+  },
   onReady(){
-      if(this.$route.query.deviceId){
+     if(this.$route.query.deviceId){
         this.formData.deviceId=this.$route.query.deviceId
         this.formData.deviceName=this.$route.query.deviceName
+        this.photoList=JSON.parse(this.$route.query.photoList)
       }
-      this.formData.faultTime=data.getNowTime()
+  },
+  onUnLoad(){
       this.active=0
   },
   watch: {},
@@ -144,7 +151,7 @@ export default {
           this.active == "0"
             ? "运行中"
             : this.active == "1"
-            ? "停机维护"
+            ? "停机维修"
             : "未上线",
         faultReason: this.faultReason,
         batchId: "",
@@ -155,13 +162,14 @@ export default {
         userName: wx.getStorageSync("applyUserName"),
       };
       if (this.photoList.length > 0) {
+         this.uuid= data.get_uuid()
         data.upLoadFile(this.photoList, 0, this.uuid).then((res) => {
           //文件code
           let resData = JSON.parse(res.data);
           params.batchId = resData.data.batchId;
           data["breakdown"].saveOrStart(params).then((res) => {
             if (res.data.code == 10000) {
-              mpvue.showToast({
+              wx.showToast({
                 title: res.data.message,
                 icon: "none",
                 duration: 3000,
@@ -179,7 +187,7 @@ export default {
       } else {
         data["breakdown"].saveOrStart(params).then((res) => {
           if (res.data.code == 10000) {
-            mpvue.showToast({
+            wx.showToast({
               title: res.data.message,
               icon: "none",
               duration: 3000,

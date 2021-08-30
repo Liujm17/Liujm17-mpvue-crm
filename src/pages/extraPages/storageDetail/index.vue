@@ -13,7 +13,6 @@
             :placeholder="item.click == 'radioGroup' ? '' : item.value"
             :type="item.type"
             :autosize="item.type == 'textarea' ? true : false"
-            :required="item.required"
             input-align="right"
             readonly
             :rules="[{ required: true, message: '请填写' + item.value }]"
@@ -41,7 +40,7 @@
     </div>
 
          <van-field
-          v-model="suggestion"
+          v-model="suggestion" @input="suggestion = $event.mp.detail"
           rows="1"
           autosize
           label="意见"
@@ -65,7 +64,7 @@
 
 <script>
 import { backFlow, agree, disagree,stockDetail,stockDel } from "../../../api/api";
-import Card from "../../../components/card.vue";
+import Card from "../../../components/boxCard.vue";
 import Dialog2 from "../../../../dist/wx/vant-weapp/dist/dialog2/dialog";
 import data from '../../../api/mockData'
 export default {
@@ -160,7 +159,7 @@ export default {
           orderId: this.orderId,
         };
         data.getHistory(params).then((res) => {
-          mpvue.showToast({
+          wx.showToast({
             title: "正在加载",
             icon: "loading",
             duration: 500,
@@ -173,7 +172,7 @@ export default {
     //获取数据
     getData() {
       let params = {
-        formId: this.$store.state.formId,
+        formId: 14,
         id: this.$route.query.id,
       };
       stockDetail(params).then((res)=>{
@@ -211,10 +210,10 @@ export default {
     del() {
       let params = {
         id: this.$route.query.id,
-        formId: this.$store.state.formId,
+        formId: 14,
       };
       stockDel(params).then((res) => {
-        mpvue.showToast({
+        wx.showToast({
           title: res.data.message,
           icon: "none",
           duration: 1000,
@@ -232,7 +231,7 @@ export default {
         orderId: this.orderId,
       };
       backFlow(params).then((res) => {
-        mpvue.showToast({
+        wx.showToast({
           title: res.data.message,
           icon: "none",
           duration: 1000,
@@ -251,6 +250,7 @@ export default {
         suggestion: this.suggestion,
       };
       agree(params).then((res) => {
+        this.getData();
         this.$router.back();
       });
     },

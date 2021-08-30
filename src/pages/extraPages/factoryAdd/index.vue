@@ -17,6 +17,7 @@
         rows="1"
         autosize
         label="备注"
+        required
         type="textarea"
         input-align="right"
         placeholder="资料描述信息"
@@ -71,13 +72,14 @@ export default {
         userName: wx.getStorageSync("applyUserName"),
       };
       if (this.photoList.length > 0) {
+         this.uuid= data.get_uuid()
         data.upLoadFile(this.photoList, 0, this.uuid).then((res) => {
           //文件code
           let resData = JSON.parse(res.data);
           params.batchId = resData.data.batchId;
           data["factory"].saveOrStart(params).then((res) => {
             if (res.data.code == 10000) {
-              mpvue.showToast({
+              wx.showToast({
                 title: res.data.message,
                 icon: "none",
                 duration: 3000,
@@ -91,7 +93,7 @@ export default {
       } else {
         data["factory"].saveOrStart(params).then((res) => {
           if (res.data.code == 10000) {
-            mpvue.showToast({
+            wx.showToast({
               title: res.data.message,
               icon: "none",
               duration: 3000,

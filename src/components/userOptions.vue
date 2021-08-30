@@ -17,7 +17,6 @@
         </van-radio-group>
       </van-tab>
     </van-tabs>
-    <div class="bottom-bt"></div>
     <BottomButton :btList="btList" @clickBt="clickBt" />
   </div>
 </template>
@@ -113,21 +112,12 @@ export default {
   }
 }
 .user-bg {
-  position: absolute;
+   position: absolute;
   top: 0;
   right: 0;
-  bottom: 2.5rem;
+  bottom: 30px;
   left: 0;
   overflow: auto;
-}
-.bottom-bt {
-  z-index: 1000;
-  position: fixed;
-  left: 0;
-  bottom: 0;
-  width: 100%;
-  height: 50px;
-  line-height: 50px;
-  text-align: center;
+  padding-bottom: 60px;
 }
 </style>

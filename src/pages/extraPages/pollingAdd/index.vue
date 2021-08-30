@@ -48,6 +48,7 @@
         </van-radio-group>
       </div>
     </div>
+    <div style="width:100%;height:200px"></div>
     <!-- 底部按钮 -->
     <van-goods-action>
       <van-goods-action-button type="info" text="保存" @click="save()" />
@@ -90,11 +91,11 @@ export default {
       title: "巡检记录-新增" + "(" + wx.getStorageSync("factoryName") + ")",
     });
   },
-  onShow(){
-     this.active=0
-     this.radio='1'
-     this.photoList=[]
-     this.remarks=''
+  onReady() {
+    this.active = 0;
+    this.radio = "1";
+    this.photoList = [];
+    this.remarks = "";
   },
   watch: {},
   methods: {
@@ -127,13 +128,14 @@ export default {
         userName: wx.getStorageSync("applyUserName"),
       };
       if (this.photoList.length > 0) {
+         this.uuid= data.get_uuid()
         data.upLoadFile(this.photoList, 0, this.uuid).then((res) => {
           //文件code
           let resData = JSON.parse(res.data);
           params.batchId = resData.data.batchId;
           data["polling"].saveOrStart(params).then((res) => {
             if (res.data.code == 10000) {
-              mpvue.showToast({
+              wx.showToast({
                 title: res.data.message,
                 icon: "none",
                 duration: 3000,
@@ -143,9 +145,13 @@ export default {
               //需要报修进入报修
               if (this.radio == "2") {
                 this.$router.push({
-                  path: '/pages/extraPages/breakdownAdd/main',
+                  path: "/pages/extraPages/breakdownAdd/main",
                   query: {
                     data: "",
+                    type: "polling",
+                    deviceId: this.formData.id,
+                    deviceName: this.formData.name,
+                    photoList:JSON.stringify(this.photoList)
                   },
                 });
               } else {
@@ -157,27 +163,28 @@ export default {
       } else {
         data["polling"].saveOrStart(params).then((res) => {
           if (res.data.code == 10000) {
-            mpvue.showToast({
+            wx.showToast({
               title: res.data.message,
               icon: "none",
               duration: 3000,
               mask: true,
             });
             //重启到某页面，如不是tabar页面会有回主页按钮
-           //需要报修进入报修
-              if (this.radio == "2") {
-                this.$router.push({
-                  path: '/pages/extraPages/breakdownAdd/main',
-                  query: {
-                    data: "",
-                    type:'polling',
-                    deviceId:this.formData.id,
-                    deviceName:this.formData.name
-                  },
-                });
-              } else {
-                this.$router.back();
-              }
+            //需要报修进入报修
+            if (this.radio == "2") {
+              this.$router.push({
+                path: "/pages/extraPages/breakdownAdd/main",
+                query: {
+                  data: "",
+                  type: "polling",
+                  deviceId: this.formData.id,
+                  deviceName: this.formData.name,
+                  photoList:[]
+                },
+              });
+            } else {
+              this.$router.back();
+            }
           }
         });
       }

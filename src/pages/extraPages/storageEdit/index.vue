@@ -91,7 +91,7 @@
 
 <script>
 import { stockDetail,getFlowList, getByFlowId ,editStockCheck} from "../../../api/api";
-import Card from "../../../components/card.vue";
+import Card from "../../../components/boxCard.vue";
 import data from '../../../api/mockData'
 import Flow from "../../../components/apply/flow.vue";
 import User from "../../../components/userOptions";
@@ -145,6 +145,7 @@ export default {
   },
   onShow() {
     this.getData();
+    this.getData2()
      wx.setNavigationBarTitle({
           title: '库存盘点-编辑'+'('+wx.getStorageSync("factoryName")+')',
       });
@@ -206,7 +207,7 @@ export default {
      //流程相关方法
      //流程弹窗
     showPopup2(val) {
-      this.show = true;
+      this.usershow = true;
       (this.popUpType = "流程"), (this.nodeId = val.nodeId);
       this.userradio = val.userId + "";
     },
@@ -240,7 +241,7 @@ export default {
           orderId: this.orderId,
         };
         data.getHistory(params).then((res) => {
-          mpvue.showToast({
+          wx.showToast({
             title: "正在加载",
             icon: "loading",
             duration: 500,
@@ -290,7 +291,7 @@ export default {
       params.startFlowDto.type = val;
       editStockCheck(params).then((res)=>{
          if(res.data.code == 10000){
-              mpvue.showToast({
+              wx.showToast({
               title: res.data.message,
               icon: "none",
               duration: 3000,

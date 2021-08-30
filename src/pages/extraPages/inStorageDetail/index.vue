@@ -13,7 +13,6 @@
         :placeholder="item.click == 'radioGroup' ? '' : item.value"
         :type="item.type"
         :autosize="item.type == 'textarea' ? true : false"
-        :required="item.required"
         input-align="right"
         readonly
         :rules="[{ required: true, message: '请填写' + item.value }]"
@@ -42,7 +41,7 @@
       </div>
     </div>
     <van-field
-          v-model="suggestion"
+          v-model="suggestion" @input="suggestion = $event.mp.detail"
           rows="1"
           autosize
           label="意见"
@@ -53,11 +52,6 @@
      <van-button type="info" size="normal" @click="operate" v-if="showoperate">操作</van-button>
     </van-tab>
          <van-tab title="日志"> 
-          <div class="header">
-        <div v-for="(item, index) in hisTitle" :key="index" class="title">
-          {{ item }}
-        </div>
-      </div>
          <Card :cardList="HistoryList"></Card>
       </van-tab>
     </van-tabs>
@@ -90,7 +84,7 @@
 <script>
 import data from "../../../api/mockData";
 import { backFlow,agree,disagree } from "../../../api/api";
-import Card from '../../../components/card.vue'
+import Card from '../../../components/boxCard.vue'
 import Dialog2 from "../../../../dist/wx/vant-weapp/dist/dialog2/dialog";
 export default {
   components:{Card},
@@ -170,7 +164,7 @@ export default {
           orderId:this.orderId
         }
         data.getHistory(params).then((res)=>{
-           mpvue.showToast({
+           wx.showToast({
             title: "正在加载",
             icon: "loading",
             duration: 500,
@@ -183,12 +177,12 @@ export default {
     //获取数据
     getData() {
       let params = {
-        formId: this.$store.state.formId,
+        formId: 6,
         id: this.$route.query.id,
       };
       data["inStorage"].getData(params).then((res) => {
         this.formData = {
-          userName: wx.getStorageSync("applyUserName"),
+          userName: res.data.data.userName,
           purchaseId: res.data.data.purchaseId,
           inDate: res.data.data.inDate,
           inType: res.data.data.inType == 1 ? "采购" : "调拨",
@@ -218,10 +212,10 @@ export default {
     del() {
           let params = {
         id: this.$route.query.id,
-        formId: this.$store.state.formId,
+        formId: 6,
       };
       data['inStorage'].delFlow(params).then((res) => {
-        mpvue.showToast({
+        wx.showToast({
           title: res.data.message,
           icon: "none",
           duration: 1000,
@@ -239,7 +233,7 @@ export default {
         orderId: this.orderId,
       };
       backFlow(params).then((res) => {
-        mpvue.showToast({
+        wx.showToast({
           title: res.data.message,
           icon: "none",
           duration: 1000,
@@ -258,6 +252,7 @@ export default {
         suggestion: this.suggestion,
       };
       agree(params).then((res) => {
+        this.getData();
         this.$router.back();
       });
     },
@@ -276,6 +271,7 @@ export default {
             dealResult:res.type
           }
           disagree(params).then((res) => {
+          this.getData()
              this.$router.back();
           });
         })

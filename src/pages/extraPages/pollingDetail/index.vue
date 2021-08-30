@@ -10,7 +10,6 @@
         :label="item.value"
         :placeholder="item.value"
         :type="item.type"
-        :required="item.required"
         :autosize="item.type == 'textarea' ? true : false"
         input-align="right"
         readonly

@@ -1,22 +1,25 @@
 <template>
   <div class="bg">
     <van-dialog2 id="van-dialog" />
-    <MoveButton @send='send' @openPrj='openPrj' :title3='"("+prjName+")"'></MoveButton>
-    <div style="width:100%;height:10px"></div>
-    <!-- <div style="width:100%" class="header-prj">
-      <div class="prj-bt" @click="openPrj">当前项目:{{prjName}}(点击切换项目)</div>
-       <div class="prj-send" @click="send">扫码巡检</div>
+    <!-- <div class="home-swiper">
+      <div
+        class="swiper-item tran"
+        v-for="(item,index) in homeSrc"
+        :key="index"
+        :style="{transform:transform}"
+        @touchstart="touchStart"
+        @touchmove="touchMove"
+        @touchend="touchEnd"
+      >
+        <img :src="item" alt />
+      </div>
+      <div class="swiper-num">{{moveNum+1}}/{{homeSrc.length}}</div>
     </div> -->
-    <!-- <van-button plain type="primary" size="small" @click="openPrj">{{prjName}}</van-button> -->
+    <MoveButton @send="send" @openPrj="openPrj" :title3="prjName" v-if="showMove"></MoveButton>
+    <div style="width:100%;height:10px"></div>
     <div class="prj-box" v-show="showPrj">
       <div class="prj-box-content">
-        <div
-          class="prj-box-item"
-          v-for="(item,index) in prjList"
-          :key="index"
-          @click="pickPrj(item,index)"
-          :style="{backgroundColor:factoryId==item.id?'rgb(0,191,255)':''}"
-        >{{item.nickName}}</div>
+        <div class="prj-box-item" v-for="(item,index) in prjList" :key="index" @click="pickPrj(item,index)" :style="{backgroundColor:factoryId==item.id?'#1C86EE':''}">{{item.nickName}}</div>
       </div>
       <div class="prj-cancel" @click="showPrj=false">收起</div>
     </div>
@@ -24,7 +27,7 @@
       <div class="title">{{ item.title }}</div>
       <div class="content">
         <van-row>
-          <van-col span="6" v-for="(item2, index2) in item.subs" :key="index2">
+          <van-col span="8" v-for="(item2, index2) in item.subs" :key="index2">
             <div class="box">
               <div class="box-content" @click="toPage(item2)">
                 <ImageView height="100%" :src="item2.icon"></ImageView>
@@ -39,11 +42,11 @@
   </div>
 </template>
 <script>
-import { getMenus, getCount, getProjects } from "../../api/api";
+import { getMenus, getCount, getReportCount, getProjects } from "../../api/api";
 import ImageView from "../../components/imageView";
 import { getStorageSync } from "../../api/wechat";
 import Dialog2 from "../../../dist/wx/vant-weapp/dist/dialog2/dialog";
-import MoveButton from '../../components/utils/moveBotton.vue'
+import MoveButton from "../../components/utils/moveBotton.vue";
 export default {
   data() {
     return {
@@ -55,14 +58,27 @@ export default {
       factoyName: "",
       prjName: "选择项目",
       btLeft: "0",
+      showMove: false,
+      timer: null,
+      timer2: null,
+      homeSrc: [
+        "http://47.105.173.228:8010/icon/news/swiper1.png",
+        "http://47.105.173.228:8010/icon/news/swiper2.png",
+        "http://47.105.173.228:8010/icon/news/swiper3.png",
+      ],
+      transform: "",
+      wxWidth: wx.getSystemInfoSync().windowWidth,
+      moveNum: 0,
+      moveX: 0,
+      startX: "",
     };
   },
-  components: { ImageView, Dialog2,MoveButton},
+  components: { ImageView, Dialog2, MoveButton },
   onShow() {
     //接收websocket消息
     if (getStorageSync("UserId") && getStorageSync("Authorization")) {
       this.getMenus();
-      this.getCount();
+      this.getSetting();
     } else {
       this.$router.push({
         path: "/pages/login/main",
@@ -70,10 +86,24 @@ export default {
       });
     }
     this.getProjects();
+    //延时器
+    this.timer = setTimeout(() => {
+      this.showMove = true;
+    }, 1000);
+    //定时器
+    this.timer2 = setInterval(() => {
+      this.next();
+    }, 5000);
+  },
+  onHide() {
+    clearTimeout(this.timer);
+    clearInterval(this.timer2);
+    this.timer = null;
+    this.timer2 = null;
   },
   onPullDownRefresh() {
     //doing something
-    mpvue.showToast({
+    wx.showToast({
       title: "下拉刷新成功",
       icon: "none",
       duration: 1000,
@@ -92,17 +122,82 @@ export default {
     },
   },
   methods: {
-     //扫码
+    touchStart(e) {
+      this.startX = e.mp.changedTouches[0].pageX;
+    },
+    touchEnd(e) {
+      if (e.mp.changedTouches[0].pageX > this.startX) {
+        this.next();
+      } else if (e.mp.changedTouches[0].pageX < this.startX) {
+        this.pre();
+      } else {
+        return null;
+      }
+    },
+    //下一个
+    next() {
+      this.moveNum += 1;
+      if (this.moveNum == this.homeSrc.length) {
+        this.moveNum = 0;
+        this.moveX = 0;
+      } else {
+        this.moveX += this.wxWidth;
+      }
+      this.transform = `translateX(-${this.moveX}px)`;
+    },
+    //上一个
+    pre() {
+      this.moveNum -= 1;
+      if (this.moveNum < 0) {
+        this.moveNum = this.homeSrc.length - 1;
+        this.moveX = this.moveNum * this.wxWidth;
+      } else {
+        this.moveX -= this.wxWidth;
+      }
+      this.transform = `translateX(-${this.moveX}px)`;
+    },
+    //授权
+    getSetting() {
+      // 可以通过 wx.getSetting 先查询一下用户是否授权了 "scope.record" 这个 scope
+      wx.getSetting({
+        success(res) {
+          if (!res.authSetting["scope.userLocation"]) {
+            wx.authorize({
+              scope: "scope.userLocation",
+              success() {
+                // 用户已经同意小程序使用录音功能，后续调用 wx.startRecord 接口不会弹窗询问
+                wx.showToast({
+                  title: "授权成功",
+                  icon: "success",
+                  duration: 1000,
+                  mask: true,
+                });
+              },
+              fail() {
+                wx.showToast({
+                  title: "授权失败",
+                  icon: "none",
+                  duration: 1000,
+                  mask: true,
+                });
+              },
+            });
+          }
+        },
+      });
+    },
+    //扫码
     send() {
       // 允许从相机和相册扫码
       wx.scanCode({
-        success:(res) =>{
-         this.$router.push({
-           path:'/pages/extraPages/pollingAdd/main',
-           query:{
-              qrCode:res.result
-           }
-         })
+        onlyFromCamera: true,
+        success: (res) => {
+          this.$router.push({
+            path: "/pages/extraPages/pollingAdd/main",
+            query: {
+              qrCode: res.result,
+            },
+          });
         },
       });
     },
@@ -140,15 +235,18 @@ export default {
           this.prjName = wx.getStorageSync("factoryName");
         } else {
           //以前没选过
-          this.factoyName = res.data.data[0].nickName;
-          this.factoryId = res.data.data[0].id;
-          this.prjName = res.data.data[0].nickName;
-          wx.setStorageSync("factoryName", res.data.data[0].nickName);
-          wx.setStorageSync("factoryId", res.data.data[0].id);
+          if (res.data.data.length > 0) {
+            this.factoyName = res.data.data[0].nickName;
+            this.factoryId = res.data.data[0].id;
+            this.prjName = res.data.data[0].nickName;
+            wx.setStorageSync("factoryName", res.data.data[0].nickName);
+            wx.setStorageSync("factoryId", res.data.data[0].id);
+          }
         }
         wx.setNavigationBarTitle({
           title: "主页" + "(" + wx.getStorageSync("factoryName") + ")",
         });
+        this.getCount();
       });
     },
     //获取待办数
@@ -158,11 +256,23 @@ export default {
         status: 0,
       };
       getCount(params).then((res) => {
-        wx.setTabBarBadge({
-          index: 1,
-          text: res.data.data + "",
-        });
+        let num = 0
+        num+=res.data.data
+        getReportCount().then((res2) => {
+          num+=res2.data.data
+          if (num > 0) {
+          wx.setTabBarBadge({
+            index: 2,
+            text: num+ "",
+          });
+        } else {
+          wx.removeTabBarBadge({
+            index: 2,
+          });
+        }
+        })
       });
+
     },
 
     //获取菜单
@@ -199,6 +309,29 @@ export default {
 };
 </script>
 <style lang="scss" scoped>
+.home-swiper {
+  width: 100%;
+  height: 200px;
+  display: -webkit-box;
+  position: relative;
+  .swiper-item {
+    width: 100%;
+    height: 100%;
+    img {
+      width: 100%;
+      height: 100%;
+    }
+  }
+  .swiper-num {
+    position: absolute;
+    bottom: 0;
+    left: 45%;
+    z-index: 100;
+  }
+}
+.tran {
+  transition: all 1s;
+}
 //右到左
 @keyframes fadeleftIn {
   0% {
@@ -247,29 +380,35 @@ export default {
   flex-direction: column;
   align-items: center;
   min-height: 100vh;
+  background: #f5f6f7;
   .box-card {
     width: 90%;
     min-height: 2.5rem;
-    border: 1px solid #96c2f1;
-    background-color: #eff7ff;
+    // border: 1px solid #96c2f1;
+    background-color: white;
     border-radius: 0.2rem;
     overflow: hidden;
     margin: 0.1rem 0;
     .title {
       width: 100%;
       height: 0.5rem;
-      text-align: center;
+      text-align: left;
+      padding: 0 10px;
+      box-sizing: border-box;
+      color: #555666;
+      font-size: 15px;
+      border-bottom: 1px solid #f5f6f7;
     }
     .box {
       width: 100%;
-      height: 80px;
+      height: 90px;
       display: flex;
       flex-direction: column;
       justify-content: center;
       align-items: center;
       .box-content {
-        width: 90%;
-        height: 70%;
+        width: 50%;
+        height: 60%;
         // border: 1px solid #96c2f1;
         // background-color: #eff7ff;
         display: flex;
@@ -284,6 +423,7 @@ export default {
       .box-name {
         width: 90%;
         height: 25%;
+        color: #333;
         //  background-color: white;
         font-size: 13px;
         text-align: center;
@@ -309,25 +449,25 @@ export default {
   border-radius: 30px;
   background: #ffdead;
 }
-.prj-send{
-   height: 50px;
+.prj-send {
+  height: 50px;
   width: 30%;
-   line-height: 50px;
+  line-height: 50px;
   border: 1px solid #07c160;
   text-align: center;
   border-radius: 30px;
   background: #ffdead;
 }
 .prj-box {
-  position: absolute;
+  position: fixed;
   top: 0;
   left: 0;
   width: 30%;
   height: 50%;
   z-index: 10001;
-  background: #242f42;
+  background: #c6e2ff;
   animation: fadeInDown 0.4s;
-  color: white;
+  color: black;
 }
 .prj-box-content {
   width: 100%;
@@ -348,6 +488,7 @@ export default {
   display: flex;
   justify-content: center;
   align-items: center;
-  background: #ff4d4d;
+  background: #fff;
+  color: black;
 }
 </style>

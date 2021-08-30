@@ -9,7 +9,7 @@
              <ImageView :src="src" height="100%" round />
            </div>
            <div class="one-two">
-             <div>员工姓名:刘佳明</div>
+             <div>员工姓名:{{userName}}</div>
              <div>微信名称:{{nickName}}</div>
              <div>地区:{{city}}</div>
              <div>性别:{{sex}}</div>

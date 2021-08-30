@@ -5,7 +5,7 @@ module.exports = (function () {
     function connect() { // 发起链接
       //建立连接
       wx.connectSocket({
-        url: `wss://test.saddlepoint.cn:8004/api-ep-user/taskSocket/${wx.getStorageSync("UserId")}`,
+        url: `wss://www.saddlepoint.cn:8004/api-ep-user/taskSocket/${wx.getStorageSync("UserId")}`,
         header: {
           "Content-Type": 'application/json',
           "Authorization": wx.getStorageSync("Authorization")
@@ -31,7 +31,7 @@ module.exports = (function () {
       //如果是tabar页面直接执行添加待办红点数量事件
       if (prevPage.route == 'pages/index/main' || prevPage.route == 'pages/shenpi/main' || prevPage.route == 'pages/self/main') {
         wx.setTabBarBadge({
-          index: 1,
+          index: 2,
           text: JSON.parse(data.data).total + "",
         });
         wx.showToast({

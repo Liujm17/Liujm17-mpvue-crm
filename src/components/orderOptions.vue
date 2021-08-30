@@ -108,9 +108,10 @@ export default {
   position: absolute;
   top: 0;
   right: 0;
-  bottom: 2.5rem;
+  bottom: 30px;
   left: 0;
   overflow: auto;
+  padding-bottom: 60px;
 }
 .bottom-bt {
   z-index: 1000;

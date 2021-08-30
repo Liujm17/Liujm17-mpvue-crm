@@ -165,7 +165,7 @@ export default {
           },
         });
       } else {
-        mpvue.showToast({
+        wx.showToast({
           title: "只能上传一张图片",
           icon: "none",
           duration: 1000,
@@ -204,7 +204,7 @@ export default {
       top: -10px;
       width: 10px;
       height: 10px;
-      z-index: 1000;
+      z-index: 2;
     }
   }
 }

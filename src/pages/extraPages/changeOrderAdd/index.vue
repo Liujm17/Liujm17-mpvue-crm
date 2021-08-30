@@ -320,34 +320,35 @@ export default {
       };
       params.startFlowDto.type = val;
       if (this.photoList.length > 0) {
+         this.uuid= data.get_uuid()
         data.upLoadFile(this.photoList, 0, this.uuid).then((res) => {
            //文件code
           let resData = JSON.parse(res.data);
           params.batchId = resData.data.batchId;
           data["changeOrder"].saveOrStart(params).then((res) => {
               if(res.data.code == 10000){
-              mpvue.showToast({
+              wx.showToast({
               title: res.data.message,
               icon: "none",
               duration: 3000,
               mask: true,
             });
             //重启到某页面，如不是tabar页面会有回主页按钮
-            this.$router.back();
+            this.$router.go(2);
             }
           });
         });
       } else {
         data["changeOrder"].saveOrStart(params).then((res) => {
              if(res.data.code == 10000){
-              mpvue.showToast({
+              wx.showToast({
               title: res.data.message,
               icon: "none",
               duration: 3000,
               mask: true,
             });
             //重启到某页面，如不是tabar页面会有回主页按钮
-            this.$router.back();
+            this.$router.go(2);
             }
         });
       }
@@ -371,7 +372,7 @@ export default {
     },
     //流程弹窗
     showPopup2(val) {
-      this.show = true;
+      this.usershow = true;
       (this.popUpType = "流程"), (this.nodeId = val.nodeId);
       this.userradio = val.userId + "";
     },

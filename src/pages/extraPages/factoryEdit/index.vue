@@ -17,6 +17,7 @@
         rows="1"
         autosize
         label="备注"
+        required
         type="textarea"
         placeholder="项目描述信息"
         input-align="right"
@@ -57,7 +58,6 @@ export default {
     };
   },
   onLoad() {
-    this.uuid = data.get_uuid();
     this.deleteList=[]
   },
   //一定要用ready 因为onshow在选完图片后会再次调用
@@ -102,6 +102,7 @@ export default {
               };
             })
           : [];
+           this.uuid=res.data.data.batchId?res.data.data.batchId:this.data.get_uuid()
       });
     },
     //保存
@@ -110,7 +111,7 @@ export default {
         id: this.$route.query.id,
         materialName: this.materialName,
         remark: this.remark,
-        batchId: "",
+        batchId: this.needList.length > 0?this.uuid:null,
         deleteIds: this.deleteList,
         factoryId: wx.getStorageSync("factoryId"),
         userId: wx.getStorageSync("UserId"),
@@ -123,7 +124,7 @@ export default {
           params.batchId = resData.data.batchId;
           data["factory"].editOrStart(params).then((res) => {
             if (res.data.code == 10000) {
-              mpvue.showToast({
+              wx.showToast({
                 title: res.data.message,
                 icon: "none",
                 duration: 3000,
@@ -137,7 +138,7 @@ export default {
       } else {
         data["factory"].editOrStart(params).then((res) => {
           if (res.data.code == 10000) {
-            mpvue.showToast({
+            wx.showToast({
               title: res.data.message,
               icon: "none",
               duration: 3000,

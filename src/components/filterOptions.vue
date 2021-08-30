@@ -15,7 +15,7 @@
       </div>
     </div>
     <div>
-      <van-button plain type="info" @click="submit">查询</van-button>
+      <van-tag plain type="info" @click="submit" size="large">查询</van-tag>
     </div>
   </div>
 </template>

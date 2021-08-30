@@ -6,6 +6,7 @@
           title="基本信息"
           :listData="data[page].vanFormData.formData"
           :formData="formData"
+            :required='true'
           :readonly="true"
         ></BaseInfo>
         <van-button type="info" size="normal" @click="operate">操作</van-button>
@@ -18,44 +19,6 @@
         <Card :cardList="HistoryList"></Card>
       </van-tab>
     </van-tabs>
-
-    <!-- <van-goods-action v-if="pageType == '历史'">
-      <van-goods-action-button type="info" text="编辑" v-if="isEdit" @click="changeText()" />
-      <van-goods-action-button type="warning" text="删除" v-if="isEdit" @click="delFlow" />
-      <van-goods-action-button type="danger" text="回撤" v-if="isBack" @click="backFlow" />
-    </van-goods-action>
-
-    <van-goods-action v-else-if="pageType == '待审批'">
-      <van-goods-action-button type="info" text="同意" @click="agree" />
-      <van-goods-action-button type="default" text="转审" @click="referral" />
-      <van-goods-action-button type="primary" text="驳回" @click="disagree" />
-    </van-goods-action>
-    <van-goods-action v-else-if="pageType == '已审批'"></van-goods-action>
-
-    <van-goods-action v-else-if="pageType == '已提交'">
-      <van-goods-action-button type="info" text="编辑" v-if="isEdit == true" @click="changeText()" />
-      <van-goods-action-button type="warning" text="删除" v-if="isEdit == true" @click="delFlow" />
-      <van-goods-action-button type="danger" text="回撤" v-if="isBack == true" @click="backFlow" />
-    </van-goods-action> -->
-
-    <!-- 同意驳回弹出层 -->
-    <!-- <van-popup
-      :show="show2"
-      position="bottom"
-      custom-style="width: 100%; min-height: 30%;display:flex;flex-direction: column;justify-content: center;"
-      @close="quxiao"
-    >
-      <Deal :type="dealType" @quxiao="quxiao" @queding="queding"></Deal>
-    </van-popup> -->
-    <!-- 删除或者回撤弹出层 -->
-    <!-- <van-popup
-      :show="show3"
-      position="bottom"
-      custom-style="width: 100%; min-height: 30%;display:flex;flex-direction: column;justify-content: center;"
-      @close="quxiao2"
-    >
-      <Delete @quxiao="quxiao2" @queding="queding2"></Delete>
-    </van-popup> -->
 
     <!-- 收款人弹出层 -->
     <van-popup
@@ -79,7 +42,7 @@ import { agree, disagree, backFlow, referral } from "../../api/api";
 export default {
   data() {
     return {
-      title: ["审批步骤", "处理人", "处理时间", "结果"],
+      title: [],
       page: "",
       data: data,
       active: 0,
@@ -143,7 +106,7 @@ export default {
         };
         //获取日志
         data.getHistory(params).then((res) => {
-          mpvue.showToast({
+          wx.showToast({
             title: "正在加载",
             icon: "loading",
             duration: 500,
@@ -158,10 +121,10 @@ export default {
       let params = {
         orderId: this.$route.query.orderId,
         userId: val.id,
-        approverUserId: mpvue.getStorageSync("UserId"),
+        approverUserId: wx.getStorageSync("UserId"),
       };
       referral(params).then((res) => {
-        mpvue.showToast({
+        wx.showToast({
           title: res.data.message,
           icon: "none",
           duration: 1000,
@@ -176,8 +139,8 @@ export default {
     getData() {
       let params = {
         id: this.$route.query.id,
-        formId: this.$store.state.formId,
-        userId: mpvue.getStorageSync("UserId"),
+        formId: this.$route.query.formId,
+        userId: wx.getStorageSync("UserId"),
       };
       //获取表单数据
       data[this.$route.query.data].getData(params).then((res) => {
@@ -200,9 +163,9 @@ export default {
         query: {
           id: this.$route.query.id,
           orderId: this.$route.query.orderId,
-          formId: this.$store.state.formId,
+          formId: this.$route.query.formId,
           data: this.$store.state.allData.filter(
-            (item) => item.formId == this.$store.state.formId
+            (item) => item.formId == this.$route.query.formId
           )[0].data,
           type: "历史",
         },
@@ -246,12 +209,12 @@ export default {
     queding(val) {
       let params = {
         ...val,
-        userId: mpvue.getStorageSync("UserId"),
+        userId: wx.getStorageSync("UserId"),
         orderId: this.$route.query.orderId,
       };
       if (this.dealType == "agree") {
         agree(params).then((res) => {
-          mpvue.showToast({
+          wx.showToast({
             title: res.data.message,
             icon: "none",
             duration: 1000,
@@ -262,7 +225,7 @@ export default {
         });
       } else {
         disagree(params).then((res) => {
-          mpvue.showToast({
+          wx.showToast({
             title: res.data.message,
             icon: "none",
             duration: 1000,
@@ -278,11 +241,11 @@ export default {
       if (this.DeleteType == "delete") {
         let params = {
           id: this.formData.id,
-          formId: this.$store.state.formId,
-          userId: mpvue.getStorageSync("UserId"),
+          formId: this.$route.query.formId,
+          userId: wx.getStorageSync("UserId"),
         };
         data[this.$route.query.data].delFlow(params).then((res) => {
-          mpvue.showToast({
+          wx.showToast({
             title: res.data.message,
             icon: "none",
             duration: 1000,
@@ -299,7 +262,7 @@ export default {
           orderId: this.$route.query.orderId,
         };
         backFlow(params).then((res) => {
-          mpvue.showToast({
+          wx.showToast({
             title: res.data.message,
             icon: "none",
             duration: 1000,

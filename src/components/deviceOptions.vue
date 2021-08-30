@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div class="options-bg">
     <van-search
       v-model="value"
       placeholder="请输入搜索关键词"
@@ -39,7 +39,7 @@ export default {
     };
   },
     components: {BottomButton},
-  mounted() {
+  onReady() {
     this.getData();
   },
   methods: {
@@ -59,6 +59,7 @@ export default {
           return {
             id: item.id + "",
             name: item.name,
+            maintenanceDay:item.maintenanceDay,
             serialNumber:item.serialNumber,
             specification:item.specification
           };
@@ -82,6 +83,7 @@ export default {
           id: this.radio,
         name: this.radioList.filter((item) => item.id == this.radio)[0].name,
          specs: this.radioList.filter((item) => item.id == this.radio)[0].specs,
+         maintenanceDay:this.radioList.filter((item) => item.id == this.radio)[0].maintenanceDay,
          unitPrice:1,
          purchaseQuantity:1,
          totalPrice:1
@@ -93,6 +95,15 @@ export default {
 };
 </script>
 <style lang="scss">
+.options-bg{
+   position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 30px;
+  left: 0;
+  overflow: auto;
+  padding-bottom: 60px;
+}
 .select {
   font-size: 0.3rem;
   .name {

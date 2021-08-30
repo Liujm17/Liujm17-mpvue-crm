@@ -26,6 +26,7 @@
         v-model="reason"
         rows="1"
         autosize
+        required
         label="申请事项"
         type="textarea"
         placeholder="申请事项描述信息"
@@ -128,13 +129,12 @@ export default {
   },
   onLoad() {
     this.deleteList=[]
-    this.uuid = data.get_uuid();
   },
    onReady() {
      this.getData()
     this.getData2()
      wx.setNavigationBarTitle({
-          title: '请求单-编辑'+'('+wx.getStorageSync("factoryName")+')',
+          title: '请示单-编辑'+'('+wx.getStorageSync("factoryName")+')',
         });
   },
   watch: {
@@ -182,6 +182,7 @@ export default {
               };
             })
           : [];
+           this.uuid=res.data.data.batchId?res.data.data.batchId:this.data.get_uuid()
       });
     },
       //获取流程列表
@@ -222,7 +223,7 @@ export default {
        //流程相关方法
      //流程弹窗
     showPopup2(val) {
-      this.show = true;
+      this.usershow = true;
       (this.popUpType = "流程"), (this.nodeId = val.nodeId);
       this.userradio = val.userId + "";
     },
@@ -268,7 +269,7 @@ export default {
         userName: this.userName,
         reason: this.reason,
         applyDate:this.applyDate,
-        batchId: "",
+        batchId: this.needList.length > 0?this.uuid:null,
          deleteIds: this.deleteList,
         factoryId: wx.getStorageSync("factoryId"),
         userId: wx.getStorageSync("UserId"),
@@ -287,7 +288,7 @@ export default {
           params.batchId = resData.data.batchId;
           data["askfor"].editOrStart(params).then((res) => {
             if (res.data.code == 10000) {
-              mpvue.showToast({
+              wx.showToast({
                 title: res.data.message,
                 icon: "none",
                 duration: 3000,
@@ -301,7 +302,7 @@ export default {
       } else {
         data["askfor"].editOrStart(params).then((res) => {
           if (res.data.code == 10000) {
-            mpvue.showToast({
+            wx.showToast({
               title: res.data.message,
               icon: "none",
               duration: 3000,

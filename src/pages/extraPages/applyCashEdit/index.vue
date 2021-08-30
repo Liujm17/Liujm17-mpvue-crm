@@ -87,7 +87,6 @@ export default {
     this.deleteList=[]
      this.formData = this.data[this.page].formData;
     this.listData = this.data[this.page].vanFormData.formData;
-    this.uuid = data.get_uuid();
   },
   onReady(){
     this.getData();
@@ -165,7 +164,7 @@ export default {
     getByFlowId() {
       let params = {
         flowId: this.flowId,
-        userId: mpvue.getStorageSync("UserId"),
+        userId: wx.getStorageSync("UserId"),
       };
       //设置流程列表
       getByFlowId(params).then((res) => {
@@ -184,7 +183,7 @@ export default {
     getData() {
       let params = {
         formId: this.$store.state.formId,
-        userId: mpvue.getStorageSync("UserId"),
+        userId: wx.getStorageSync("UserId"),
       };
       getFlowList(params).then((res) => {
         if (res.data.data.length >= 1) {
@@ -230,6 +229,7 @@ export default {
                 id:item.id?item.id:''
               };
             }):[];
+             this.uuid=res.data.data.batchId?res.data.data.batchId:this.data.get_uuid()
       })
     },
     //mpvue的更改选择，异步
@@ -252,7 +252,7 @@ export default {
         systemCode: "05",
         userId: wx.getStorageSync("UserId"),
         ...this.formData,
-        batchId: "",
+        batchId: this.needList.length > 0?this.uuid:null,
          deleteIds:this.deleteList,
          startFlowDto: {
            type: val == "save" ? 0 : 1,
@@ -268,7 +268,7 @@ export default {
           params.batchId = resData.data.batchId;
           data["applyCash"].editOrStart(params).then((res) => {
               if(res.data.code == 10000){
-              mpvue.showToast({
+              wx.showToast({
               title: res.data.message,
               icon: "none",
               duration: 3000,
@@ -285,7 +285,7 @@ export default {
       } else {
         data["applyCash"].editOrStart(params).then((res) => {
            if(res.data.code == 10000){
-              mpvue.showToast({
+              wx.showToast({
               title: res.data.message,
               icon: "none",
               duration: 3000,

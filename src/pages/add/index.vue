@@ -10,15 +10,6 @@
     @showPopup='showPopup'
     v-if="showComponents[0]"
     ></BaseInfo>
-    <!-- <Flow
-    :flowStatus='flowStatus'
-    :flowId='flowId'
-    :flowList='flowList'
-    :fitNodeList='fitNodeList'
-    @showPopup2='showPopup2'
-    @radioChange='radioChange'
-    v-if="showComponents[1]"
-    ></Flow> -->
     <van-goods-action>
       <van-goods-action-button
         type="info"
@@ -90,6 +81,9 @@ export default {
           title: '新增'+'('+wx.getStorageSync("factoryName")+')',
         });
   },
+  onUnload(){
+     this.show=false
+  },
   watch: {
     formData:function(val){
     this.formData.userId=getStorageSync('UserId')
@@ -149,7 +143,7 @@ export default {
     getByFlowId() {
       let params = {
         flowId: this.flowId,
-        userId: mpvue.getStorageSync("UserId"),
+        userId: wx.getStorageSync("UserId"),
       };
       //设置流程列表
       getByFlowId(params).then((res) => {
@@ -168,7 +162,7 @@ export default {
     getData() {
       let params = {
         formId: this.$store.state.formId,
-        userId: mpvue.getStorageSync("UserId"),
+        userId: wx.getStorageSync("UserId"),
       };
        if(this.showComponents[1]){
            getFlowList(params).then((res) => {
@@ -210,13 +204,14 @@ export default {
         ...this.formData,
         formId: this.$store.state.formId,
         flowId: this.flowId,
-        userId: mpvue.getStorageSync("UserId"),
+        userId: wx.getStorageSync("UserId"),
+        factoryId: wx.getStorageSync("factoryId"),
         type: val == "save" ? 0 : 1,
         optionalJson: val == "save" ? "" : JSON.stringify(this.fitNodeList),
       };
       data[this.page].saveOrStart(params).then((res)=>{
           if(res.data.code == 10000){
-              mpvue.showToast({
+              wx.showToast({
               title: res.data.message,
               icon: "none",
               duration: 3000,

@@ -13,7 +13,6 @@
         :label="item.value"
         :placeholder="item.click == 'radioGroup' ? '' : item.value"
         :type="item.type"
-        :required="item.required"
         input-align="right"
         readonly
         :rules="[{ required: true, message: '请填写' + item.value }]"
@@ -205,7 +204,7 @@ export default {
     };
   },
   onShow() {
-   
+    
   },
   onReady() {
     
@@ -250,7 +249,7 @@ export default {
         path: "/pages/extraPages/deviceEdit/main",
         query: {
           id: this.$route.query.id,
-          formId: this.$store.state.formId,
+          formId: 4,
         },
       });
     },
@@ -266,7 +265,7 @@ export default {
         factoryId: wx.getStorageSync("factoryId"),
       };
       data["deviceInfo"].delFlow(params).then((res) => {
-        mpvue.showToast({
+        wx.showToast({
           title: res.data.message,
           icon: "none",
           duration: 1000,
@@ -319,6 +318,7 @@ export default {
       text-align: center;
       color: #666666;
       font-weight: 700;
+      font-size:15px;
       border-right: 1px solid;
       border-bottom: 1px solid;
     }

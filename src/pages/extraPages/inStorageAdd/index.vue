@@ -202,6 +202,9 @@ export default {
     this.radioList=this.data[this.page].radioList;
   },
   onReady() {
+    if(this.$route.query.purchaseId){
+       this.$set(this.formData, "purchaseId", Number(this.$route.query.purchaseId));
+    }
     this.getData();
       wx.setNavigationBarTitle({
           title: '入库单-新增'+'('+wx.getStorageSync("factoryName")+')',
@@ -282,7 +285,7 @@ export default {
     //获取流程列表
     getData() {
       let params = {
-        formId: this.$store.state.formId,
+        formId: 6,
       };
       getFlowList(params).then((res) => {
         if (res.data.data.length >= 1) {
@@ -325,7 +328,7 @@ export default {
         batchId: "",
         startFlowDto: {
           optionalJson: JSON.stringify(this.fitNodeList),
-          formId: this.$store.state.formId,
+          formId: 6,
           flowId: Number(this.flowId),
         },
       };
@@ -333,7 +336,7 @@ export default {
       params.startFlowDto.type = val;
       data["inStorage"].saveOrStart(params).then((res) => {
         if(res.data.code == 10000){
-              mpvue.showToast({
+              wx.showToast({
               title: res.data.message,
               icon: "none",
               duration: 3000,
@@ -363,7 +366,7 @@ export default {
         if(this.active == 0){
           this.ordershow=true
         }else{
-          mpvue.showToast({
+          wx.showToast({
           title: '调拨单无产品订单',
           icon: "none",
           duration: 1000,
@@ -376,7 +379,7 @@ export default {
       if(this.formData.purchaseId || this.active==1){
       this.show2 = true;
       }else{
-            mpvue.showToast({
+            wx.showToast({
           title: '请先添加采购订单',
           icon: "none",
           duration: 1000,
@@ -386,7 +389,7 @@ export default {
     },
     //流程弹窗
     showPopup2(val) {
-      this.show = true;
+      this.usershow = true;
       (this.popUpType = "流程"), (this.nodeId = val.nodeId);
       this.userradio = val.userId + "";
     },
@@ -420,7 +423,7 @@ export default {
       this.show2 = false;
       this.content.push(val);
       }else{
-         mpvue.showToast({
+         wx.showToast({
           title: '请不要重复添加产品',
           icon: "none",
           duration: 1000,

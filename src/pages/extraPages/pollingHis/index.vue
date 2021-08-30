@@ -3,13 +3,9 @@
     <!-- 年月日选择器 -->
     <div class="lookForMonth_top">
       <div class="selectDate">
-        <van-button type="default" size="small" @click="dateUp"
-          >上个月</van-button
-        >
+        <van-button type="default" size="small" @click="dateUp">上个月</van-button>
         <div>{{ year }} 年 {{ month }} 月</div>
-        <van-button type="default" size="small" @click="dateDown"
-          >上个月</van-button
-        >
+        <van-button type="default" size="small" @click="dateDown">下个月</van-button>
       </div>
     </div>
     <div class="calendar" :style="calendarStyle">
@@ -19,115 +15,139 @@
         :key="index"
         :class="{
           ash: item.color === 'ash',
-          date: index > 6 && item.color !== 'ash',
+          date:item.color !== 'ash',
         }"
-        @click="index > 6 && item.color !== 'ash' ? getTime(item.label) : ''"
+        :style="{background:index == activeIndex?'#eee':''}"
+        @click="item.color !== 'ash'?getTime(item.label,index):''"
       >
         <div class="dateEdit" :style="{color:item.abnormalNum>0?'#FF0000':''}">
           {{ item.label}}
           <i class="el-icon-edit-outline" v-if="item.color !== 'ash' && index >= 7"></i>
         </div>
-        <div class="dateEdit"  :style="{color:item.abnormalNum>0?'#FF0000':''}">{{item.polling?item.polling:''}}</div>
+        <div
+          class="dateEdit"
+          :style="{color:item.abnormalNum>0?'#FF0000':''}"
+        >{{item.polling?item.polling:''}}</div>
       </div>
     </div>
-   <div class="tabs">
-      <RadioList :typeList='typeList' :active="active" @changeData='changeData'></RadioList>
-   </div>
-    <Card
-      :cardList="cardList"
-      @toDetail="toDetail"
-      v-if="cardList.length > 0"
-    ></Card>
+    <div class="tabs">
+      <RadioList :typeList="typeList" :active="active" @changeData="changeData"></RadioList>
+      <p>&nbsp;&nbsp;当前显示日期:{{showTime}}</p>
+    </div>
+    <Card :cardList="cardList" @toDetail="toDetail" v-if="cardList.length > 0"></Card>
     <div class="empty-text" v-else>暂无记录</div>
   </div>
 </template>
 
 <script>
-import RadioList from '../../../components/radioButton.vue'
-import Card from '../../../components/card.vue'
-import {getHistoryInspects} from '../../../api/api'
-import data from '../../../api/mockData'
+import RadioList from "../../../components/radioButton.vue";
+import Card from "../../../components/boxCard.vue";
+import { getHistoryInspects } from "../../../api/api";
+import data from "../../../api/mockData";
 export default {
-  components:{RadioList,Card},
+  components: { RadioList, Card },
   data() {
     return {
-      data:data,
+      data: data,
       calendarData: [
-        { label: "日" },
-        { label: "一" },
-        { label: "二" },
-        { label: "三" },
-        { label: "四" },
-        { label: "五" },
-        { label: "六" },
+        // { label: "日" },
+        // { label: "一" },
+        // { label: "二" },
+        // { label: "三" },
+        // { label: "四" },
+        // { label: "五" },
+        // { label: "六" },
       ], //日历循环渲染数据
       year: 0, //当前日期年
       month: 0, //当前日期月数
       date: 0, //当前日期号数
       day: -1, //当前星期几
-      time:'',//选中的日
-      typeList:[{value:'异常',text:'异常'},{value:'',text:'全部'}],
-      active:0,
-      cardList:[],
-      pollingList:[]
+      time: "", //选中的日
+      typeList: [
+        { value: "异常", text: "异常" },
+        { value: "", text: "全部" },
+      ],
+      active: 0,
+      cardList: [],
+      pollingList: [],
+      nowDate:'',
+      status:'异常',
+      showTime:'',
+      activeIndex:''
     };
   },
-  onLoad(){
-       // 获取当前日期数据
+  onReady() {
+    // 获取当前日期数据
     this.getNow();
     // 获取当前月份一号的时间戳
     // let firstTime = +new Date(this.year,this.month-1,1,0,0,0)
 
-    this.getData()
-     wx.setNavigationBarTitle({
-          title: '历史巡检记录'+'('+wx.getStorageSync("factoryName")+')',
-      });
+    this.getData();
+    wx.setNavigationBarTitle({
+      title: "历史巡检记录" + "(" + wx.getStorageSync("factoryName") + ")",
+    });
+    this.nowDate=data.getNowDay()
+    this.activeIndex=Number(this.nowDate.split('-')[2]-1)
+  },
+  watch:{
+       'nowDate':{
+         handler(newVal,oldVal){
+           this.getTime(this.nowDate.split('-')[2])
+         }
+       }
   },
   methods: {
     //获取当月数据
-    getData(){
-       const month=this.year + "-" + this.month
-       let params={
-         monthDate:month
-       }
-        getHistoryInspects(params).then((res)=>{
-           this.pollingList=res.data.data.map((item)=>{
-             return {
-               polling:item.abnormalNum+'/'+item.totalNum,
-               abnormalNum:item.abnormalNum
-             }
-           })
-         this.getCalendarDate(); // 给calendarData添加当月数据
-      })
+    getData() {
+      const month = this.year + "-" + this.month;
+      let params = {
+        monthDate: month,
+      };
+      getHistoryInspects(params).then((res) => {
+        this.pollingList = res.data.data.map((item) => {
+          return {
+            polling: item.abnormalNum + "/" + item.totalNum,
+            abnormalNum: item.abnormalNum,
+          };
+        });
+        this.getCalendarDate(); // 给calendarData添加当月数据
+      });
     },
-    toDetail(val){
-     this.$router.push({
-        path: '/pages/extraPages/pollingDetail/main',
+    toDetail(val) {
+      this.$router.push({
+        path: "/pages/extraPages/pollingDetail/main",
         query: {
           id: val.id,
         },
       });
     },
     //更换异常全部
-    changeData(item,index){
-      this.active=index
-     this.getTime(this.time,item.value)
+    changeData(item, index) {
+      this.active = index;
+      this.status=this.active==0?'异常':'',
+      this.getTime(this.time);
     },
     //点击日期事件
-    getTime(val,status="异常") {  
-    const time = this.year + "-" + this.month + "-" + val;
-    this.time=val
-      let params={
-        day:time,
-        pageNum:1,
-        pageSize:99999,
-        deviceId:'',
-        status:status
+    getTime(val,index) {
+      this.activeIndex=index
+      let time;
+      if (val) {
+        time = this.year + "-" + this.month + "-" + val;
+        this.time = val;
+      }else{
+        time = this.year + "-" + this.month;
       }
-      data['polling'].getRecord(params).then((res)=>{
-        this.cardList=res
-      })
-     
+      this.showTime=val?time:this.nowDate
+      let params = {
+        day: val?time:this.nowDate,
+        pageNum: 1,
+        pageSize: 99999,
+        deviceId: "",
+        status: this.status,
+      };
+      data["polling"].getRecord(params).then((res) => {
+        this.cardList = res;
+      });
     },
     // 获取当前时间
     getNow() {
@@ -162,13 +182,13 @@ export default {
         this.year + "-" + this.month + "-" + "01"
       ).getDay();
       this.calendarData = [
-        { label: "日" },
-        { label: "一" },
-        { label: "二" },
-        { label: "三" },
-        { label: "四" },
-        { label: "五" },
-        { label: "六" },
+        // { label: "日" },
+        // { label: "一" },
+        // { label: "二" },
+        // { label: "三" },
+        // { label: "四" },
+        // { label: "五" },
+        // { label: "六" },
       ];
       let num = parseInt(firstDay);
       let nowDays = this.monthDay(this.month);
@@ -180,7 +200,11 @@ export default {
       }
       // 循环添加当月数据
       for (let i = 0; i < nowDays; i++) {
-        this.calendarData.push({ label: (i + 1 ),polling:this.pollingList[i].polling,abnormalNum:this.pollingList[i].abnormalNum},);
+        this.calendarData.push({
+          label: i + 1,
+          polling: this.pollingList[i].polling,
+          abnormalNum: this.pollingList[i].abnormalNum,
+        });
       }
       // 循环添加下一个月数据
       if (this.calendarData.length % 7 !== 0) {
@@ -198,8 +222,7 @@ export default {
         this.year--;
         this.month = 12;
       }
-      this.cardList=[]
-      this.getData()// 给calendarData添加当月数据
+      this.getData(); // 给calendarData添加当月数据
     },
     // 将日期调下
     dateDown() {
@@ -208,8 +231,7 @@ export default {
         this.year++;
         this.month = 1;
       }
-       this.cardList=[]
-      this.getData()// 给calendarData添加当月数据
+      this.getData(); // 给calendarData添加当月数据
     },
   },
 };
@@ -274,9 +296,6 @@ export default {
     flex-direction: column;
     justify-content: flex-start;
     align-items: center;
-    &.date:hover {
-      background: #eee;
-    }
     .status {
       margin-top: 10px;
       &.textBlue {
@@ -298,10 +317,12 @@ export default {
     // margin-bottom: 10px;
   }
 }
-.tabs{
+.tabs {
   margin-top: 20px;
+  display: flex;
+  align-items: center;
 }
-.empty-text{
+.empty-text {
   text-align: center;
 }
 </style>

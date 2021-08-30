@@ -6,7 +6,6 @@
         v-model="materialName"
         label="项目名称"
         placeholder="请输入项目名称"
-        required
         readonly
         input-align="right"
         @input="materialName = $event.mp.detail"
@@ -90,10 +89,10 @@ export default {
     del() {
       let params = {
         id: this.$route.query.id,
-        formId: this.$store.state.formId,
+        formId: 20,
       };
       data["factory"].delFlow(params).then((res) => {
-        mpvue.showToast({
+        wx.showToast({
           title: res.data.message,
           icon: "none",
           duration: 1000,
@@ -136,13 +135,14 @@ export default {
         userName: wx.getStorageSync("applyUserName"),
       };
       if (this.photoList.length > 0) {
+         this.uuid= data.get_uuid()
         data.upLoadFile(this.photoList, 0, this.uuid).then((res) => {
           //文件code
           let resData = JSON.parse(res.data);
           params.batchId = resData.data.batchId;
           data["factory"].saveOrStart(params).then((res) => {
             if (res.data.code == 10000) {
-              mpvue.showToast({
+              wx.showToast({
                 title: res.data.message,
                 icon: "none",
                 duration: 3000,
@@ -156,7 +156,7 @@ export default {
       } else {
         data["factory"].saveOrStart(params).then((res) => {
           if (res.data.code == 10000) {
-            mpvue.showToast({
+            wx.showToast({
               title: res.data.message,
               icon: "none",
               duration: 3000,

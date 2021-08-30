@@ -1,7 +1,7 @@
 
  //是否获得授权
  export function getSetting(auth, onSuccess, onFail) {
-  mpvue.getSetting({
+  wx.getSetting({
     success(res) {
       if (res.authSetting[`scope.${auth}`]) {
         onSuccess(res)
@@ -38,16 +38,16 @@ export function getUserInfo(onSuccess, onFail) {
 }
 
 export function setStorageSync(key,data){
-  mpvue.setStorageSync(key, data)
+  wx.setStorageSync(key, data)
 }
 
 export function getStorageSync(key) {
- return mpvue.getStorageSync(key)
+ return wx.getStorageSync(key)
 }
 //这里的return是能让取值渠道当前定义域，没return取不到值
 
 // export function getUserOpenId(){
-//     mpvue.login({
+//     wx.login({
 //       success(res) {
 //         if (res.code) {
 //           const { code } = res
@@ -70,7 +70,7 @@ export function getStorageSync(key) {
 
 
 export function showLoading(title) {
-  mpvue.showLoading({
+  wx.showLoading({
     title,
     mask: true
   })
@@ -78,5 +78,5 @@ export function showLoading(title) {
 
 
 export function hideLoading(){
-  mpvue.hideLoading()
+  wx.hideLoading()
 }

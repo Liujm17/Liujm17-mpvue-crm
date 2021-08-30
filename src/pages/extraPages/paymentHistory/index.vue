@@ -22,7 +22,7 @@
 </template>
 <script>
 import RadioButton from '../../../components/radioButton'
-import Card from "../../../components/card";
+import Card from "../../../components/boxCard";
 import Search from "../../../components/searchView";
 import data from "../../../api/mockData";
 export default {
@@ -74,7 +74,7 @@ export default {
   //下拉刷新
   onPullDownRefresh() {
     //doing something
-    mpvue.showToast({
+    wx.showToast({
       title: "下拉刷新成功",
       icon: "none",
       duration: 1000,
@@ -132,7 +132,7 @@ export default {
       let params = {
         pageNum: 1,
         pageSize: this.pageSize,
-        applyUserId: mpvue.getStorageSync("UserId"),
+        applyUserId: wx.getStorageSync("UserId"),
         searchValues: this.value,
         formId: this.$store.state.formId,
         classification:this.classification

@@ -12,16 +12,16 @@ export default {
 
     // let logs
     // if (mpvuePlatform === 'my') {
-    //   logs = mpvue.getStorageSync({key: 'logs'}).data || []
+    //   logs = wx.getStorageSync({key: 'logs'}).data || []
     //   logs.unshift(Date.now())
-    //   mpvue.setStorageSync({
+    //   wx.setStorageSync({
     //     key: 'logs',
     //     data: logs
     //   })
     // } else {
-    //   logs = mpvue.getStorageSync('logs') || []
+    //   logs = wx.getStorageSync('logs') || []
     //   logs.unshift(Date.now())
-    //   mpvue.setStorageSync('logs', logs)
+    //   wx.setStorageSync('logs', logs)
     // }
   },
   // log () {

@@ -13,7 +13,6 @@
             :placeholder="item.click == 'radioGroup' ? '' : item.value"
             :type="item.type"
             :autosize="item.type == 'textarea' ? true : false"
-            :required="item.required"
             input-align="right"
             readonly
             :rules="[{ required: true, message: '请填写' + item.value }]"
@@ -23,7 +22,7 @@
         <!-- 附件 -->
         <Accessroy :photoList="photoList" :onlyOne="false" :notShow="false"></Accessroy>
         <van-field
-          v-model="suggestion"
+          v-model="suggestion" @input="suggestion = $event.mp.detail"
           rows="1"
           autosize
           label="意见"
@@ -49,7 +48,7 @@
 <script>
 import data from "../../../api/mockData";
 import { backFlow, agree, disagree } from "../../../api/api";
-import Card from "../../../components/card.vue";
+import Card from "../../../components/boxCard.vue";
 import Accessroy from "../../../components/apply/accessory.vue";
 import Dialog2 from "../../../../dist/wx/vant-weapp/dist/dialog2/dialog";
 export default {
@@ -57,7 +56,7 @@ export default {
   data() {
     return {
       //tab栏激活页
-      hisTitle: ["审批步骤", "处理人", "处理时间", "结果"],
+      hisTitle: [],
       active: 0,
       HistoryList: [],
       //采购清单list
@@ -131,7 +130,7 @@ export default {
           orderId: this.orderId,
         };
         data.getHistory(params).then((res) => {
-          mpvue.showToast({
+          wx.showToast({
             title: "正在加载",
             icon: "loading",
             duration: 500,
@@ -144,7 +143,7 @@ export default {
     //获取数据
     getData() {
       let params = {
-        formId: this.$store.state.formId,
+        formId: 18,
         id: this.$route.query.id,
       };
       data["second"].getData(params).then((res) => {
@@ -188,10 +187,10 @@ export default {
     del() {
       let params = {
         id: this.$route.query.id,
-        formId: this.$store.state.formId,
+        formId: 18,
       };
       data["second"].delFlow(params).then((res) => {
-        mpvue.showToast({
+        wx.showToast({
           title: res.data.message,
           icon: "none",
           duration: 1000,
@@ -209,7 +208,7 @@ export default {
         orderId: this.orderId,
       };
       backFlow(params).then((res) => {
-        mpvue.showToast({
+        wx.showToast({
           title: res.data.message,
           icon: "none",
           duration: 1000,
@@ -228,6 +227,7 @@ export default {
         suggestion: this.suggestion,
       };
       agree(params).then((res) => {
+        this.getData();
         this.$router.back();
       });
     },
@@ -246,6 +246,7 @@ export default {
             dealResult:res.type
           }
           disagree(params).then((res) => {
+          this.getData()
              this.$router.back();
           });
         })

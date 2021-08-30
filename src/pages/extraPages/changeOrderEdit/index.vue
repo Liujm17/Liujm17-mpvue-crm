@@ -351,7 +351,7 @@ export default {
         ...this.formData,
         newTotalPrice:this.totalPrice,
         purchaseChangeDetailList:this.purchaseDetailList,
-        batchId: "",
+        batchId: this.needList.length > 0?this.uuid:null,
         deleteIds:this.deleteList,
          id:Number(this.$route.query.id),
         startFlowDto: {
@@ -368,7 +368,7 @@ export default {
           params.batchId = resData.data.batchId;
           data["changeOrder"].editOrStart(params).then((res) => {
              if(res.data.code == 10000){
-              mpvue.showToast({
+              wx.showToast({
               title: res.data.message,
               icon: "none",
               duration: 3000,
@@ -377,7 +377,7 @@ export default {
             //重启到某页面，如不是tabar页面会有回主页按钮
              setTimeout(() => {
                //回退2层
-                 this.$router.go(2);
+                 this.$router.back();
                 }, 1000);
              }
           });
@@ -385,7 +385,7 @@ export default {
       } else {
         data["changeOrder"].editOrStart(params).then((res) => {
            if(res.data.code == 10000){
-              mpvue.showToast({
+              wx.showToast({
               title: res.data.message,
               icon: "none",
               duration: 3000,
@@ -394,7 +394,7 @@ export default {
             //重启到某页面，如不是tabar页面会有回主页按钮
              setTimeout(() => {
                //回退2层
-                 this.$router.go(2);
+                 this.$router.back();
                 }, 1000);
              }
         });
@@ -419,7 +419,7 @@ export default {
     },
     //流程弹窗
     showPopup2(val) {
-      this.show = true;
+      this.usershow = true;
       (this.popUpType = "流程"), (this.nodeId = val.nodeId);
       this.userradio = val.userId + "";
     },

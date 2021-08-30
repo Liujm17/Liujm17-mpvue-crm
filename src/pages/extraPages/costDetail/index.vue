@@ -7,7 +7,6 @@
       <van-field
         v-model="formData.userName"
         label="申请人"
-        required
         readonly
         input-align="right"
         @input="formData.userName = $event.mp.detail"
@@ -15,7 +14,6 @@
       <van-field
         v-model="formData.isPay"
         label="是否已付款"
-        required
         readonly
         input-align="right"
         @input="formData.isPay = $event.mp.detail"
@@ -26,7 +24,6 @@
         v-model="formData.month"
         label="费用所属期"
         placeholder="请选择费用所属期"
-        required
         readonly
         input-align="right"
         @input="formData.month = $event.mp.detail"
@@ -39,34 +36,33 @@
         v-model="formData.accountName"
         placeholder="请填写账户"
         label="账户"
-        required
         readonly
         input-align="right"
         @input="formData.accountName = $event.mp.detail"
+          v-if="formData.isPay == '否'"
       />
       <van-field
         v-model="formData.bankName"
         placeholder="请填写开户行"
         label="开户行"
-        required
         readonly
         input-align="right"
         @input="formData.bankName = $event.mp.detail"
+          v-if="formData.isPay == '否'"
       />
       <van-field
         v-model="formData.bankAccount"
         placeholder="请填写银行账号"
         label="银行账号"
-        required
         readonly
         type="digit"
         input-align="right"
         @input="formData.bankAccount = $event.mp.detail"
+          v-if="formData.isPay == '否'"
       />
       <van-field
         v-model="formData.totalPrice"
         label="合计付款金额"
-        required
         readonly
         type="digit"
         input-align="right"
@@ -84,18 +80,16 @@
           v-model="item.purpose"
           placeholder="请填写费用用途"
           label="费用用途"
-          required
           readonly
           input-align="right"
           @input="item.purpose = $event.mp.detail"
         />
-        <van-field label="费用类别"   v-model="item.type"   readonly required input-align="right"   @input="item.type = $event.mp.detail"></van-field>
+        <van-field label="费用类别"   v-model="item.type"   readonly  input-align="right"   @input="item.type = $event.mp.detail"></van-field>
         <van-field
           v-model="item.money"
           placeholder="请填写报销金额"
           label="报销金额"
           type="digit"
-          required
           readonly
           input-align="right"
           @input="item.money = $event.mp.detail"
@@ -104,7 +98,6 @@
           v-model="item.remark"
           placeholder="请填写备注"
           label="备注"
-          required
           readonly
           input-align="right"
           @input="item.remark = $event.mp.detail"
@@ -115,7 +108,7 @@
     <!-- 附件 -->
     <Accessroy :photoList="photoList" :onlyOne="false" :notShow="false"></Accessroy>
     <van-field
-          v-model="suggestion"
+          v-model="suggestion" @input="suggestion = $event.mp.detail"
           rows="1"
           autosize
           label="意见"
@@ -142,7 +135,7 @@ import Accessroy from "../../../components/apply/accessory";
 import data from "../../../api/mockData";
 import { backFlow, agree, disagree } from "../../../api/api";
 import Dialog2 from "../../../../dist/wx/vant-weapp/dist/dialog2/dialog";
-import Card from "../../../components/card.vue";
+import Card from "../../../components/boxCard.vue";
 export default {
  components: { Card, Accessroy },
   data() {
@@ -161,7 +154,7 @@ export default {
         totalPrice: "",
       },
        //tab栏激活页
-      hisTitle: ["审批步骤", "处理人", "处理时间", "结果"],
+      hisTitle: [],
       active: 0,
       HistoryList: [],
       //附件
@@ -191,13 +184,21 @@ export default {
     this.getData();
   },
   onReady() {
-    this.formData.userName = wx.getStorageSync("applyUserName");
-    this.formData.userId = wx.getStorageSync("UserId");
       wx.setNavigationBarTitle({
           title: '费用报销-详情'+'('+wx.getStorageSync("factoryName")+')',
       });
   },
   watch: {
+     formData: {
+      handler(newVal, oldVal) {
+        if (!this.isBack && !this.isEdit && !this.isApproval && !this.isDel) {
+          this.showoperate = false;
+        } else {
+          this.showoperate = true;
+        }
+        // this.getData()
+      },
+    },
     content: {
       handler(newValue, oldValue) {
         this.formData.totalPrice = newValue.reduce(
@@ -241,7 +242,7 @@ export default {
           orderId: this.orderId,
         };
         data.getHistory(params).then((res) => {
-          mpvue.showToast({
+          wx.showToast({
             title: "正在加载",
             icon: "loading",
             duration: 500,
@@ -254,7 +255,7 @@ export default {
     //获取数据
     getData() {
       let params = {
-        formId: this.$store.state.formId,
+        formId: 15,
         id: this.$route.query.id,
       };
       data["cost"].getData(params).then((res) => {
@@ -309,10 +310,10 @@ export default {
     del() {
       let params = {
         id: this.$route.query.id,
-        formId: this.$store.state.formId,
+        formId: 15,
       };
       data["cost"].delFlow(params).then((res) => {
-        mpvue.showToast({
+        wx.showToast({
           title: res.data.message,
           icon: "none",
           duration: 1000,
@@ -330,7 +331,7 @@ export default {
         orderId: this.orderId,
       };
       backFlow(params).then((res) => {
-        mpvue.showToast({
+        wx.showToast({
           title: res.data.message,
           icon: "none",
           duration: 1000,
@@ -349,6 +350,7 @@ export default {
         suggestion: this.suggestion,
       };
       agree(params).then((res) => {
+        this.getData();
         this.$router.back();
       });
     },
@@ -367,6 +369,7 @@ export default {
             dealResult:res.type
           }
           disagree(params).then((res) => {
+          this.getData()
              this.$router.back();
           });
         })

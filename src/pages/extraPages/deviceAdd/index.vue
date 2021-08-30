@@ -50,6 +50,7 @@
         >添加配件</van-button
       >
     </div>
+    <div style="width:100%;height:300px"></div>
 
     <!-- 日期 -->
     <Picker
@@ -143,13 +144,14 @@ export default {
       params.status = this.active + 1;
       params.productIds = this.content.map((item) => Number(item.id));
       if (this.photoList.length > 0) {
+         this.uuid= data.get_uuid()
         data.upLoadFile(this.photoList, 0, this.uuid).then((res) => {
           //文件code
           let resData = JSON.parse(res.data);
           params.fileCode = resData.data.code;
           data["deviceInfo"].saveOrStart(params).then((res) => {
              if(res.data.code == 10000){
-              mpvue.showToast({
+              wx.showToast({
               title: res.data.message,
               icon: "none",
               duration: 3000,
@@ -163,7 +165,7 @@ export default {
       } else {
         data["deviceInfo"].saveOrStart(params).then((res) => {
            if(res.data.code == 10000){
-              mpvue.showToast({
+              wx.showToast({
               title: res.data.message,
               icon: "none",
               duration: 3000,
@@ -244,6 +246,7 @@ export default {
       text-align: center;
       color: #666666;
       font-weight: 700;
+      font-size:15px;
       border-right: 1px solid;
       border-bottom: 1px solid;
     }

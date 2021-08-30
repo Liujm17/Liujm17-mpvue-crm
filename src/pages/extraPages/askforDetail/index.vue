@@ -7,7 +7,6 @@
       <van-field
         v-model="userName"
         label="申请人"
-        required
         readonly
         input-align="right"
         @input="userName = $event.mp.detail"
@@ -16,7 +15,6 @@
         v-model="applyDate"
         label="申请日期"
         placeholder="请选择申请日期"
-        required
         readonly
         input-align="right"
         @input="applyDate = $event.mp.detail"
@@ -39,7 +37,7 @@
     <!-- 附件 -->
     <Accessroy :photoList="photoList" :onlyOne="false"  :notShow="false"></Accessroy>
     <van-field
-          v-model="suggestion"
+          v-model="suggestion" @input="suggestion = $event.mp.detail"
           rows="1"
           autosize
           label="意见"
@@ -67,7 +65,7 @@
 <script>
 import data from "../../../api/mockData";
 import { backFlow, agree, disagree } from "../../../api/api";
-import Card from "../../../components/card.vue";
+import Card from "../../../components/boxCard.vue";
 import Accessroy from "../../../components/apply/accessory.vue";
 import Dialog2 from "../../../../dist/wx/vant-weapp/dist/dialog2/dialog";
 export default {
@@ -78,7 +76,7 @@ export default {
       uuid: "",
       //问题描述
       reason: "",
-      userName:wx.getStorageSync('applyUserName'),
+      userName:'',
       applyDate:'',
       //附件
       photoList: [],
@@ -106,10 +104,21 @@ export default {
    onShow() {
      this.getData()
       wx.setNavigationBarTitle({
-          title: '请求单-详情'+'('+wx.getStorageSync("factoryName")+')',
+          title: '请示单-详情'+'('+wx.getStorageSync("factoryName")+')',
         });
   },
-  watch: {},
+  watch: {
+      applyDate: {
+      handler(newVal, oldVal) {
+        if (!this.isBack && !this.isEdit && !this.isApproval && !this.isDel) {
+          this.showoperate = false;
+        } else {
+          this.showoperate = true;
+        }
+        // this.getData()
+      },
+    },
+  },
   methods: {
     //操作
     operate() {
@@ -140,7 +149,7 @@ export default {
           orderId: this.orderId,
         };
         data.getHistory(params).then((res) => {
-          mpvue.showToast({
+          wx.showToast({
             title: "正在加载",
             icon: "loading",
             duration: 500,
@@ -153,10 +162,11 @@ export default {
      //获取数据
     getData() {
       let params = {
-        formId: this.$store.state.formId,
+        formId: 16,
         id: this.$route.query.id,
       };
       data["askfor"].getData(params).then((res) => {
+        this.userName=res.data.data.userName
         this.applyDate=res.data.data.applyDate
         this.reason=res.data.data.reason
 
@@ -185,6 +195,7 @@ export default {
         suggestion: this.suggestion,
       };
       agree(params).then((res) => {
+        this.getData();
         this.$router.back();
       });
     },
@@ -203,6 +214,7 @@ export default {
             dealResult:res.type
           }
           disagree(params).then((res) => {
+          this.getData()
              this.$router.back();
           });
         })
@@ -224,10 +236,10 @@ export default {
     del() {
       let params = {
         id: this.$route.query.id,
-        formId: this.$store.state.formId,
+        formId: 16,
       };
       data["askfor"].delFlow(params).then((res) => {
-        mpvue.showToast({
+        wx.showToast({
           title: res.data.message,
           icon: "none",
           duration: 1000,
@@ -245,7 +257,7 @@ export default {
         orderId: this.orderId,
       };
       backFlow(params).then((res) => {
-        mpvue.showToast({
+        wx.showToast({
           title: res.data.message,
           icon: "none",
           duration: 1000,

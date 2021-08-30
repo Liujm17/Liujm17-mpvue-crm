@@ -266,33 +266,6 @@ export default {
       //深度监听
       deep: true,
     },
-    // "formData.purchaseId": {
-    //   handler(newValue, oldValue) {
-    //     //有采购订单的时候
-    //     if (newValue) {
-    //       let params = {
-    //         id: newValue,
-    //       };
-    //       getProductItemOptions(params).then((res) => {
-    //         this.ProductItemList = res.data.data.map((item) => {
-    //           return {
-    //             id: item.id,
-    //             productId: item.productId,
-    //             name: item.productName,
-    //             specs: item.specs,
-    //             inQuantity: item.inQuantity,
-    //             unitPrice:item.unitPrice?item.unitPrice:''
-    //           };
-    //         });
-    //       });
-    //       //没有的时候
-    //     } else {
-    //       console.log("无");
-    //     }
-    //   },
-    //   //深度监听
-    //   deep: true,
-    // },
     //产品列表
     content: {
       handler(newValue, oldValue) {
@@ -314,7 +287,7 @@ export default {
     //获取流程列表
     getData() {
       let params = {
-        formId: this.$store.state.formId,
+        formId: 6,
         id: this.$route.query.id,
       };
       data["inStorage"].getData(params).then((res) => {
@@ -343,7 +316,7 @@ export default {
         this.active = res.data.data.inType - 1;
       });
       let params2 = {
-        formId: this.$store.state.formId,
+        formId: 6,
       };
       getFlowList(params2).then((res) => {
         if (res.data.data.length >= 1) {
@@ -384,10 +357,10 @@ export default {
         userId: wx.getStorageSync("UserId"),
         ...this.formData,
         stockInDetailList: this.purchaseDetailList,
-        batchId: "",
+        batchId:'',
         startFlowDto: {
           optionalJson: JSON.stringify(this.fitNodeList),
-          formId: this.$store.state.formId,
+          formId: 6,
           flowId: Number(this.flowId),
         },
       };
@@ -395,7 +368,7 @@ export default {
       params.startFlowDto.type = val;
       data["inStorage"].editOrStart(params).then((res) => {
         if(res.data.code == 10000){
-              mpvue.showToast({
+              wx.showToast({
               title: res.data.message,
               icon: "none",
               duration: 3000,
@@ -428,7 +401,7 @@ export default {
       if (this.active == 0) {
         this.ordershow = true;
       } else {
-        mpvue.showToast({
+        wx.showToast({
           title: "调拨单无产品订单",
           icon: "none",
           duration: 1000,
@@ -441,7 +414,7 @@ export default {
       if (this.formData.purchaseId || this.active == 1) {
         this.show2 = true;
       } else {
-        mpvue.showToast({
+        wx.showToast({
           title: "请先添加采购订单",
           icon: "none",
           duration: 1000,
@@ -451,7 +424,7 @@ export default {
     },
     //流程弹窗
     showPopup2(val) {
-      this.show = true;
+      this.usershow = true;
       (this.popUpType = "流程"), (this.nodeId = val.nodeId);
       this.userradio = val.userId + "";
     },

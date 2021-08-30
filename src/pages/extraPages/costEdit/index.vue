@@ -38,6 +38,7 @@
         required
         input-align="right"
         @input="formData.accountName = $event.mp.detail"
+          v-if="active1==0"
       />
       <van-field
         v-model="formData.bankName"
@@ -46,6 +47,7 @@
         required
         input-align="right"
         @input="formData.bankName = $event.mp.detail"
+          v-if="active1==0"
       />
       <van-field
         v-model="formData.bankAccount"
@@ -55,6 +57,7 @@
         type="digit"
         input-align="right"
         @input="formData.bankAccount = $event.mp.detail"
+          v-if="active1==0"
       />
       <van-field
         v-model="formData.totalPrice"
@@ -224,7 +227,6 @@ export default {
     };
   },
   onLoad() {
-    this.uuid = data.get_uuid();
     this.deleteList=[]
   },
   onReady() {
@@ -240,6 +242,7 @@ export default {
   watch: {
     content: {
       handler(newValue, oldValue) {
+        console.log(newValue)
        this.formData.totalPrice=newValue.reduce((total,item)=>total+item.money*1,0)
       },
         //首次监听
@@ -270,6 +273,7 @@ export default {
         id: this.$route.query.id,
       };
       data["cost"].getData(params).then((res) => {
+        this.active1=res.data.data.isPay
         this.formData = {
           isPay: res.data.data.isPay ==0?'否':'是',
           userName: res.data.data.userName,
@@ -290,6 +294,7 @@ export default {
               };
             })
           : [];
+           this.uuid=res.data.data.batchId?res.data.data.batchId:this.data.get_uuid()
           this.content=res.data.data.costReimburseDetailVoList.map((item)=>{
             return {
               id:item.id?item.id:'',
@@ -372,7 +377,7 @@ export default {
     //流程相关方法
     //流程弹窗
     showPopup2(val) {
-      this.show = true;
+      this.usershow = true;
       (this.popUpType = "流程"), (this.nodeId = val.nodeId);
       this.userradio = val.userId + "";
     },
@@ -416,7 +421,7 @@ export default {
       let params = {
         id: this.$route.query.id,
         ...this.formData,
-        batchId: "",
+        batchId: this.needList.length > 0?this.uuid:null,
         factoryId: wx.getStorageSync("factoryId"),
         costReimburseDetailList:this.content,
         isPay:'',
@@ -437,7 +442,7 @@ export default {
           params.batchId = resData.data.batchId;
           data["cost"].editOrStart(params).then((res) => {
             if (res.data.code == 10000) {
-              mpvue.showToast({
+              wx.showToast({
                 title: res.data.message,
                 icon: "none",
                 duration: 3000,
@@ -451,7 +456,7 @@ export default {
       } else {
         data["cost"].editOrStart(params).then((res) => {
           if (res.data.code == 10000) {
-            mpvue.showToast({
+            wx.showToast({
               title: res.data.message,
               icon: "none",
               duration: 3000,

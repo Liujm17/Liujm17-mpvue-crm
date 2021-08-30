@@ -12,7 +12,6 @@
             :label="item.value"
             :placeholder="item.value"
             :type="item.type"
-            :required="item.required"
             input-align="right"
             readonly
             :rules="[{ required: true, message: '请填写' + item.value }]"
@@ -26,6 +25,7 @@
             label="故障原因"
             type="textarea"
             readonly
+            required
             placeholder="故障报修描述信息"
             @input="faultReason = $event.mp.detail"
           />
@@ -53,7 +53,7 @@
               @changeData="changeData"
             ></RadioList>
           </div>
-          <div style="margin-top: 30px">
+          <div style="margin-top: 30px" v-if="active==2">
             <van-field
               v-model="formData.repairUserName"
               label="选择维修人员"
@@ -61,7 +61,7 @@
               input-align="right"
               placeholder="维修人员"
               @input="faultReason = $event.mp.detail"
-              @click="usershow = true"
+              @click="handle?usershow = true:''"
             />
           </div>
         </div>
@@ -95,7 +95,7 @@
         type="info"
         :text="saveText"
         @click="save()"
-        v-if="managerUserIs || repairUserIs"
+        v-if="saveText"
       />
     </van-goods-action>
   </div>
@@ -105,9 +105,9 @@
 import data from "../../../api/mockData";
 import Accessroy from "../../../components/apply/accessory.vue";
 import RadioList from "../../../components/radioButton.vue";
-import User from "../../../components/userOptions";
+import User from "../../../components/userOptions2";
 import DeviceInfo from '../../../components/detail/deviceInfo.vue'
-import Card from "../../../components/card.vue";
+import Card from "../../../components/boxCard.vue";
 export default {
   components: { Accessroy, RadioList, User ,DeviceInfo,Card},
   data() {
@@ -124,7 +124,7 @@ export default {
           readonly: true,
         },
         {
-          name: "factoryId",
+          name: "id",
           value: "故障报修编号",
           click: "device",
           type: "",
@@ -151,7 +151,7 @@ export default {
       //表单
       formData: {
         deviceName: "",
-        factoryId: "",
+        id: "",
         faultTime: "",
         deviceStatus: "",
         faultReason: "",
@@ -162,11 +162,11 @@ export default {
       //附件
       photoList: [],
       //按钮群
-      active: 1,
+      active: 0,
       typeList: [
-        { value: 0, text: "批准维修" },
-        { value: 1, text: "密切关注" },
-        { value: 2, text: "暂不处理" },
+        { value: 0, text: "密切关注" },
+        { value: 1, text: "暂不处理" },
+        { value: 2, text: "批准维修" },
       ],
       userradio: "1",
       usershow: false,
@@ -178,7 +178,8 @@ export default {
       repairUserIs: false,
       deviceId:'',
       reportId:'',
-      cardList:[]
+      cardList:[],
+      handle:true,
     };
   },
   onShow() {
@@ -186,17 +187,6 @@ export default {
       wx.setNavigationBarTitle({
           title: '故障报修-详情'+'('+wx.getStorageSync("factoryName")+')',
         });
-  },
-  computed: {
-    saveText() {
-      if (this.managerUserIs) {
-        return "确定";
-      } else if (this.repairUserIs) {
-        return "创建维修";
-      } else {
-        return "";
-      }
-    },
   },
   methods: {
      //维修详情
@@ -234,7 +224,11 @@ export default {
     },
     //更换正常异常
     changeData(item, index) {
-      this.active = index;
+      if(this.handle){
+        this.active = index;
+      }else{
+        return
+      }
     },
     //获取数据
     getData() {
@@ -242,9 +236,11 @@ export default {
         id: this.$route.query.id,
       };
       data["breakdown"].getData(params).then((res) => {
+        this.active=res.data.data.handleOption
+        this.handle=res.data.data.handleOption==0?true:false
         const {
           deviceName,
-          factoryId,
+          id,
           faultTime,
           deviceStatus,
           faultReason,
@@ -254,7 +250,7 @@ export default {
         } = res.data.data;
         this.formData = {
           deviceName,
-          factoryId,
+          id,
           faultTime,
           deviceStatus,
           faultReason,
@@ -275,24 +271,37 @@ export default {
               };
             })
           : [];
+     if (this.managerUserIs) {
+       if(this.handle){
+         this.saveText = "确定";
+       }else{
+         this.saveText = "";
+       }
+      } else if (this.repairUserIs) {
+        this.saveText ="创建维修";
+      } else {
+        this.saveText = "";
+      }
       });
     },
     //保存
     save() {
-      let params = {
+      if(this.managerUserIs){
+        let params = {
         id: this.$route.query.id,
         handleOption: this.active,
-        repairUser: this.formData.repairUser,
-        repairUserName: this.formData.repairUserName,
+        repairUser: this.formData.repairUser?this.formData.repairUser:'',
+        repairUserName: this.formData.repairUserName?this.formData.repairUserName:'',
       };
       data["breakdown"].editOrStart(params).then((res) => {
         if(res.data.code == 10000){
-              mpvue.showToast({
+              wx.showToast({
               title: res.data.message,
               icon: "none",
               duration: 3000,
               mask: true,
             });
+            this.getData()
             //重启到某页面，如不是tabar页面会有回主页按钮
              setTimeout(() => {
                //回退2层
@@ -300,6 +309,17 @@ export default {
                 }, 1000);
              }
       });
+      }else if(this.repairUserIs){
+         this.$router.push({
+        path:'/pages/extraPages/maintainAdd/main',
+        query:{
+          deviceId:this.deviceId,
+          deviceName:this.formData.deviceName,
+          faultTime:this.formData.faultTime,
+          reportId:this.reportId
+        }
+      })
+      }
     },
   },
 };

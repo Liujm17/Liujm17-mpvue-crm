@@ -8,7 +8,7 @@
 </template>
 
 <script>
-import Card from "../../../components/card";
+import Card from "../../../components/boxCard";
 import RadioButton from '../../../components/radioButton.vue'
 import {stockList} from '../../../api/api'
 export default {
@@ -67,9 +67,10 @@ export default {
         this.cardList=res.data.data.list.map((item,index)=>{
           return{
             id:item.id,
-            index:index+1,
-            name:item.userName,
-            time:item.checkDate
+            index:"序号:"+(index+1+(res.data.data.pageNum-1>=0?res.data.data.pageNum-1:0)*15),
+            name:'盘点人:'+item.userName,
+            time:'盘点日期:'+item.checkDate,
+            color:item.approveStatus==-1||item.approveStatus==2?'#87CEFA':(item.approveStatus==0?'#808080':(item.approveStatus==1?'#000000':''))
           }
         })
          wx.hideLoading();

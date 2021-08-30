@@ -5,7 +5,7 @@
         v-model="account"
         label="账号"
         @input="account = $event.mp.detail"
-        placeholder="请输入用户名"
+        placeholder="请输入账号"
       />
       <van-field
         v-model="password"
@@ -15,8 +15,8 @@
         placeholder="请输入密码"
       />
       <div class="bt">
-        <van-button type="primary" @click="notBind">不绑定</van-button>
-        <van-button type="info" @click="bind">绑定</van-button>
+         <button  @click="notBind">不绑定</button>
+        <button @click="bind">绑定</button>
       </div>
     </div>
     <!-- <Auth v-else @getUserInfo='getUserInfo'></Auth> -->
@@ -93,7 +93,7 @@ export default {
             }
           });
         } else {
-          mpvue.showToast({
+          wx.showToast({
             title: res.data.message,
             icon: "none",
             duration: 3000,

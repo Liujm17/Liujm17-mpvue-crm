@@ -35,7 +35,7 @@
     </van-cell-group>
 
     <!-- 关联产品 -->
-    <div class="title">入库信息</div>
+    <div class="title">出库信息</div>
     <div class="table">
       <div class="table-header">
         <div v-for="(item, index) in title" :key="index" class="header-title">
@@ -269,7 +269,7 @@ export default {
       params.startFlowDto.type = val;
       data["outStorage"].saveOrStart(params).then((res) => {
         if(res.data.code == 10000){
-              mpvue.showToast({
+              wx.showToast({
               title: res.data.message,
               icon: "none",
               duration: 3000,
@@ -299,7 +299,7 @@ export default {
         if(this.active == 0){
           this.ordershow=true
         }else{
-          mpvue.showToast({
+          wx.showToast({
           title: '调拨单无产品订单',
           icon: "none",
           duration: 1000,
@@ -313,7 +313,7 @@ export default {
     },
     //流程弹窗
     showPopup2(val) {
-      this.show = true;
+      this.usershow = true;
       (this.popUpType = "流程"), (this.nodeId = val.nodeId);
       this.userradio = val.userId + "";
     },
@@ -343,8 +343,17 @@ export default {
     },
     //产品确认
     submit3(val) {
+      if(this.content.filter(item=>item.id==val.id).length==0){
       this.show2 = false;
       this.content.push(val);
+      }else{
+         wx.showToast({
+          title: '请不要重复添加产品',
+          icon: "none",
+          duration: 1000,
+          mask: true,
+        });
+      }
     },
     //删除产品列表对应产品
     delList(val) {

@@ -74,10 +74,15 @@
   ],
   "window": {
     "backgroundTextStyle": "light",
-    "navigationBarBackgroundColor": "#96c2f1",
+    "navigationBarBackgroundColor": "#A5B1D9",
     "navigationBarTitleText": "审批",
     "navigationBarTextStyle": "black",
-    "onReachBottomDistance":100
+    "onReachBottomDistance":200
+  },
+  "permission": {
+    "scope.userLocation": {
+      "desc": "用于一些地址的填写"
+    }
   },
   "tabBar": {
     "color": "#686868",
@@ -85,38 +90,36 @@
     "backgroundColor": "#ffffff",
     "borderStyle": "white",
     "list": [{
-      "pagePath": "pages/index/main",
-      "iconPath": "static/images/home.png",
-      "selectedIconPath": "static/images/home_active.png",
-      "text": "主页"
-    },
-    {
-      "pagePath": "pages/shenpi/main",
-      "iconPath": "static/images/self.png",
-      "selectedIconPath": "static/images/self_active.png",
-      "text": "待办"
-    },
- 
-    {
-      "pagePath": "pages/report/main",
-      "iconPath": "static/images/self.png",
-      "selectedIconPath": "static/images/self_active.png",
-      "text": "报表"
-    },
+        "pagePath": "pages/jiankong/main",
+        "iconPath": "static/images/home.png",
+        "selectedIconPath": "static/images/home_active.png",
+        "text": "首页"
+      },
+      {
+        "pagePath": "pages/index/main",
+        "iconPath": "static/images/function.png",
+        "selectedIconPath": "static/images/function_active.png",
+        "text": "功能"
+      },
+      {
+        "pagePath": "pages/shenpi/main",
+        "iconPath": "static/images/shenpi.png",
+        "selectedIconPath": "static/images/shenpi_active.png",
+        "text": "待办"
+      },
 
-    {
-      "pagePath": "pages/myself/main",
-      "iconPath": "static/images/self.png",
-      "selectedIconPath": "static/images/self_active.png",
-      "text": "个人信息"
-    },
-
-    {
-      "pagePath": "pages/jiankong/main",
-      "iconPath": "static/images/self.png",
-      "selectedIconPath": "static/images/self_active.png",
-      "text": "监控"
-    }
+      {
+        "pagePath": "pages/report/main",
+        "iconPath": "static/images/report.png",
+        "selectedIconPath": "static/images/report_active.png",
+        "text": "报表"
+      },
+      {
+        "pagePath": "pages/myself/main",
+        "iconPath": "static/images/self.png",
+        "selectedIconPath": "static/images/self_active.png",
+        "text": "个人信息"
+      }
   ]
 
   },

@@ -5,8 +5,8 @@
         {{label}}
       </div>
     </div>
-    <div v-show="more&&cardList.length>10">下拉加载</div>
-    <div v-show="!more||cardList.length<=10">没有更多了</div>
+    <div v-show="more" class="moretext">下拉加载</div>
+    <div v-show="!more" class="moretext">没有更多了</div>
     <div style="width:100%;height:8rem"></div>
   </div>
 </template>
@@ -44,7 +44,7 @@ export default {
   .card {
     width: 90%;
     line-height: 40px;
-    border-bottom: 1px solid #aaa;
+    border-bottom: 1px solid #8866;
     margin: 3px 0;
     box-sizing: border-box;
     padding: 3px;
@@ -59,11 +59,13 @@ export default {
       text-align: center;
       overflow: hidden;
     }
-    // .text:nth-child(2){
-    //    flex: 0.25;
-    //   flex-wrap: wrap;
-    //   text-align: center;
-    // }
   }
+    .card:hover{
+    background:#D3D3D3;
+  }
+}
+.moretext{
+  color:#666;
+  font-size: 13px;
 }
 </style>

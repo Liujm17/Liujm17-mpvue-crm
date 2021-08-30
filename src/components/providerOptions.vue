@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div class="options-bg">
     <van-search
       v-model="value"
       placeholder="请输入搜索关键词"
@@ -32,14 +32,14 @@ export default {
     return {
       active: 0,
       value: "",
-      radio: "1",
+      radio: "",
       radio2: "59",
       ProviderList: [],
        btList:[{name:'取消',click:'cancel'},{name:'确定',click:'submit',color:'blue'}]
     };
   },
     components: {BottomButton},
-  mounted() {
+  onReady() {
     this.getData();
   },
   methods: {
@@ -90,6 +90,15 @@ export default {
 };
 </script>
 <style lang="scss">
+.options-bg{
+    position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 30px;
+  left: 0;
+  overflow: auto;
+  padding-bottom: 60px;
+}
 .select {
   font-size: 0.3rem;
   .name {

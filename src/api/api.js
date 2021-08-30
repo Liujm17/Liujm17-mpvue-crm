@@ -6,17 +6,30 @@ import {
 import {setStorageSync} from './wechat'
 
 
+//获取用户所属监控项目列表
+export function getProjects0(params) {
+  return request.get(`/api-ep-main/projectScreen/getProjectByFactoryAndUser`, params)
+}
+
 //获取用户所属项目列表
 export function getProjects(params) {
   return request.get(`/api-ep-project/factory/getIncludeProjects`, params)
+}
+//获取不同项目类型
+export function getProjects2(params){
+  return request.get('/api-ep-project/factory/getList',params)
 }
 //获取目录菜单
 export function getMenus(params) {
   return request.get(`/api-ep-user/menu/getMenus`, params)
 }
-//获取待办数量
+//获取审批待办数量
 export function getCount(params) {
   return request.get(`/api-ep-user/flowTask/getCount`, params)
+}
+//获取待办数量
+export function getReportCount(params) {
+  return request.get(`/api-ep-project/device/getToDoReportCount`, params)
 }
 //获取备用金申请的历史记录
 export function getHistory(params) {
@@ -25,6 +38,11 @@ export function getHistory(params) {
 //获取用户列表
 export function getUserOptions(params) {
   return request.post(`/api-ep-user/userController`, params)
+}
+
+//获取项目底下用户列表
+export function getUserOptions2(params) {
+  return request.get(`/api-ep-user/userController/getUsersByFactoryId`, params)
 }
 //获取供应商列表
 export function getProviderOptions(params) {
@@ -94,6 +112,20 @@ export function getDeviceByQrCode(params) {
   return request.get(`/api-ep-project/device/getDeviceByQrCode`, params)
 }
 
+//获取当前设备故障报修单
+export function getDeviceReport(params) {
+  return request.get(`/api-ep-project/device/getDeviceReport`, params)
+}
+
+//获取维修工名单
+export function getRepairByFactoryId(params) {
+  return request.get(`/api-ep-user/userController/getRepairByFactoryId`, params)
+}
+
+//获取报修待办
+export function getReportWait(params){
+  return request.get('/api-ep-project/device/getToDoReport',params)
+}
 
 //根据授权获得code再获取系统里的Authorization
 export function getUnionid(params) {
